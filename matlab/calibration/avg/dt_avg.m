@@ -1,4 +1,7 @@
-function dta=dt_avg(file,date_range,ref)
+% Juanjo 02/11/2009 
+%  añandido flag de depuracion;
+
+function dta=dt_avg(file,date_range,ref,flag_outlier)
 
 try
  a=textread(file,'');
@@ -28,6 +31,22 @@ if nargin>1
 else
     dta=dt;
 end
+
+% OUTLIERS
+if nargin>3
+    if flag_outlier
+        % outliers HT
+        [ax,bx,cx,dx]=outliers_bp(dta(:,4),3);
+        disp(dta(dx,[1,4]))
+        dta(dx,4)=NaN;
+        
+        % outliers LT
+        [ax,bx,cx,dx]=outliers_bp(dta(:,end),3);
+        disp(dta(dx,[1,end]))
+        dta(dx,end)=NaN;
+    end
+end
+
 j=find(dta(:,4)>60 | dta(:,4)<10 | dta(:,5)>60 | dta(:,5)<10 );
 dta(j,:)=[];
 
@@ -44,5 +63,5 @@ set(gca,'XTick',labs,'GridLineStyle','-.','Linewidth',1);
 datetick('x',25,'keeplimits','keepticks');  rotateticklabel(gca,20);
 ylabel('Time {\it(x10^-^9 seconds)}');
 title(sprintf('%s%s','Dead Time Test, ',file(regexp(file,'AVG')-3:regexp(file,'AVG')+6)));
-legend('dt high','dt low','Location','NorthWest');
+legend('dt high','dt low','Location','NorthEast');
 grid; orient portrait 

@@ -1,5 +1,12 @@
+
 function [res,detail,DSP_QUAD,QUAD_SUM,QUAD_DETAIL,CUBIC_SUM,CUBIC_DETAIL,salida...
     ]=dsp_report(day,year,brewnb,path,cfg,comment,uvr)
+% 
+% Modificaciones:
+% 05/11/2009 Juanjo: modificada la línea 361 para mostrar las WL con 2
+% decimales
+% 
+
 day=day-1:day+1;
 %year=08;
 %brewnb=193;
@@ -350,7 +357,8 @@ label_1={'slit\#0','slit\#1','slit\#2','slit\#3','slit\#4','slit\#5'};
 label_2={sprintf('step= %d ',res(jcal+ii,1));'WL(A)';'Res(A)';'O3abs(1/cm)';'Ray abs(1/cm)';'SO2abs(1/cm)'};
 label_r={'step','O3abs','Rayabs','SO2abs','O3SO2Abs'};
     
- detail(1,:,jcal+ii)=round(detail(1,:,jcal+ii));
+% modificado el 05/11/2009
+ detail(1,:,jcal+ii)=str2num(sprintf('%7.2f %7.2f %7.2f %7.2f %7.2f %7.2f',detail(1,:,jcal+ii)));%round(detail(1,:,jcal+ii));
  step_report=num2cell(detail(1:end-1,:,jcal+ii));
  %  end -2 introducimos daumont
  quad_res=num2cell(res(jcal+ii,1:end-2));

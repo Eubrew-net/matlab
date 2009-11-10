@@ -100,8 +100,6 @@ try
         };
     hg_data.time_badhg=time_badhg/60/24+datefich(1);
 
-
-
     if ~isempty(jco)
         co=l(jco);
         jsc_aux=strfind(co,'sc:');
