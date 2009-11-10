@@ -8,9 +8,9 @@
 % rp= ration porcentual
 %
 % Special Version for ozone measurements
-% input argument date, ozone,airm, sza,ms9,sms9, temperature, filter
+% input argument:  date, ozone,airm, sza,ms9,sms9, temperature, filter
 
-function [x,r,ab,rp,data,osc_out,osc_smooth]=ratio_min(a,b,n_min,name_a,name_b)
+function [x,r,ab,rp,data,osc_out,osc_smooth]=ratio_min_ozone(a,b,n_min,name_a,name_b)
 % calcula el ratio entre respuestas o lamparas
 MIN=60*24;
 %n_min=10;
@@ -174,7 +174,7 @@ if nargin>3
          ylabel(' % ratio');
         title( [name_a,' - ',name_b,'/ ',name_b])
    
-     %figure by filter 
+    %figure by filter 
     f=figure;
     set(f,'Tag','RATIO_BOTH');
     if size(b,2)==8;   
