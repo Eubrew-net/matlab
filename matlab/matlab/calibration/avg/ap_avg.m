@@ -1,4 +1,7 @@
-function apa=ap_avg(file,date_range,ref)
+% Juanjo 02/11/2009 
+%  añadido flag de depuracion;
+
+function apa=ap_avg(file,date_range,flag_outlier)
 
 try
  a=textread(file,'');
@@ -7,6 +10,7 @@ catch
      a=read_avg_line(file);   
     catch
      disp(file);
+
      aux=lasterror;
      disp(aux.message)
     return;
@@ -27,6 +31,27 @@ if nargin>1
 else
     apa=ap;
 end
+
+% OUTLIERS
+if nargin==3
+    if flag_outlier
+        % outliers HT
+        [ax,bx,cx,dx]=outliers_bp(apa(:,4),3);
+        disp(apa(dx,[1,4]))
+        apa(dx,4)=NaN;
+        
+%         % outliers SL current
+%         [ax,bx,cx,dx]=outliers_bp(apa(:,end),3);
+%         disp(apa(dx,[1,end]))
+%         apa(dx,end)=NaN;
+
+%         % outliers 5V voltage
+%         [ax,bx,cx,dx]=outliers_bp(apa(:,5),3);
+%         disp(apa(dx,[1,5]))
+%         apa(dx,5)=NaN;
+    end
+end
+
 % j=find(apa(:,4)>60 | apa(:,4)<20 | apa(:,5)>60 | apa(:,5)<20 );
 % apa(j,:)=[];
 

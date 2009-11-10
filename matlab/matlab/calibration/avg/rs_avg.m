@@ -1,5 +1,8 @@
 % plotea el fichero run/stop
-function rsa=rs_avg(file,date_range);
+% Juanjo 02/11/2009 
+%  añandido flag de depuracion;
+
+function rsa=rs_avg(file,date_range,flag_outlier);
 
 try
  a=textread(file,'');
@@ -29,9 +32,33 @@ if nargin>1
         rsa_=rsa;
     else
         rsa=rsa_;
-    end
-        
+    end        
 end
+
+% OUTLIERS
+    if flag_outlier
+        % outliers HT
+        [ax,bx,cx,dx]=outliers_bp(rsa(:,2),3);
+        disp(rsa(dx,:))
+        rsa(dx,2)=NaN;
+        
+        [ax,bx,cx,dx]=outliers_bp(rsa(:,3),3);
+        disp(rsa(dx,:))
+        rsa(dx,3)=NaN;
+ 
+        [ax,bx,cx,dx]=outliers_bp(rsa(:,4),3);
+        disp(rsa(dx,:))
+        rsa(dx,4)=NaN;
+        
+        [ax,bx,cx,dx]=outliers_bp(rsa(:,5),3);
+        disp(rsa(dx,:))
+        rsa(dx,5)=NaN;
+        
+        [ax,bx,cx,dx]=outliers_bp(rsa(:,6),3);
+        disp(rsa(dx,:))
+        rsa(dx,6)=NaN;
+    end
+
 num_lab=6;
 labs=linspace(rsa(1,1),rsa(end,1),num_lab);
 

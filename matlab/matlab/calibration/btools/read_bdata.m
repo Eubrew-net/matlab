@@ -25,8 +25,8 @@ for day=CALC_DAYS
           sfc_flag='sfc';
          [ o3,config_,sl_,hg_]=readb_ds_develop(bfile,brw_config_files(i,1:2),scf);
         else
-         [ o3,config_,sl_,hg_]=readb_ds_develop(bfile,brw_config_files(i,1:2));
          sfc_flag='  ';
+        [o3,config_,sl_,hg_]=readb_ds_develop(bfile,brw_config_files(i,1:2));
          %disp(['OK-> ',brw_name{i}]);
         end
         catch
@@ -59,7 +59,7 @@ for day=CALC_DAYS
         missing(index_day)=NaN;
         log{index_day}={'ERROR',bfile,brw_name{i},'Not found','   '};
     end
-     log{index_day}
+     log{index_day};
 end
 disp(brw(i));
 

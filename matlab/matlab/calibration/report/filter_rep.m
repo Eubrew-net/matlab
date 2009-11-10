@@ -109,8 +109,8 @@ catch
  fi=reshape(fi_avg(:,5:end-2),[],15,6);
 end
 % dim 1 n de medidas
-%    2 medidas (slit 0-5) 15 datos
-%    3 medidas por filtro 
+%     2 medidas (slit 0-5) 15 datos
+%     3 medidas por filtro 
 
 % ya son directamente las atenuaciones.
 % nominal values
@@ -137,11 +137,10 @@ fh=figure; set(fh,'tag','FI_TIME');
 for ii=1:6
   subplot(2,3,ii);
   %plot(dia,((fi(:,4:2:end,ii)-repmat(nominal(ii),[nmeas,6]))./repmat(nominal(ii),[nmeas,6])));
-  mmplotyy(dia(:,1),fi(:,4:2:end,ii),temp,'.');
+  mmplotyy(dia(:,1),fi(:,4:2:end,ii),':*',temp,'^k');
   %plot(dia(:,1),fi(:,4:2:end,ii),'.');
   axis('tight');
   xlabel('Day')
-
 end
 
 legend(label_lamda); 
