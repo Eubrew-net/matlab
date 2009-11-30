@@ -1,11 +1,22 @@
 
  function rename_disp(path_a_brewer)
-
-origen=pwd; cd (path_a_brewer); brew=cell2mat(regexp(path_a_brewer,'[*\d]','match'));
-% renombra los ficheros de dispersion del brewer en longitudes de onda crecientes
+ 
+% Renombra los ficheros de dispersion del brewer en longitudes de onda crecientes
 % 
-% falta reescribir el fichero con la longitud de onda correcta
-% lineas   orden  lamp  tom_granar
+% lineas  orden    lamp           tom_granar
+% 2893.600	1	%	Hg	9
+% 2932.630	2	%	In	9
+%  ...     ...      ......
+% 
+% TODO: reescribir el fichero con la longitud de onda correcta ?
+% 
+% Modificado: 30/11/2009 Juanjo: Corregido el patrón de busqueda de brewer
+%                                 
+ 
+origen=pwd; cd (path_a_brewer); 
+brew=cell2mat(regexp(path_a_brewer,'(\\\d+)','match'));
+s=dir(['W*.',brew(2:end)]);
+
 disp_lines=[
 2893.600	1	%	Hg	9
 2932.630	2	%	In	9
@@ -28,7 +39,6 @@ disp_lines=[
 3611.510    14
 ];
 
-s=dir(['W*.',brew]);
 for i=1:length(s)
 
      name_old=sscanf(s(i).name,'W%01d%01d%03d%02d.%03d');
