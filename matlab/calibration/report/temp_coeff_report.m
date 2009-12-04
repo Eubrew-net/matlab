@@ -1,25 +1,61 @@
-%% SL temperature analysis
+function [NTC,tabla_regress]=temp_coeff_report(config_file,sl,config,varargin)
+
+% SL temperature analysis
 %  
 % TODO
-% cambiar la fecha para contemplar mas de un año
 % outputs
 % calculation from raw counts. Revisar linea 49
 %
-% Alberto 09/2009
-% Modificado el plot para elegir el numero de dias a plotear
-% ndays=length(unique(fix(Fr(~isnan(Fr(:,1)),1))));
-%  nrep=ceil(ndays/20);
-%  c=hsv(ceil(ndays/nrep));
-%
+% MODIFICADO: 
+% Alberto 09/2009: plot para elegir el numero de dias a plotear
+%                  ndays=length(unique(fix(Fr(~isnan(Fr(:,1)),1))));
+%                  nrep=ceil(ndays/20);
+%                  c=hsv(ceil(ndays/nrep));
+%  
+% Juanjo 10/11/2009: Redefino los inputs de la función. Tres son
+%                    obligatorios; config_file, sl y config. Otros tres opcionales;
+%                  - 'daterange' -> array de uno o dos elementos (fecha matlab)
+%                  - 'outlier_flag' -> 1=depuración, 0=no depuración
 % 
-function [NTC,tabla_regress]=temp_coeff_report(config_file,sl,config,daterange,outlier_flag)
- if isstruct(config_file)
+% Juanjo 03/12/2009: No se depuraban las MS9 del sumario.
+%                    Modifico el indice del bucle a ii=0:6 para hacerlo (no es tan importante, 
+%                    porque se recalculan las ratios a partir de las cuentas de slit, que si se depuran)
+%                    Modifico el código que carga datos para contemplar
+%                    estructuras (la generada por readb_sll)
+% Ejemplo:
+% [NTC,tabla_regress]=temp_coeff_report(config_temp,sl_cr,config,'daterange',...
+%                                       datenum(cal_year,cal_month-10,1),...
+%                                       'outlier_flag',1);
+% 
+
+ok_vargs = {'daterange','outlier_flag'};
+
+    for j=1:2:(length(varargin)-1)
+        pname = varargin{j};
+        pval = varargin{j+1};
+        k = strmatch(pname, ok_vargs);
+        if isempty(k)
+            disp(sprintf('%s %s','Error temp_coeff_report: Unknown parameter name ', pname));
+        elseif length(k)>1
+            disp(sprintf('%s %s','Error temp_coeff_report: Ambiguous parameter name ', pname));
+        else
+            switch(k)
+                case 1  % daterange
+                     date_range = pval;
+                case 2  % color
+                     outlier_flag = pval;
+            end            
+        end
+    end              
+
+if isstruct(config_file)
      n_inst=config_file.n_inst;
      brw_name{n_inst}=config_file.brw_name;
      FINAL_DAYS(1)=config_file.final_days;
- else
-eval(config_file);
+else
+     eval(config_file);
 end
+
 %% OLD and new configuration files
 TC=[];A=[];
 TC_old=[]; cfg_old=[];cfg=[];
@@ -30,12 +66,11 @@ out=[];
 %idx_inst=n_inst;
 
 for i=n_inst
-    
     a=cell2mat(config{n_inst}');
     % new config
     %falla si solo hay 1
     if size(a,2)>2
-    b=unique(a(1:end-1,2:2:end-1)','rows');
+    b=unique(a(1:end-1,2:2:end)','rows');
     else
     b=unique(a(1:end-1,2)','rows');
     end
@@ -45,7 +80,7 @@ for i=n_inst
     TC(i,1:5)=b(2:6);
     
     % old config
-    b=unique(a(1:end-2,1:2:end)','rows');
+    b=unique(a(1:end-1,1:2:end-1)','rows');
     A_old(i)=b(8);
     ETC_old(i)=b(11);
     %cfg_old(i,1:52)=b;
@@ -69,31 +104,31 @@ end
 % Temperature coefficients calculated with the configuration provided
 %
 if isfloat(sl)
-  Fr=ratio2counts_avg(sl)
-  sls=sl;
-elseif iscell(sl{n_inst})
-  sls=cell2mat(sl{n_inst});
-  Fr=ratio2counts(sls);
-Fr(:,1)=diaj2(sls(:,1)); %fecha
-Fr(:,2)=abs(sls(:,13));
-%Fr(:,10)=sls(:,1); %fecha 
-else
-    sls=sl{n_inst};
-    Fr=ratio2counts(sls);
-Fr(:,1)=diaj2(sls(:,1)); %fecha
-Fr(:,2)=abs(sls(:,13));
-
+   Fr=ratio2counts_avg(sl);
+   sls=sl;
+elseif iscell(sl)
+       if iscell(sl{n_inst})
+          sls=cell2mat(sl{n_inst});
+          Fr=ratio2counts(sls);
+          Fr(:,1)=diaj2(sls(:,1)); %fecha
+          Fr(:,2)=abs(sls(:,13));
+         %Fr(:,10)=sls(:,1); %fecha 
+       else
+          sls=sl{n_inst};
+          Fr=ratio2counts(sls);
+          Fr(:,1)=diaj2(sls(:,1)); %fecha
+          Fr(:,2)=abs(sls(:,13));
+       end
+elseif isstruct(sl)
+    sls=cat(1,sl.c);
+    Fr=ratio2counts(sls);    
+    Fr(:,1)=diaj2(sls(:,1)); %fecha
+    Fr(:,2)=abs(sls(:,13));
 end
 %Fr=ratio2counts(sls);
 
-
-% Date filter
-if nargin>3 % overwrite setup config
-    date_range=daterange;
-end
-
 %% control de fechas
-if exist('date_range','var') || ~isempty(date_range)
+if exist('date_range','var')
     j=find(sls(:,1)<(date_range(1)));
     Fr(j,:)=NaN;
     if length(date_range)>1
@@ -103,34 +138,31 @@ if exist('date_range','var') || ~isempty(date_range)
 end
 
 
+%% Depuración de Outliers
 %only for julian
 %  j=find(Fr(:,2)>25);
 %  Fr(j,:)=NaN;
- 
 
-
-Fr_dep=[];
-
-
-
-if exist('outlier_flag')
-    f=figure;
-    for ii=0:6
-        [a,b,out]=boxparams(Fr(:,3+ii),2.5);
-        subplot(4,2,ii+1);
-        plot(Fr(:,2),Fr(:,3+ii),'.','MarkerSize',1);
-        hold on;
-        plot(Fr(out,2),Fr(out,3+ii),'x','MarkerSize',14);
-        subplot(4,2,8);hold on;
-        mmplotyy_temp(Fr(out,1),Fr(out,end),'bx',Fr(out,end-1),'rx');
-        Fr_dep=Fr(out,:) ;
-        Fr(out,1)=NaN;
-        Fr(out,3+ii)=NaN;
+if exist('outlier_flag') 
+    if outlier_flag==1 
+       for ii=0:6
+           [a,b,out]=boxparams(Fr(:,3+ii),1.5);
+           if ii==6
+               subplot(4,2,7:8);
+           else
+               subplot(4,2,ii+1);
+           end
+           plot(Fr(:,2),Fr(:,3+ii),'.','MarkerSize',1);
+           hold on;
+           plot(Fr(out,2),Fr(out,3+ii),'x','MarkerSize',14);
+           Fr_dep=Fr(out,:) ;
+           Fr(out,1)=NaN;
+           Fr(out,3+ii)=NaN;
+       end
     end
-     subplot(4,2,8);
-     mmplotyy_temp(Fr(:,1),Fr(:,end),'b.',Fr(:,end-1),'r.');
-    suptitle('DEPURATION')
+    else disp('Warning: especifica ''outlier_flag'': 0 ó 1'), return
 end
+
 %%
 f=figure;
 set(f,'Tag','TEMP_COEF_DESC');
@@ -141,7 +173,7 @@ ploty(Fr(:,[1,3:end-2]),'.');
 set(gca,'LineWidth',1);
 ylabel('Counts');
 xlabel('day');
-text(repmat(FINAL_DAYS(1)+.5,5,1),nanmean(Fr(:,3:end-2)),...
+text(repmat(min(Fr(:,1))+.1,5,1),nanmean(Fr(:,3:end-2)),...
             {'\itslit #2','\itslit #3','\itslit #4','\itslit #5','\itslit #6'});
 %legend({'slit #0','slit #1','slit #2','slit #3','slit #4','slit #5'},'BestOutSide');
 
@@ -180,31 +212,25 @@ plot(Fr(:,2),Fr(:,3:7),'.');
 [a,b]=robust_line;
 tc=b(2,:);otc=TC(n_inst,:);
 if TC(n_inst,1)==0 % si esta normalizada o no
- NTC=-(tc-tc(1))+TC(n_inst,:);
+ NTC=-(tc-tc(1))+otc;
 else
- NTC=-tc+TC(n_inst,:)
+ NTC=-tc+otc;
 end
 
 title(num2str([TC(n_inst,:);NTC]));
 grid;
 xlabel('PMT Temperature (C\circ)');
 ylabel('counts seconds');
-
-sl_temp={...
-                'old ',num2str(TC(n_inst,:));...
-                'new ',num2str( NTC);...
-                'new2',num2str( b(2,:));
-                };
-
 suptitle(brw_name{n_inst})
+
+
 %% REVISAR
 O3W=[   0.00   -1.00    0.50    2.20   -1.70];
 
 f=figure;
 set(f,'tag','TEMP_OLD_VS_NEW');
 FN=Fr;
-FN(:,3:7)=Fr(:,3:7)+matmul(repmat(FN(:,2),1,5),+(NTC)-otc);
-
+FN(:,3:7)=Fr(:,3:7)+matmul(repmat(FN(:,2),1,5),(NTC)-otc);
 plot(Fr(:,2),Fr(:,3:7)*O3W','x')
 hold on;plot(FN(:,2),FN(:,3:7)*O3W','bo')
 legend({'R6  TC','R6 TC new'});
@@ -212,7 +238,6 @@ legend({'R6  TC','R6 TC new'});
 title('R6 ratios, TC vs calculated TC');
 
 
-%%
 %%
 f=figure;
 set(f,'tag','TEMP_day');
@@ -277,17 +302,4 @@ tabla_regress={{''},{'intercept +/- standard error'},{'slope +/- standard error'
     {'SLIT #5 '},{sprintf('%g +/- %g',[round(coeff{4}(1)),round(error{4}.se(1))])},{sprintf(' %3.1f +/- %3.1f',[coeff{4}(2),error{4}.se(2)])}
     {'SLIT #6 '},{sprintf('%g +/- %g',[round(coeff{5}(1)),round(error{5}.se(1))])},{sprintf(' %3.1f +/- %3.1f',[coeff{5}(2),error{5}.se(2)])}
     {'MS9 '}    ,{sprintf('%g +/- %g',[round(coeff{7}(1)),round(error{7}.se(1))])},{sprintf(' %3.1f +/- %3.1f',[coeff{7}(2),error{7}.se(2)])}};
-% tabla_regress={{''},{'SLIT #2 '},{'SLIT #3 '},{'SLIT #4 '},{'SLIT #5 '},{'SLIT #6 '},{'MS9 '}
-%     {'intercept '},{sprintf('%+0.1f +/- %0.2f',coeff{1}(1),error{1}.se(1))},...
-%                    {sprintf('%+0.1f +/- %0.2f',coeff{2}(1),error{2}.se(1))},...
-%                    {sprintf('%+0.1f +/- %0.2f',coeff{3}(1),error{3}.se(1))},...
-%                    {sprintf('%+0.1f +/- %0.2f',coeff{4}(1),error{4}.se(1))},...
-%                    {sprintf('%+0.1f +/- %0.2f',coeff{5}(1),error{5}.se(1))},...
-%                    {sprintf('%+0.1f +/- %0.2f',coeff{7}(1),error{7}.se(1))} 
-%     {'slope '},{sprintf('%+0.1f +/- %0.2f',coeff{1}(2),error{1}.se(2))},...
-%                {sprintf('%+0.1f +/- %0.2f',coeff{2}(2),error{2}.se(2))},...
-%                {sprintf('%+0.1f +/- %0.2f',coeff{3}(2),error{3}.se(2))},...
-%                {sprintf('%+0.1f +/- %0.2f',coeff{4}(2),error{4}.se(2))},...
-%                {sprintf('%+0.1f +/- %0.2f',coeff{5}(2),error{5}.se(2))},...
-%                {sprintf('%+0.1f +/- %0.2f',coeff{7}(2),error{7}.se(2))}};
 
