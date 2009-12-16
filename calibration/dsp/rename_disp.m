@@ -96,8 +96,8 @@ for i=1:length(s)
     if c==5
         % wv slit day year inst
         ndir=sprintf('%03d_%02d_%03d',data(5:-1:3));
-        data(3)=data(3)-1;  ndir_m=sprintf('%03d_%02d_%03d',data(5:-1:3));
-        data(3)=data(3)+2;  ndir_p=sprintf('%03d_%02d_%03d',data(5:-1:3));
+        ndir_m=sprintf('%03d_%02d_%03d',[data(5:-1:4);data(3)-1]);   
+        ndir_p=sprintf('%03d_%02d_%03d',[data(5:-1:4);data(3)+1]);  
            
         if exist(ndir_p,'dir')
             movefile(s(i).name,ndir_p);

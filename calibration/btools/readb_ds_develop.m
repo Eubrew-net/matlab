@@ -8,8 +8,11 @@ function [o3,config,sl_data,hg_data]=readb_ds_develop(bfile,config_file,spectral
 %
 %
 % output
-%  o3 structure;
-%
+%  o3 structure; 
+% o3.ozone_ds_legend={  'date'    'hg_flag'    'n'    'sza'    'airm'  'temp' 'flt'...
+%                        'o3'     'r1'      'r2'      'r3'     'r4'    'r5'    'r6'   ...
+%                        'o3'     'r1'      'r2'      'r3'     'r4'    'r5'    'r6'};
+
 dsum=[];ds=[];dss=[];timeds=[];timedss=[];ds_l=[];ds_aod=[];
 ds=[];dss=[];ndss=0;timedsum=[];timeds=[];
 sl=[];sls=[];nsl=0;nsls=0;timesls=[];timesl=[];

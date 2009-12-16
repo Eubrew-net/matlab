@@ -1,7 +1,6 @@
 %% PLOT
 
-
-c=jet(length(brw)+2);       
+c=jet(length(brw)*2);       
 f=figure; 
 set(f,'Tag','_GlobalPlot_');
 h=plot(1);
@@ -9,27 +8,28 @@ MK=set(plot(1),'Marker');
 for i=length(MK):length(brw)
    MK{i}='.';
 end
-MK{n_inst}='o';
+MK{n_inst}='d';
 MK{n_ref}='*';
+% no se ven los puntos
+MK{strmatch('.',MK)}='o';
 
 
 
-%MK{n_inst}='+';
-MK{n_inst}='o';
-MK{n_ref}='*';
 % separa los dias -> nice plot
 for i=1:length(brw)
-aux=sortrows(summary{i},1);
-[dias,j]=unique(diaj(aux(:,1)),'first');
-B=aux(j,:);
-B(:,2:end)=NaN;
-aux=insertrows(aux,B,j);
-[dias,j2]=unique(diaj(aux(:,1)),'last');
-B=aux(j2,:);
-B(:,2:end)=NaN;
-aux=insertrows(aux,B,j2);
-summary{i}=insertrows(aux,B,j2);
+ aux=sortrows(summary{i},1);
+ [dias,j]=unique(diaj(aux(:,1)),'first');
+ B=aux(j,:);
+ B(:,2:end)=NaN;
+ aux=insertrows(aux,B,j);
+ [dias,j2]=unique(diaj(aux(:,1)),'last');
+ B=aux(j2,:);
+ B(:,2:end)=NaN;
+ aux=insertrows(aux,B,j2);
+ summary{i}=insertrows(aux,B,j2);
 end
+
+
 
 clf
 hold on;
@@ -55,7 +55,7 @@ for i=1:length(brw)
 end  
 legend(k,[brw_name,([brw_name{n_inst},'_s_l'])],'Location','Best');
 datetick('keepticks');
-axis([datenum(cal_year,cal_month,8),datenum(cal_year,cal_month,16),280,340])
+axis([datenum(cal_year,cal_month,8),datenum(cal_year,cal_month,16),240,320])
 box on
 grid
 ylabel('Dobson Units')
@@ -67,7 +67,7 @@ xlabel('Date')
 
 for dj=CALC_DAYS
     
- c=(hot(length(brw)+2));       
+ c=(jet(length(brw)*2));       
     f=figure; 
     set(f,'Tag',['_DayPlot_',num2str(dj)]);
  
@@ -77,7 +77,7 @@ for dj=CALC_DAYS
     for i=1:length(brw)
         
        k(i)=ploty(summary{i}(:,[1,end-1]),'.');
-       set(k(i),'color',c(i,:),'Marker',MK{i},'MarkerSize',2);
+       set(k(i),'color',c(i,:),'Marker',MK{i},'MarkerSize',4);
        if i==n_ref || i==1;
         set(k(i),'color',[1,0,0],'Marker','d','LineStyle','-','LineWidth',2);
         set(k(1),'color',[0,1,0],'Marker','d','LineStyle','-','LineWidth',2);
@@ -93,9 +93,9 @@ for dj=CALC_DAYS
 %        end
     end
     suptitle('RBCC-E ')
-    axis([datenum(cal_year,1,1)+dj-1+.25,datenum(cal_year,1,1)+dj-.20,280,340])
-    %legend(k,brw_name,-1);
-    legend(k,[brw_name,([brw_name{n_inst},'_s_l'])],-1);
+    axis([datenum(cal_year,1,1)+dj-1+.25,datenum(cal_year,1,1)+dj-.20,245,305])
+    legend(k,brw_name,-1);
+    %legend(k,[brw_name,([brw_name{n_inst},'_s_l'])],-1);
     set(f,'Tag',['__DayPlot__',datestr(datenum(cal_year,1,1)+dj)]);
     datetick('keeplimits');
     box on
@@ -107,6 +107,38 @@ for dj=CALC_DAYS
    
 end
 
+
+ c=(jet(length(brw)*2));       
+ f=figure; 
+ set(f,'Tag',['_Summary_',num2str(dj)]);
+ h=plot(1);
+ clf
+ hold on;
+ for i=1:length(brw)
+     k(i)=ploty(summary{i}(:,[1,end-1]),'.');
+     set(k(i),'color',c(i,:),'Marker',MK{i},'MarkerSize',4);
+     if i==n_ref || i==1;
+        set(k(i),'color',[1,0,0],'Marker','d','LineStyle','-','LineWidth',2);
+        set(k(1),'color',[0,1,0],'Marker','d','LineStyle','-','LineWidth',2);
+     end
+     if i==n_inst
+       set(k(i),'color',[0,0,0],'Marker','o','LineStyle','-','LineWidth',2);
+       k(length(brw)+1)=ploty(summary_old{i}(:,[1,end-1]),'bs');
+       %k(length(brw)+2)=ploty(summary_old{i}(:,[1,7]),'c.');
+     end
+ end
+ suptitle('RBCC-E ')
+ axis([-Inf,Inf,245,305])
+    legend(k,brw_name,-1);
+    %legend(k,[brw_name,([brw_name{n_inst},'_s_l'])],-1);
+    datetick('x','keepticks');
+    box on
+    grid
+    ylabel('Dobson Units')
+    title('RBCC-E');
+    %xlabel('Hour (GMT)')
+    
+   
 try
     snapnow;
     %close all;
