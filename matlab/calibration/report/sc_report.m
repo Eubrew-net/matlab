@@ -2,6 +2,7 @@
 % change-> no eliminar los datos filtrados. Marcar el filtro que los
 % invalida.
 % change > from setup files %OSC,control_flag
+% 05/11/2009 Juanjo: Se modifican los Tag de los ploteos de SC individuales con vistas a incluirlos en Appendix?
 
 % HECHO ref_iau introducir el ozone slant path climatologico  en brewer_setup
 % HECHO  introducir le date range
@@ -236,7 +237,7 @@ end
     if ~isempty(scraw )
         for ii=1:size(scavg,1),
             h=figure;
-            set(h,'tag','SC_INDIVIDUAL');
+            set(h,'tag',sprintf('%s%i%c%i','SC_INDIVIDUAL',jj,'_',ii)); 
 
             sc_=scraw(medida==scavg(ii,3),:);
             sca=scavg(ii,:);
@@ -248,12 +249,12 @@ end
                 sprintf(' airm=%.2f  filter=%d ozone=%.1f  step=%.0f \\Delta hg step=%.1f ',sca(1,[8,9,11,10,21])),...
                 ['y=',poly2str(round(sca(18:20)*100)/100,'x'),'',sprintf(' normr=%.1f',sca(1,17))]});
             sup=suptitle([brw_str ,'  DiaJ=',num2str(dias(jj)),' ' ,datestr(sca(1,1))]);
-            xlabel('step');
-            ylabel('ozone');
+            xlabel('step');  ylabel('ozone');
+            set(gca,'LineWidth',1);
         end
+      end
     end
-    end
-set(h,'Tag','SC_Example'); set(gca,'LineWidth',1); 
+set(h,'Tag','SC_INDIVIDUAL'); 
     
 %figure;
 %plot(a(:,10),a(:,8).*a(:,11),'.',a(:,15),a(:,16).*a(:,8),'+')

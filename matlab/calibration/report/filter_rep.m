@@ -44,14 +44,15 @@ function [ETC_FILTER_CORRECTION,media,fi,fi_avg]=filter_rep(brw_str,date_range,o
 
 % se le puede introducir el nombre del fichero o el numero de brewer
 % si le introduces el numero de brewer busca primero en bfiles y luego en bdataxxx
-if length(brw_str)==3;
-    fioavg=['.',filesep(),'bfiles',filesep(),'FIOAVG.',brw_str];
-    if ~exist(fioavg,'file');
-      fioavg=['.',filesep(),'bdata', brw_str,filesep(),'FIOAVG.',brw_str];
-    end
-else
-      fioavg=brw_str;
-end
+
+  if length(brw_str)==3;
+     fioavg=['.',filesep(),'bfiles',filesep(),brw_str,filesep(),'FIOAVG.',brw_str];
+     if ~exist(fioavg,'file');
+       fioavg=['.',filesep(),'bdata', brw_str,filesep(),'FIOAVG.',brw_str];
+     end
+  else
+     fioavg=brw_str;
+  end
 
 
 try
@@ -193,16 +194,19 @@ for ii=2:6
   subplot(3,2,ii-1);
   boxplot(100*((fi(:,4:2:end,ii)-repmat(nominal(ii),[nmeas,6]))./repmat(nominal(ii),[nmeas,6])),...
           'label',label_lamda);   set(gca,'Linewidth',1);      
-  xlabel('wavelength'); ylabel(sprintf('%s\n%s','%difference from ','nominal values')); 
+  xlabel('wavelength'); %ylabel(sprintf('%s\n%s','%difference from ','nominal values'),'FontSize',9); 
+  ylabel(''); 
   title(sprintf('Filter #%d',ii-1));
 end
 subplot(3,2,6);
 boxplot(100*((fi(:,4:2:end,1)-repmat(nominal(1),[nmeas,6]))./repmat(nominal(1),[nmeas,6])),...
         'label',label_lamda);   set(gca,'Linewidth',1);      
-xlabel('wavelength'); ylabel('Intensity');  
+xlabel('wavelength'); ylabel('');
+% ylabel('Intensity','FontSize',9);  
 title('Intensity');
 
-sup=suptitle(sprintf('%s%s','Attenuation Filter Test, ',fioavg(regexp(fioavg,'AVG')-3:regexp(fioavg,'AVG')+6)));
+sup=suptitle(sprintf('%s%s\n%s','Attenuation Filter Test, ',fioavg(regexp(fioavg,'AVG')-3:regexp(fioavg,'AVG')+6),...
+                                'Difference from nominal values, %'));
 pos=get(sup,'Position'); set(sup,'Position',[pos(1)+.02,pos(2)-.01,1]);
 
 f=figure; set(f,'tag','FI_wavelength');

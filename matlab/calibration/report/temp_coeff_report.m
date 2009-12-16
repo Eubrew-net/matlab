@@ -1,27 +1,23 @@
-function [NTC,tabla_regress]=temp_coeff_report(config_file,sl,config,varargin)
+function [NTC,tabla_regress,Fr]=temp_coeff_report(config_file,sl,config,varargin)
 
 % SL temperature analysis
 %  
 % TODO
+% cambiar la fecha para contemplar mas de un año
 % outputs
 % calculation from raw counts. Revisar linea 49
 %
-% MODIFICADO: 
-% Alberto 09/2009: plot para elegir el numero de dias a plotear
-%                  ndays=length(unique(fix(Fr(~isnan(Fr(:,1)),1))));
-%                  nrep=ceil(ndays/20);
-%                  c=hsv(ceil(ndays/nrep));
+% Alberto 09/2009
+% Modificado el plot para elegir el numero de dias a plotear
+%  ndays=length(unique(fix(Fr(~isnan(Fr(:,1)),1))));
+%  nrep=ceil(ndays/20);
+%  c=hsv(ceil(ndays/nrep));
 %  
 % Juanjo 10/11/2009: Redefino los inputs de la función. Tres son
-%                    obligatorios; config_file, sl y config. Otros tres opcionales;
-%                  - 'daterange' -> array de uno o dos elementos (fecha matlab)
-%                  - 'outlier_flag' -> 1=depuración, 0=no depuración
+%        obligatorios; config_file, sl y config. Otros tres opcionales;
+%        - 'daterange' -> array de uno o dos elementos (fecha matlab)
+%        - 'outlier_flag' -> 1=depuración, 0=no depuración
 % 
-% Juanjo 03/12/2009: No se depuraban las MS9 del sumario.
-%                    Modifico el indice del bucle a ii=0:6 para hacerlo (no es tan importante, 
-%                    porque se recalculan las ratios a partir de las cuentas de slit, que si se depuran)
-%                    Modifico el código que carga datos para contemplar
-%                    estructuras (la generada por readb_sll)
 % Ejemplo:
 % [NTC,tabla_regress]=temp_coeff_report(config_temp,sl_cr,config,'daterange',...
 %                                       datenum(cal_year,cal_month-10,1),...
@@ -66,6 +62,7 @@ out=[];
 %idx_inst=n_inst;
 
 for i=n_inst
+    
     a=cell2mat(config{n_inst}');
     % new config
     %falla si solo hay 1
@@ -142,25 +139,22 @@ end
 %only for julian
 %  j=find(Fr(:,2)>25);
 %  Fr(j,:)=NaN;
+ 
 
-if exist('outlier_flag') 
-    if outlier_flag==1 
-       for ii=0:6
-           [a,b,out]=boxparams(Fr(:,3+ii),1.5);
-           if ii==6
-               subplot(4,2,7:8);
-           else
-               subplot(4,2,ii+1);
-           end
-           plot(Fr(:,2),Fr(:,3+ii),'.','MarkerSize',1);
-           hold on;
-           plot(Fr(out,2),Fr(out,3+ii),'x','MarkerSize',14);
-           Fr_dep=Fr(out,:) ;
-           Fr(out,1)=NaN;
-           Fr(out,3+ii)=NaN;
-       end
+
+Fr_dep=[];
+
+if exist('outlier_flag')
+    for ii=0:5
+        [a,b,out]=boxparams(Fr(:,3+ii),1.5);
+        subplot(3,2,ii+1);
+        plot(Fr(:,2),Fr(:,3+ii),'.','MarkerSize',1);
+        hold on;
+        plot(Fr(out,2),Fr(out,3+ii),'x','MarkerSize',14);
+        Fr_dep=Fr(out,:) ;
+        Fr(out,1)=NaN;
+        Fr(out,3+ii)=NaN;
     end
-    else disp('Warning: especifica ''outlier_flag'': 0 ó 1'), return
 end
 
 %%
@@ -176,7 +170,9 @@ xlabel('day');
 text(repmat(min(Fr(:,1))+.1,5,1),nanmean(Fr(:,3:end-2)),...
             {'\itslit #2','\itslit #3','\itslit #4','\itslit #5','\itslit #6'});
 %legend({'slit #0','slit #1','slit #2','slit #3','slit #4','slit #5'},'BestOutSide');
-
+hold on;
+plot2(Fr(:,1),Fr(:,2),'p');
+ylabel('Temperature Cº');
 subplot(2,4,3:4);
 mmplotyy_temp(Fr(:,1),Fr(:,end),'.',Fr(:,end-1),'x');
 set(gca,'LineWidth',1);
@@ -203,6 +199,8 @@ mmplotyy('shrink');
 suptitle(brw_name{n_inst})
 legend(gca,{'R6','R5'},'Location','NorthEast','HandleVisibility','Off');
 
+%% cambio % respecto al valor medio
+%figure; plot(Fr(:,1),100*matdiv(matadd(Fr(:,3:end-2),-nanmean(Fr(:,3:end-2))),nanmean(Fr(:,3:end-2))))
 %%
 f=figure;
 set(f,'tag','TEMP_global');
@@ -231,7 +229,7 @@ f=figure;
 set(f,'tag','TEMP_OLD_VS_NEW');
 FN=Fr;
 FN(:,3:7)=Fr(:,3:7)+matmul(repmat(FN(:,2),1,5),(NTC)-otc);
-plot(Fr(:,2),Fr(:,3:7)*O3W','x')
+plot(Fr(:,2),Fr(:,3:7)*O3W','rx')
 hold on;plot(FN(:,2),FN(:,3:7)*O3W','bo')
 legend({'R6  TC','R6 TC new'});
 [a,r6tc]=rline;

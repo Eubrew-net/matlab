@@ -4,9 +4,9 @@ sl_avg=[];
 sl_raw=[];
 s=dir(path);
 [p,n,e]=fileparts(path);
-if nargin>1
-[pc,nc,ec]=fileparts(config);
-end
+% if nargin>1
+% [pc,nc,ec]=fileparts(config);
+% end
 hf=[];
 for i=1: length(s)
     slraw=[];
