@@ -415,9 +415,24 @@ if ~isempty(dss)
     F=ds(:,7:13); % asilamos las cuetas
 
     %dead  time correction and filter atenuation.
-    % Falta verctorizar
+    
+    
+%%% Prueba de vectorizar 
+%     l(4,1000)=NaN;
+%     for i=1:1000
+%
+%      tic;F=ds(:,7:13);F4=raw2counts(F,ds(:,2),ds_temp,ds(:,6),DT(1,:),TC(1,:),AT(1,:));l(4,i)=toc;
+%      
+%      tic;F=ds(:,7:13);F3=raw2counts(F,ds(:,2),ds_temp,ds(:,6),DT(1,:),TC(1,:),AT(1,:),spectral_config);l(3,i)=toc;
+%      
+%      tic;F=ds(:,7:13);F2=ds_counts(F,ds(:,2),ds_temp,ds(:,6),DT(1,:),TC(1,:),AT(1,:));l(2,i)=toc;
+%      tic;F=ds(:,7:13);F1=ds_counts(F,ds(:,2),ds_temp,ds(:,6),DT(1,:),TC(1,:),AT(1,:),spectral_config);l(1,i)=toc;
+%     end
+%     
+    
+    
     %IF Q14%=0 THEN TE%=-33.27+VAL(TE$)*18.64:IF Q10%=0 THEN TE%=-30+VAL(TE$)*16+.5
-   if nargin <3 | isempty(spectral_config) 
+   if nargin <3 || isempty(spectral_config) 
     F=ds_counts(F,ds(:,2),ds_temp,ds(:,6),DT(1,:),TC(1,:),AT(1,:));
    else
     F=ds_counts(F,ds(:,2),ds_temp,ds(:,6),DT(1,:),TC(1,:),AT(1,:),spectral_config);
@@ -874,6 +889,8 @@ if nargin==7 % standard configuration
       F(:,j)=F(:,j)+(TC(ii)*temp)+AF(Filtro);
   end
 else % spectral configuration
+    SAF=[SAF(:,1),NaN*SAF(:,1),SAF(:,2:end),SAF(:,1)];
+
    for j=1:7
 
       if j~=1  
@@ -882,12 +899,66 @@ else % spectral configuration
           ii=8;
       end
       % slit 0 no tiene correccion (no se usa para ozono) 
-      F(:,j)=F(:,j)+(TC(ii)*temp)+SAF(j,Filtro)';
+      F(:,j)=F(:,j)+(TC(ii)*temp)+SAF(Filtro,j);
   end
 end   
     
   F(:,2)=F_dark;
   DS=F; 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%function DS=raw2counts(F,Filtro,temp,CY,DT,TC,AF,SAF)
+%SAF=lineas Filtro, columnas slits
+function DS=raw2counts(F,Filtro,temp,CY,DT,TC,AF,SAF)
+  
+%AF en columna
+AF=AF(:);
+
+% REM calc corr F's
+% 8305 FOR I=WL TO WU:IF I=1 THEN 8335
+% 8310   VA=F(I):GOSUB 8350
+% 8350 REM correct VA for dark/dead time
+% 8355 VA=(VA-F(1))*2/CY/IT:IF VA>1E+07 THEN VA=1E+07
+% 8360 IF VA<2 THEN VA=2
+% 8365 F1=VA:FOR J=0 TO 8:VA=F1*EXP(VA*T1):NEXT
+% 8370 RETURN
+
+%correccion por dark  
+  F_dark=F(:,2);
+  F(:,2)=NaN*F_dark;
+  % otra constante
+  IT=0.1147;
+  F= 2*matdiv(matadd(F,-F_dark),CY)/IT;
+  F(F<=0)=2;
+  F(F>1E07)=1E07;
+
+  % dead time correction
+  F0=F;
+  for j=1:9
+    F=F0.*exp(F*DT);   
+  end
+  F=round(log10(F)*10^4);  %aritmetica entera
+  
+% REM calc corr F's
+% 8305 FOR I=WL TO WU:IF I=1 THEN 8335
+% 8310   VA=F(I):GOSUB 8350
+% 8315   F(I)=LOG(VA)/CO*P4%:J=I:IF J=0 THEN J=7
+% 8320   IF MDD$="o3" THEN X=TC(J) ELSE X=NTC(J)
+% 8325   F(I)=F(I)+X*TE%+AF(AF%)
+% 8335 NEXT:RETURN
+
+  Filtro=(Filtro/64)+1;
+%
+TC(1)=TC(8);
+TC=TC(1:7);
+TCorr=temp*TC;  
+if nargin==7 % standard configuration  
+    F=TCorr+ matadd(F,AF(Filtro));
+ else % spectral configuration
+   SAFx=[SAF(Filtro,1),NaN*SAF(Filtro,1),SAF(Filtro,2:end)];
+   F=F+TCorr+SAFx;
+end    
+F(:,2)=F_dark;
+DS=F; 
 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   %function RC=rayleigth_cor(F,P,M3,BE)
