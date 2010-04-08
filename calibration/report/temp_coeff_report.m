@@ -1,9 +1,11 @@
-function [NTC,tabla_regress,Fr]=temp_coeff_report(config_file,sl,config,varargin)
+function [NTC,tabla_regress,Fr]=temp_coeff_report_prueba(config_file,sl,config,varargin)
 
 % SL temperature analysis
 %  
-% TODO
-% cambiar la fecha para contemplar mas de un año
+% TODO :
+%           -Comprobar las entradas
+%           -Separar calculos y salidas    
+% 
 % outputs
 % calculation from raw counts. Revisar linea 49
 %
@@ -18,13 +20,15 @@ function [NTC,tabla_regress,Fr]=temp_coeff_report(config_file,sl,config,varargin
 %        - 'daterange' -> array de uno o dos elementos (fecha matlab)
 %        - 'outlier_flag' -> 1=depuración, 0=no depuración
 % 
+% Alberto: Ya contempla mas de un año
+%           
 % Ejemplo:
 % [NTC,tabla_regress]=temp_coeff_report(config_temp,sl_cr,config,'daterange',...
 %                                       datenum(cal_year,cal_month-10,1),...
 %                                       'outlier_flag',1);
 % 
 
-ok_vargs = {'daterange','outlier_flag'};
+ok_vargs = {'date_range','outlier_flag'};
 
     for j=1:2:(length(varargin)-1)
         pname = varargin{j};
@@ -102,24 +106,25 @@ end
 %
 if isfloat(sl)
    Fr=ratio2counts_avg(sl);
+   Fr(:,1)=sl(:,1);
    sls=sl;
 elseif iscell(sl)
        if iscell(sl{n_inst})
           sls=cell2mat(sl{n_inst});
           Fr=ratio2counts(sls);
-          Fr(:,1)=diaj2(sls(:,1)); %fecha
+          Fr(:,1)=(sls(:,1)); %fecha
           Fr(:,2)=abs(sls(:,13));
          %Fr(:,10)=sls(:,1); %fecha 
        else
           sls=sl{n_inst};
           Fr=ratio2counts(sls);
-          Fr(:,1)=diaj2(sls(:,1)); %fecha
+          Fr(:,1)=(sls(:,1)); %fecha
           Fr(:,2)=abs(sls(:,13));
        end
 elseif isstruct(sl)
     sls=cat(1,sl.c);
     Fr=ratio2counts(sls);    
-    Fr(:,1)=diaj2(sls(:,1)); %fecha
+    Fr(:,1)=(sls(:,1)); %fecha
     Fr(:,2)=abs(sls(:,13));
 end
 %Fr=ratio2counts(sls);
@@ -166,9 +171,11 @@ subplot(2,4,1:2)
 ploty(Fr(:,[1,3:end-2]),'.');
 set(gca,'LineWidth',1);
 ylabel('Counts');
-xlabel('day');
+xlabel('date');
 text(repmat(min(Fr(:,1))+.1,5,1),nanmean(Fr(:,3:end-2)),...
             {'\itslit #2','\itslit #3','\itslit #4','\itslit #5','\itslit #6'});
+datetick('keeplimits');
+
 %legend({'slit #0','slit #1','slit #2','slit #3','slit #4','slit #5'},'BestOutSide');
 hold on;
 plot2(Fr(:,1),Fr(:,2),'p');
@@ -182,7 +189,7 @@ xlabel('day')
 mmplotyy('shrink');
 legend({'R6','R5'},'Location','NorthEast','HandleVisibility','Off');
 %legend('R6','R5');
-
+datetick('keeplimits');
 subplot(2,4,5:6)
 ploty(Fr(:,[2,3:end-2]),'.');
 set(gca,'LineWidth',1);
@@ -200,7 +207,42 @@ suptitle(brw_name{n_inst})
 legend(gca,{'R6','R5'},'Location','NorthEast','HandleVisibility','Off');
 
 %% cambio % respecto al valor medio
-%figure; plot(Fr(:,1),100*matdiv(matadd(Fr(:,3:end-2),-nanmean(Fr(:,3:end-2))),nanmean(Fr(:,3:end-2))))
+figure; 
+subplot(2,2,1)
+plot(Fr(:,2),100*matdiv(matadd(Fr(:,3:end-2),-nanmean(Fr(:,3:end-2))),nanmean(Fr(:,3:end-2))),'.');
+ylabel(' ratio to mean (%) SL counts/seconds');xlabel('Temperature');
+legend({'sl#0','sl#2','sl#3','sl#4','sl#5'},'Location','North','Orientation','Horizontal');
+
+
+
+t_2=subplot(2,2,2);
+plot(Fr(:,1),100*matdiv(matadd(Fr(:,3:end-2),-nanmean(Fr(:,3:end-2))),nanmean(Fr(:,3:end-2))),'.');
+ylabel(' ratio to mean (%) SL counts/seconds');xlabel('Time');
+legend({'sl#0','sl#2','sl#3','sl#4','sl#5'},'Location','South','Orientation','Horizontal');
+datetick('keeplimits');
+
+% subplot(2,2,3)
+% plot(Fr(:,1),100*matdiv(matadd(Fr(:,end-1:end),-nanmean(Fr(:,end-1:end))),nanmean(Fr(:,end-1:end))),'.');
+% ylabel(' %ratio to mean SL ratios');xlabel('Time');
+% legend({'R6','R5'},'Location','Best','HandleVisibility','Off');
+
+t_3=subplot(2,2,3);
+plot(Fr(:,1),matadd(Fr(:,end-1:end),-nanmean(Fr(:,end-1:end))),'.');
+ylabel(' Abs diff to mean SL ratios');xlabel('Time');
+legend({'R6','R5'},'Location','Best','HandleVisibility','Off');
+datetick('keeplimits');
+
+% subplot(2,2,4)
+% plot(Fr(:,2),100*matdiv(matadd(Fr(:,end-1:end),-nanmean(Fr(:,end-1:end))),nanmean(Fr(:,end-1:end))),'.');
+% ylabel(' %ratio to mean SL ratios');xlabel('Temperature');
+% legend({'R6','R5'},'Location','Best','HandleVisibility','Off');
+
+subplot(2,2,4)
+plot(Fr(:,2),matadd(Fr(:,end-1:end),-nanmean(Fr(:,end-1:end))),'.');
+ylabel(' Abs diff  to mean SL ratios');xlabel('Temperature');
+legend({'R6','R5'},'Location','Best','HandleVisibility','Off');
+
+
 %%
 f=figure;
 set(f,'tag','TEMP_global');
@@ -246,7 +288,7 @@ suptitle(brw_name{n_inst})
 hl={};  line={};  stats={};
 
 ndays=length(unique(fix(Fr(~isnan(Fr(:,1)),1))));
-nrep=ceil(ndays/20);
+nrep=ceil(ndays/10);
 %c=hsv(fix(length(unique(fix(Fr(~isnan(Fr(:,1)),1))))/3));
 c=hsv(ceil(ndays/nrep));
 for ii=0:5
@@ -261,7 +303,8 @@ for ii=0:5
  hold on
  
  plot(Fr(out,2),Fr(out,3+ii),'x','MarkerSize',14);
- [h]=gscatter(Fr(:,2),Fr(:,3+ii),fix(Fr(:,1)/nrep)*nrep,c,[],10);
+ [Y,M,D]=datevec(fix(Fr(:,1)/nrep)*nrep);
+ [h]=gscatter(Fr(:,2),Fr(:,3+ii),[Y,M,D],c,[],10);
 
 % Si queremos la legenda en todos los subplots
 % lg=legend('show');
