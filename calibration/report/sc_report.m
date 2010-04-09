@@ -1,62 +1,85 @@
-%% 
-% change-> no eliminar los datos filtrados. Marcar el filtro que los
-% invalida.
-% change > from setup files %OSC,control_flag
-% 05/11/2009 Juanjo: Se modifican los Tag de los ploteos de SC individuales con vistas a incluirlos en Appendix?
 
+%   INPUTS:
+% -------- Necesarios --------
+% - brw_str, string con el nombre de brewer
+% - brw_config, configuracion que se le pasa (la nueva)
+% 
+% -------- Opcionales ---------
+% - date_range
+% - CSN_orig
+% - OSC, mu*O3(DU) climatologico
+% - control_flag
+% 
+% Estructura:  arguin.date_range
+%                   arguin.CSN_orig
+%                   arguin.OSC
+%                   arguin.control_flag
+% 
+% MODIFICADO: 
 % HECHO ref_iau introducir el ozone slant path climatologico  en brewer_setup
 % HECHO  introducir le date range
+% 
+% Juanjo 05/11/2009: Se modifican los Tag de los ploteos de SC individuales con vistas a 
+%                              incluirlos en Appendix?
+% 
+% Juanjo 09/04/2010: Se cambia la forma de especificar los input a la
+%                             funcion. Ahora se le pasan todos como
+%                             estructura
+%                             
+% Juanjo 09/04/2010: Ahora el CSN_orig se coge de la configuracion inicial (config_orig).               
+%                             Se le pasa como argumento desde el
+%                             cal_report_###
+%                             
 
-function [step_cal,sc_avg,sc_raw]=sc_report(brw_str,brw_config,date_range,CSN_orig,OSC,control_flag)
+% change-> no eliminar los datos filtrados. Marcar el filtro que los
+% invalida.
 
-if nargin<4
-    CSN_orig=NaN;
-end
-if nargin<5 || isempty(OSC) 
-    OSC=680;
-end
-if nargin<6 || isempty(control_flag) 
-    control_flag=1;
-end
+function [step_cal,sc_avg,sc_raw]=sc_report(brw_str,brw_config,arguin)
 
+mmv2struct(arguin)
 
 sc_avg={};
 sc_raw={};
-
 disp(brw_str)    
 try
-  %   Para el B156, B040, leer solo a partir del dia 100->
+% Para el B156, B040, leer solo a partir del dia 100->
+% sc_avg: hora_ini, hora_fin, indx, min_step, max_step, paso, 
+%              temp, mu, filter, cal_stepmax, O3, cal_stepmin, SO2, step_before, 
+%              fit_stepmax, fit_O3, norm_res, coeff_pol_(3), hg_flag, hg_start, hg_end,
+  if isempty(brw_config)
+    [sc_avg,sc_raw]=readb_scl(['.',filesep(),'bdata',brw_str,filesep(),'B*.',brw_str]);
+  else    
+   % del fichero de configuracion CSN_orig=   
   [sc_avg,sc_raw]=readb_scl(['.',filesep(),'bdata',brw_str,filesep(),'B*.',brw_str],brw_config);
+  end
 catch
    l=lasterror;
    disp(['Error: ',l.message])
 end
 
-%%
+if isempty(OSC)
+    OSC=680;
+end
 ref_iau=OSC;
+
 if isempty(sc_avg) 
     step_cal=[NaN,NaN,NaN];
     return
 end
-current_step=mean(sc_avg(:,14));
-CSN_orig=current_step;
-
 
 %% Date filter
-
-if  nargin>2 && ~isempty(date_range)
-    sc_avg(sc_avg(:,1)<date_range(1),:)=NaN;
-    sc_raw(sc_raw(:,1)<date_range(1),:)=NaN;
-    if length(date_range)>1
-        sc_avg(sc_avg(:,1)>date_range(2),:)=NaN;
-        sc_raw(sc_raw(:,1)>date_range(2),:)=NaN;
-    end
+if  ~isempty(date_range)
+       sc_avg(sc_avg(:,1)<date_range(1),:)=NaN;
+       sc_raw(sc_raw(:,1)<date_range(1),:)=NaN;
+       if length(date_range)>1
+           sc_avg(sc_avg(:,1)>date_range(2),:)=NaN;
+           sc_raw(sc_raw(:,1)>date_range(2),:)=NaN;
+       end
 end
 
 
 %% Depuracion
 if control_flag==1
-
 a=sc_avg;
 b=sc_raw;
 brw_name=brw_str;
@@ -247,8 +270,8 @@ end
 
             title({' ',' ',...
                 sprintf(' airm=%.2f  filter=%d ozone=%.1f  step=%.0f \\Delta hg step=%.1f ',sca(1,[8,9,11,10,21])),...
-                ['y=',poly2str(round(sca(18:20)*100)/100,'x'),'',sprintf(' normr=%.1f',sca(1,17))]});
-            sup=suptitle([brw_str ,'  DiaJ=',num2str(dias(jj)),' ' ,datestr(sca(1,1))]);
+                ['y=',poly2str(round(sca(18:20)*100)/100,'x'),'',sprintf(' normr=%.1f',sca(1,17))]},'FontSize',9);
+            sup=suptitle([brw_str ,'  DiaJ=',num2str(dias(jj)),' ' ,datestr(sca(1,1))]); set(sup,'FontSize',10)
             xlabel('step');  ylabel('ozone');
             set(gca,'LineWidth',1);
         end
@@ -263,6 +286,8 @@ set(h,'Tag','SC_INDIVIDUAL');
 
 %%
 figure
+% IF no debug
+a(isnan(a(:,10)),:)=[];
 [p,s]=polyfit(a(:,10),a(:,8).*a(:,11),1);
 %x=unique(fix(a(:,10)))
 
@@ -289,7 +314,7 @@ f_end=figure; set(f_end,'Tag','Final_SC_Calculation');
 h0=plot(X,a(:,8).*a(:,11),'s'); set(gca,'LineWidth',1);
 hold on;
 hconf=confplot(x,y,delta); set(hconf(1),'Marker','none')
-ylim([300,2000]); xlim(xlims);
+ylim([300,1400]); xlim(xlims);
 hold on;
 h1=plot(X,a(:,8).*a(:,11),'o');
 try
@@ -303,12 +328,16 @@ try    step1=invpred(x,y,ref_iau-delta1);catch step1=NaN; end
 
 hl=hline([ref_iau,ref_iau+delta1,ref_iau-delta1],{'b-','r:','r:'},{'','',''}); 
 vl=vline(([step0,step_cal,step1]),{'r:','b-','r:'},{'','',''}); 
+try
 title(sprintf('Ozone slant path =%.0f   Calc Step = %.1f [%.1f,%.1f] \n   Calibration Step from config file %s = %.0f ',...
                ref_iau,step_cal,step0,step1,brw_config(end-11:end),CSN_orig));
+catch
+    title('OSC no config file');
+end
 % sup=suptitle(brw_str); pos=get(sup,'Position');
 % set(sup,'Position',[pos(1)+.02,pos(2)+.02,1]);
 ylabel('Ozone slant Path'); xlabel(' Calc Step number');
 orient('portrait');  
 
 step_cal=[step_cal,step0,step1];    sc_avg=a;
-%printfiles_fast(f_start,f_end-1,['sc_report_',brw_str])    
+ 
