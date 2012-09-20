@@ -1,4 +1,5 @@
-%function [config,TC,DT,extrat,absx,AT,leg]=read_icf(file,show);
+function [config,TC,DT,extrat,absx,AT,legend]=read_icf(file,datefich,show)
+%function [config,TC,DT,extrat,absx,AT,leg]=read_icf(file,datefich,show);
 %
 % config 1:52 with values of icf file:
 % 1  'Release date         ' 17 'ND filter 0      ' 35 'O3 FW #3 Offset   '
@@ -23,14 +24,18 @@
 % example pretty print
 % cfg=read_icf('icf28006.196');
 % xlswrite([cellstr(leg),num2cell(cfg)])
-
-
-function [config,TC,DT,extrat,absx,AT,legend]=read_icf(file,show);
 if nargin==1
+    datefich=now;
+    show=0;
+elseif nargin==2
     show=0;
 end
-lines=fileread(file);
 
+[fpath,ffile,fext]=fileparts(file);
+
+if ~strcmpi(fext,'.cfg')
+    
+lines=fileread(file);
 fmt_icf=[
 '%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f mk%3c',...
 ' %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %s %s'];
@@ -47,7 +52,7 @@ end
 
 
 
-%date
+%date 
 config(54:end)=[];
 %model erase
 config(24:25)=[];
@@ -70,9 +75,15 @@ catch
   %config(53)=fecha;
 end 
 end
-
 config=[fecha;config];
-    if ~isnan(config(2:6)) 
+else
+ configfile=load(file); 
+ cal_idx=max(find(configfile(1,:)<=datefich(1))); % calibracion mas proxima por debajo
+ config=configfile(:,cal_idx);
+ datestr(configfile(1,cal_idx))
+end
+
+    if ~isnan(config(2:6))
         TC=config(2:6); end
     if ~isnan(config(13))
         DT=config(13);  end 
@@ -147,7 +158,7 @@ legend=[
 ];
 
 if show==1
-    xlswrite([cellstr(legend),num2cell(config)])
+    xlswrite_([cellstr(legend),num2cell(config)])
 end
 % 5399 :
 % 5400 REM read ic file

@@ -15,12 +15,18 @@
 %                 en % es menos estricta en altos angulos zenitales
 %                 default 3% (0.03)      
 %OUTPUT
-%
-%      -Two point calibration
-%
-%
-%
-%
+%  o3c= 27 col   
+%                1-2  , Date , difference date ref instr 
+%                2-14   Reference instrument
+%                15-26  Instrument to be calibrated
+%                27-  O3 calculated with the new ETC 
+%  o3c=[   
+%  1    	2       3       4       5       6       7	8	9	10      11
+%  Fecha	dif     sza     airm	temp	filter	O3	sO3	MS9	sMS9 O3sl
+%  	12      13      14      15  16      17      18      19	20	21	22	
+%  	SO3sl	O3slc	So3slc	sza	airm	temp	filter	O3	sO3	MS9	sMS9
+%  	23      24      25      26      27
+%  	O3rc	sO3rc	O3sl	sO3sl	O3_NEWETC
 %% TODO -----------> 
 %                     SEPARAR LAS FIGURAS DEL PROCESO
 
@@ -29,7 +35,15 @@ function [ETC_NEW,o3_c,m_netc]=ETC_calibration(file_setup,summary,A,...
     instrumento,referencia,tsync,oscmax,szasync)
 
 % Cargamos la configuracion
-eval(file_setup);
+if isstruct(file_setup)
+    Cal=file_setup;
+    tsync=Cal.Tsync;
+    FINAL_DAYS=Cal.Date.FINAL_DAYS;
+    brw_str=Cal.brw_str;
+   
+else
+    eval(file_setup);
+end
 
 % Por si queremos cambiar los valores por defecto
 if ~isempty(instrumento) n_inst=instrumento; end
@@ -81,18 +95,21 @@ ref=summary{n_ref}(jday,:);
          [aa,bb]=findm_min(ref(:,1),inst(:,1),n_min/MIN);
          o3_c=[ref(aa,1),ref(aa,1)-inst(bb,1),ref(aa,2:end),inst(bb,2:end)];
 % o3_c simultaneous data;
-%    % ozone_r=recalculated; ozone_1:original ; ozone_sl-> recalc+SL
-% date,dif_date,
-% Ref->3-14
-%sza,airm, temp,filter,ozono_r sigma_r  ms9 sm9  ozone_1 sigma_1, ozone_sl sigma_sl
-% Inst to calibrate->15-26
-%sza,airm, temp,filter,ozono_r sigma_r  ms9 sm9  ozone_1 sigma_1, ozone_sl sigma_sl
+% % ozone_r=recalculated; ozone_1:original ; ozone_sl-> recalc+SL
+%    date,dif_date,
+%    Ref->3-14
+%    sza,airm, temp,filter,ozono_r sigma_r  ms9 sm9  ozone_1 sigma_1, ozone_sl sigma_sl
+%    Inst to calibrate->15-26
+%    sza,airm, temp,filter,ozono_r sigma_r  ms9 sm9  ozone_1 sigma_1, ozone_sl sigma_sl
 % 
          
         % diferencia en angulo zenital en %  
         % este parameetro es determinante sobretodo con tiempos de
         % sincronizacion grandes
          o3_c=o3_c(abs(o3_c(:,16)-o3_c(:,4))./o3_c(:,4)<SZA_SYNC,:);
+  %outliers       
+  j=find(abs(100*(o3_c(:,7)-o3_c(:,19))./o3_c(:,7))>2);
+  o3_c(j,:)=[];
          
 %          ozone_slant_inst=o3_c(:,13).*o3_c(:,16)/1000;
          

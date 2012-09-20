@@ -1,4 +1,5 @@
 function samexaxis(varargin)
+%function samexaxis('abc','xmt','on','ytac','join','yld',1)
 %% helper function to clean up subplots that have common x axises
 %
 % USAGE: samexaxis([optionalarguments])

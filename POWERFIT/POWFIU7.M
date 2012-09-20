@@ -132,7 +132,7 @@ for loop=loopmax, % loop for different slit positions.
   
   missingslits=sum(all(dslit==0)); % returns 1 for every column of zeros.
   %freecoef=5*(loop>1)+p+1+4*(~isempty(fit288))
-  freecoef=5*(loop>1)+p+1+2*(~isempty(per288)+~isempty(per48))-missingslits
+  freecoef=5*(loop>1)+p+1+2*(~isempty(per288)+~isempty(per48))-missingslits;
   rmsf(loop)=sigma(dslit,freecoef);
   f(:,:,loop)=dslit;
 end % of for loop

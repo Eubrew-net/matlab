@@ -1,4 +1,4 @@
-function matrix2latex(matrix, filename, varargin)
+function matrix2latex_QDETAIL(matrix, filename, varargin)
 
 % function: matrix2latex(...)
 % Author:   M. Koehler

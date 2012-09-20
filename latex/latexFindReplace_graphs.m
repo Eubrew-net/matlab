@@ -179,6 +179,7 @@ if bol
     % Reads the LaTeX source code
     [fid,msg]=fopen(latexsource,'r');
     if fid==-1
+        disp(latexsource)
         error(msg);
     end
     laso = fread(fid,'uint8=>uint8')';
@@ -195,13 +196,13 @@ if bol
         i=i+1;
 
         if laso(i)==37
-            if i>1
-                if laso(i-1)~=92
-                    notincomment=logical(0);
-                end
-            else
-                notincomment=logical(0);
-            end
+%             if i>1
+%                 if laso(i-1)~=92
+%                     notincomment=logical(0);
+%                 end
+%             else
+%                 notincomment=logical(0);
+%             end
         elseif or(laso(i)==13,laso(i)==10)
             notincomment=logical(1);
         end
@@ -243,9 +244,15 @@ if bol
 %                         end
 %                     end
 %                     laso(i+7:(iend-2))=laso_n;
-                    
-                    [numReplacements,cellLaTeX]=fireLaTeX(inputflag,[homedirectory,newlatexfile],homedirectory,findthis,replacewith,numReplacements,cellLaTeX);
-
+                    try
+                     [numReplacements,cellLaTeX]=fireLaTeX(inputflag,[homedirectory,newlatexfile],homedirectory,findthis,replacewith,numReplacements,cellLaTeX);
+                    catch
+                        disp('ERROR')
+                        aux=lasterror;
+                        aux.message
+                        disp([homedirectory,newlatexfile]);
+                        %disp(cellLateX);
+                    end
                     clear extraSpaces newlatexfile
 
                     laou=[laou,laso(i:(iend-1))];

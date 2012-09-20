@@ -16,10 +16,11 @@ end
 y_sort=sortrows([x,y_stat],1);
 
 
-if nargin >3
-figure;
+if nargin >=3
+%figure;
     if plot==1
       aux=y_sort;
+      aux(isnan(aux(:,end)),:)=[];
       aux2=(matadd(aux(:,[6,7]),-aux(:,2)));
     errorfill(aux(:,1)',aux(:,2)',aux(:,3)','b');
     hold on

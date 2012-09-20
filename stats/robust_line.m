@@ -11,12 +11,16 @@ function [h,L,stats] = robust_line
 %   Copyright 1993-2002 The MathWorks, Inc. 
 % $Revision: 1.1.1.1 $  $Date: 2008-05-13 14:21:41 $
 
-lh = findobj(get(gca,'Children'),'Type','line');
+% el sort abajo es para que respete el orden en la legenda del ajuste 2p
+% (todo y parcial) de ETC_calibration_C. Es algo que tengo que chequear que
+% no molesta en otras funciones
+
+lh = sort(findobj(get(gca,'Children'),'Type','line'));
 if nargout == 1,
     h = [];
 end
 count = 0;
-L=[];leg={};
+L=[];leg={}; 
 for k = 1:length(lh)
     %k=1
     xdat = get(lh(k),'Xdata'); xdat = xdat(:);
@@ -26,28 +30,29 @@ for k = 1:length(lh)
     style = get(lh(k),'LineStyle');
     if ~strcmp(style,'-') & ~strcmp(style,'--') & ~strcmp(style,'-.')
         count = count + 1;
-        [beta,stats] = robustfit(xdat(ok,:),ydat(ok,:));
+        [beta,stat] = robustfit(xdat(ok,:),ydat(ok,:));
         newline = refline(beta(2),beta(1));
         set(newline,'Color',datacolor);
         x=get(newline,'XData');y=get(newline,'YData');
-        leg{k}=sprintf('  y=%f + %f x +/- [%f %f]',[beta,stats.se]);
-        t=text(x(1)+1,y(end)-1-10*(k-1),...
-        sprintf('  y=%f + %f x +/- [%f %f]',[beta,stats.se]));
+        leg{k}=sprintf('  y=%f + %f x +/- [%f %f]',[beta,stat.se]);
+        t=text(x(1)+1,mean(y),...
+        sprintf('  y=%f + %f x +/- [%f %f]',[beta,stat.se]));
         set(t,'Color',datacolor);
-        L(:,count)=[beta];       
+        L(:,count)=[beta];
+        stats(count)=stat;
         if nargout >= 1
             h(count) = newline;
-        end
-           
-           
-           
-
-            
+        end                                          
     end
 end
+stats=fliplr(stats);
 L=fliplr(L);
 if count == 0
     disp('No allowed line types found. Nothing done.');
 else 
+    try
     legend(leg)
+    catch
+      disp(leg);
+    end
 end

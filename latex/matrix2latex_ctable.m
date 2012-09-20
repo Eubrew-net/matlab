@@ -1,4 +1,4 @@
-function matrix2latex(matrix, filename, varargin)
+function matrix2latex_ctable(matrix, filename, varargin)
 
 % function: matrix2latex(...)
 % Author:   M. Koehler
@@ -87,7 +87,7 @@ function matrix2latex(matrix, filename, varargin)
                         warning('matrix2latex: ', 'Unkown alignment. (Set it to \''left\''.)');
                     end
                 case 4  % format
-                    format = lower(pval);
+                       format = lower(pval);                        
                 case 5  % size
                     textsize = pval;
                 case 6 % resize table
@@ -107,9 +107,15 @@ function matrix2latex(matrix, filename, varargin)
         for h=1:height
             for w=1:width
                 if(~isempty(format))
-                    matrix{h, w} = num2str(matrix{h, w}, format);
-                else
+                    if iscell(format)
+                        matrix{h, w} = num2str(matrix{h, w}, format{w});                        
+                    else
+                        matrix{h, w} = num2str(matrix{h, w}, format);
+                    end
+                elseif isnumeric(matrix{h, w}) || ischar(matrix{h, w})
                     matrix{h, w} = num2str(matrix{h, w});
+                elseif iscell(matrix{h, w})
+                    matrix{h, w} = cell2mat(matrix{h, w});
                 end
             end
         end

@@ -1,3 +1,6 @@
+%function [y_stat,y_sort,f]=mean_smooth(x,y,tol,plot)
+% media desviacion estandard n elementos error estandard intervalo de
+% confianza al 95%
 function [y_stat,y_sort,f]=mean_smooth(x,y,tol,plot)
 y_stat=zeros(size(x,1),6);
 for i=1:length(x)

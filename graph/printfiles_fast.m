@@ -1,5 +1,5 @@
-
 function Options=printfiles(n0,n1,patern,varargin)
+%function Options=printfiles(n0,n1,patern,varargin)
 
 Options.Format='eps';   %'Format'  a string specifies the output format. Defaults to 'eps'. For 
 Options.Preview='tiff'; %'Preview' one of the strings 'none', 'tiff' specifies a preview for EPS files. Defaults to 'none'.  
@@ -83,7 +83,7 @@ try
         print(h,'-depsc','-tiff','-r300','-cmyk',[figura,'.eps']);
     end
 %    save as fig file
-%    saveas(h,[patern,label,num2str(i)],'fig');
+    saveas(h,[figura,num2str(i)],'fig');
 
     
 %     saveas(h,[patern,num2str(i)],'fig');

@@ -1,3 +1,4 @@
+%function Options=printfiles(n0,n1,patern,varargin)
 
 function Options=printfiles(n0,n1,patern,varargin)
 
@@ -18,11 +19,11 @@ Options.LockAxes=1;     %LockAxes'  one of 0 or 1 specifies that all axes limits
       
       
 Options.FontMode='fixed';  %one of the strings 'scaled', 'fixed'
-Options.FontSize=11.5;     %'scaled' mode multiplies with the font size of each  text object to obtain the exported font size
+Options.FontSize=10;     %'scaled' mode multiplies with the font size of each  text object to obtain the exported font size
                            %'fixed' mode specifies the font size of all text objects in points
                            %If FontMode is 'scaled' but FontSize is not specified then a  scaling factor is computed from the ratio of the size of the
                            %exported figure to the size of the actual figure. The default 'FontMode' setting is 'scaled'.
-Options.DefaultFixedFontSize=18; %a positive scalar in 'fixed' mode specified the default font size in points
+Options.DefaultFixedFontSize=14; %a positive scalar in 'fixed' mode specified the default font size in points
 Options.FontSizeMin=5;           %a positive scalar specifies the minimum font size allowed after scaling
 Options.FontSizeMax=18;          %a positive scalar specifies the maximum font size allowed after scaling
 
@@ -71,7 +72,9 @@ try
     label=get(h,'Tag');
 %     grid on;
     %figura=[patern,'_',label];%,num2str(i)];
-    suptitle(strrep([patern,'_',label],'_',' '));
+    if ~isempty(label)
+   % suptitle(strrep([patern,'_',label],'_',' '));
+    end
     figura=[patern,'_'];%,num2str(i)];
     
     
@@ -84,13 +87,19 @@ try
     else
         applytofig(h,Options);
         print(h,'-dpsc','-r300','-cmyk','-append',[figura,'.ps']);
+        saveas(h,[patern,label,num2str(i)],'fig');  
     end
     
+    applytofig(h,Options);
+        print(h,'-dpsc','-r300','-cmyk','-append',[figura,'.ps']);
+        saveas(h,[patern,label,num2str(i)],'fig');  
+        hgexport(h,'-clipboard');  
+        print(h,'-r300','-dpng',[patern,label,num2str(i)]);
 close(h);
 %    save as fig file
-%    saveas(h,[patern,label,num2str(i)],'fig');  
+
 %     saveas(h,[patern,num2str(i)],'fig');
-%      print(h,'-r300','-dpng',[patern,label]);
+
 %     if ispc
 %      save2word([patern,'.doc']);
 %     end

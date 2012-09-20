@@ -108,7 +108,7 @@ function matrix2latex(matrix, filename, varargin)
         end
         fprintf(fid, '%s\\\\\\hline\r\n', matrix{h, width});
     end
-    fprintf(fid, '\\caption{Configuration files}\r\n');
+%    fprintf(fid, '\\caption{Configuration files}\r\n');
     fprintf(fid, '\\end{longtable}\r\n');
     
     if(~isempty(textsize))

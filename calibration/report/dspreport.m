@@ -1,3 +1,6 @@
+function [res,detail, DSP_QUAD,QUAD_SUM,QUAD_DETAIL,CUBIC_SUM,CUBIC_DETAIL,...
+             salida,CSN]=dspreport(file_setup,varargin)
+         
 % Dispersion Analysis REPORT
 %
 %  % res= step o3abs so2abs o3/so2 Raley ETC
@@ -12,32 +15,96 @@
 % Se incluye la posibilidad de uvr
 % TODO: poner todas las salidas en ceTldas
 % ahora no saca todas solo la 'ULITIMA'
-%% o poner como parametro el directorio de dispersion que interese
-% tambi�n se podr�an hacer dos modos: uno depuracion y otro final que no plotee los scanes individuales
+% TODO: Reorganizar las salidas
+%
+%
+         
+%% Validamos argumentos                                                      
+arg = inputParser;   % Create instance of inputParser class.
+arg.FunctionName = 'dspreport';
 
-function [res,detail, ...
-       DSP_QUAD,QUAD_SUM,QUAD_DETAIL,CUBIC_SUM,CUBIC_DETAIL,salida...
-       ]=dspreport(file_setup,n_inst,dsp_directory)
-eval(file_setup);
-if nargin==2
-    n_inst=n_inst;
+% input obligatorio
+arg.addRequired('file_setup'); 
+
+
+% input param - value
+arg.addOptional('n_inst',NaN,@isfloat); % Es opcional -------------> Ya esta en config
+arg.addOptional('dsp_dir','',@ischar);% por defecto todos los dsp's
+arg.addOptional('config_n',2,@(x)(isfloat(x) || ischar(x)));% por defecto la confg. final (2)
+arg.addOptional('csn',[],@(x)isfloat(x));% por defecto la confg. final (2)
+
+% validamos los argumentos definidos:
+try
+arg.parse(file_setup,varargin{:});
+mmv2struct(arg.Results);
+chk=1;
+
+catch
+  errval=lasterror;
+  if length(varargin)==3
+      dsp_dir=varargin{1};
+      config_n=varargin{2};
+      n_inst=varargin{3};
+  elseif length(varargin)==2
+      dsp_dir=varargin{1};
+      config_n=varargin{2};
+      n_inst=NaN; % por defecto 
+  elseif length(varargin)==1
+      dsp_dir=varargin{1};
+      config_n=2; % por defecto 
+      n_inst=NaN; % por defecto 
+  else
+      dsp_dir='';   % por defecto todos los DSP's
+      config=''; % por defecto valores nominales      
+      n_inst=NaN; % por defecto 
+  end
+  chk=0;
 end
-if nargin==2
-s=dir(['DSP',filesep(),brw_str{n_inst},'*']);
+
+
+if isnan(n_inst) n_inst=file_setup.n_inst; end
+
+%%
+if isstruct(file_setup)
+  brw_config_files=file_setup.brw_config_files;
+  brw_str=file_setup.brw_str; calyear=file_setup.Date.cal_year;
 else
-s(1).name=(dsp_directory);
-s(1).isdir=1;
+   eval(file_setup);
 end
+
+if isempty(dsp_dir)
+   s=dir(['DSP',filesep(),brw_str{n_inst},'*']);
+   res={}; detail={};DSP_QUAD={};QUAD_SUM={};QUAD_DETAIL={};
+   CUBIC_SUM={};CUBIC_DETAIL={};salida={};
+else
+   s(1).name=(dsp_dir);
+   s(1).isdir=1;
+end
+
+    
 for j=1:length(s)
     if s(j).isdir
-       aux=sscanf(s(j).name,'%d_%d_%d');
+       [a name]=fileparts(s(j).name);
+       aux=sscanf(name,'%d_%d_%d');
        day=aux(3);
        year=aux(2);
        brewnb=aux(1);
-       path=fullfile('.',s(j).name,filesep);
-       cfg=read_icf([brw_config_files{n_inst,2}]);
+       datefile=datenum(year+2000,1,0)+day
+       path=fullfile('.',name,filesep);
+       if ischar(config_n)
+       cfg=read_icf(config_n,datefile); CSN=[cfg(14) cfg(8) cfg(44)];
+       else
+       cfg=read_icf([brw_config_files{n_inst,config_n}],datefile); CSN=[cfg(14) cfg(8) cfg(44)];
+       end           
+       if ~isempty(csn)
+           cfg(14)=csn(1); cfg(8)=csn(2); cfg(44)=csn(3);
+       end
        coment=brw_str{n_inst};
-       cd('DSP')
+       if isempty(strfind(a,'DSP'))
+          cd('DSP');
+       else 
+          cd('..\DSP');
+       end
        
        uvr_file=dir(['..',filesep(),brw_str{n_inst},filesep(),'UVR*.',brw_str{n_inst}]);
        if ~isempty(uvr_file)
@@ -45,13 +112,31 @@ for j=1:length(s)
        else
            uvr=[];
        end
+       if isempty(dsp_dir)
+          [res{j},detail{j}, ...
+          DSP_QUAD{j},QUAD_SUM{j},QUAD_DETAIL{j},CUBIC_SUM{j},CUBIC_DETAIL{j},salida{j}...
+          ]=dsp_report(day,year,brewnb,path,cfg,coment,uvr);
+       else
+          [res,detail, ...
+          DSP_QUAD,QUAD_SUM,QUAD_DETAIL,CUBIC_SUM,CUBIC_DETAIL,salida...
+          ]=dsp_report(day,year,brewnb,path,cfg,coment,uvr);           
+       end
        
-       [res,detail, ...
-       DSP_QUAD,QUAD_SUM,QUAD_DETAIL,CUBIC_SUM,CUBIC_DETAIL,salida...
-       ]=dsp_report(day,year,brewnb,path,cfg,coment,uvr);
-
-%       QUAD_SUM_table=dsp_tables(DSP_QUAD,QUAD_SUM,QUAD_DETAIL);
-       cd('..')
+       dsp_sum.day=day;
+       dsp_sum.year=year;
+       dsp_sum.brewnb=brewnb;
+       dsp_sum.cfg=cfg;
+       dsp_sum.uvr=uvr;
+       dsp_sum.res=res;
+       dsp_sum.detail=detail;
+       dsp_sum.salida=salida;
+       save( fullfile(path,sprintf('%03d_%02d_%03d',brewnb,year,day)),'dsp_sum') 
+       
+       if isempty(strfind(a,'DSP'))
+          cd ..;
+       else 
+          cd(['..\',num2str(calyear)]);
+       end
    else
     disp('err');
    end

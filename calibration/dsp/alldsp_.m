@@ -62,7 +62,6 @@ elseif year>1900,y2=year-1900;year=y2;end
 
 for slits=minslit:maxslit,
 
-    figure
     figcnt=0;linecnt=-1;
 
     frachgline=0;  %% use for 10098 dispersion
@@ -82,7 +81,7 @@ for slits=minslit:maxslit,
             if isempty(a),
                % disp(['file ' dspp filename ' does not exist']);
             else
-                disp(['now:' filename]);
+%                 disp(['now:' filename]);
                 
                 daycnt=daycnt+1;
                 if (rem(linecnt,6)==0),figure;linecnt=0;end
