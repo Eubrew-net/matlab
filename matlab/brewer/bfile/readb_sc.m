@@ -15,7 +15,12 @@
 % de la cabecer
 % Alberto Redondas 2005
 % revisar linea 77
-function [sc,sc_raw,co,o3]=readb_sc(bfile,config_file)
+% 
+%  MODIFICADO:  
+%  Juanjo 08/02/2012: Añadido condicional para evitar problemas cuando se detiene el sc
+%                    (HOME key pressed) -> líneas 120:122
+% 
+function [sc,sc_raw,co,o3]=readb_sc(bfile,config_file,varargin)
 sc=[];
 fmtsc=' sc %c %d %f %d %d %d %d %d %d %d %d %d %d rat %f %f %f %f';
 fmt_head=' version=%f dh %f %f %f %s %f %f %f pr %f';
@@ -30,7 +35,7 @@ end
 
 try
     s=fileread(bfile);
-    [PATHSTR,NAME,EXT,VERSN] = fileparts(bfile);
+    [PATHSTR,NAME,EXT] = fileparts(bfile);
     fileinfo=sscanf([NAME,EXT],'%c%03d%02d.%03d');
     datefich=datejul(fileinfo(3),fileinfo(2));
     %datestr(datefich(1))
@@ -49,7 +54,8 @@ try
     c=cell2num(c);
     datebfile=datenum(c(4)+2000,c(3),c(2));
     if datebfile~=datefich(1)
-        disp('Date error');
+        disp('warning Date error in file');
+        datevec(datebfile-datefich(1))
     %else
     %   disp(loc);
     end
@@ -57,25 +63,31 @@ try
     long=c(6);
     pr=c(8);
 
-    % HG read
-    if isempty(jhgscan)
-        %hg=sscanf(char(l(jhg))','hg %d:%d:%d %f %f %d %f %d ',[8,Inf]);
-        hg=cellfun(@(x) sscanf(x,'hg %d:%d:%d %f %f %d %f %d '),l(jhg), 'UniformOutput', false);
-        hg=cell2mat(hg');
-        if ~isempty(hg)
-         hg=[hg;nan*hg(1,:)];
-        else
-% revisar 77            
-         hg=[NaN;NaN;NaN;NaN;NaN];
-        end
-    else
-        jhg=setdiff(jhg,jhgscan);
-       % hg=sscanf(char(l(jhg))','hg %d:%d:%d %f %f %d %f %d %d ',[9,Inf]);
-        hg=cellfun(@(x) sscanf(x,'hg %d:%d:%d %f %f %d %f %d %d '),l(jhg), 'UniformOutput', false);
-        hg=cell2mat(hg');
-        hg=[hg;nan*hg(1,:)];
-    end
-    time_hg=hg(1,:)*60+hg(2,:)+hg(3,:)/60; %a minutos
+% READ HG
+% filtro de hg
+  if isempty(jhgscan)% Con la version antigua nunca se escribe la diferencia de pasos??
+% Se asume como maximo 9 campos (version nueva)
+     hg=NaN*ones(length(jhg),9);
+     hg(:,1:end-1)=cell2mat(textscan(char(l(jhg))','hg %f:%f:%f %f %f %f %f %f',...
+                                'delimiter',char(13),'multipleDelimsAsOne',1));  hg=hg';
+  else
+% This only accounts for changing to new sofware after the old one
+     hg=NaN*ones(length(setdiff(jhg,jhgscan)),9);
+     jhg_old=find(jhg<jhgscan(1)); % these are the old ones
+     if ~isempty(jhg_old)
+        idx_old=length(jhg_old);
+        hg(1:idx_old,1:end-1)=cell2mat(textscan(char(l(jhg(jhg_old)))','hg %f:%f:%f %f %f %f %f %f',...
+                                 'delimiter',char(13),'multipleDelimsAsOne',1));
+        jhg=setdiff(jhg(1+idx_old:end),jhgscan); % after hgscan follows hg
+     else
+        idx_old=[];       
+        jhg=setdiff(jhg,jhgscan); % after hgscan follows hg
+     end
+   hg(length(jhg_old)+1:end,:)=cell2mat(textscan(char(l(jhg))','hg %f:%f:%f %f %f %f %f %f %f',...
+                                 'delimiter',char(13),'multipleDelimsAsOne',1));  hg=hg';                                            
+  end
+
+    time_hg=sort(hg(1,:)*60+hg(2,:)+hg(3,:)/60); %a minutos. Lo de sort es un APAÑO
     flaghg=abs(hg(5,:)-config(14))<2; % more than 2 steps change
     if size(hg,2)>1
         flag_hg=find(diff(flaghg)==-1);   %
@@ -103,24 +115,48 @@ try
     if ~isempty(jco)
         co=l(jco);
         jsc_aux=strfind(co,'sc:');
-        jsc=find(~cellfun('isempty',jsc_aux));
+        jsc=find(~cellfun('isempty',jsc_aux)); 
+        co_aux=find(~cellfun('isempty',strfind(co,'sc: Supressed'))); [a b]=intersect(jsc,co_aux);
+        jsc(b)=[];
+        
         sc=[];
         sc_raw=[];
         o3.co=co;
         if ~isempty(jsc)
+            idx=1;
             for jj=1:2:length(jsc)
                 sc_aux=co(jsc(jj));
+                if ~isempty(strfind(cell2str(sc_aux),'HOME key'));
+                    continue
+                end
                 lsc=mmstrtok(sc_aux,char(13));
                 aux_time_start=sscanf(lsc{2},'%02d:%02d:%02d');
                 aux_start=sscanf(lsc{3},'sc: start %d %d %d %d %d %d ');
                 %14015 B$="start"+" "+str$(w1)+str$(w2)+str$(dw)+" "+da$+" "+mo$+" "+ye$: gosub 3050
-               if jj==length(jsc)
-                   return; 
-               end
+                if ~isempty(varargin)
+                    date_range=varargin{1};
+                    if datenum([datefich(2),1,datefich(3),aux_time_start'])<date_range(1)
+                       continue
+                    elseif length(date_range)>1
+                        if datenum([datefich(2),1,datefich(3),aux_time_start'])>date_range(2)                            
+                           continue                       
+                        end
+                    end
+                end
+                if jj==length(jsc)
+                    return; 
+                end
                 sc_aux=co(jsc(jj+1));
                 lsc=mmstrtok(sc_aux,char(13));
                 aux_time_end=sscanf(lsc{2},'%02d:%02d:%02d');
                 aux_end=sscanf(lsc{3},'sc: end %f %f %f %f %f %f %f %f %d ');
+                if size(aux_end,1)~=8
+                    for ii=size(aux_end,1)+1:8
+                        aux_end(ii)=NaN;
+                    end
+                end
+                
+                
                 %40020 REM  VAR1$: Temp       VAR5$: O3
                 %40030 REM  VAR2$: Mu         VAR6$: Min step
                 %40040 REM  VAR3$: Filter     VAR7$: SO2
@@ -149,7 +185,7 @@ try
 
                 n=size(sc_meas,1);
                 % indice+ n_sc +scan
-                idx=100*(jj+1)/2+(1:n);
+                jj=100*(jj+1)/2+(1:n);
 
 
                 sc_temp=repmat(aux_sc(7),n,1);
@@ -162,11 +198,11 @@ try
                 sc_meas(:,4)=m2sc;
                 sc_meas(:,5)=m3sc*pr/1013;
                 % size step == n
-                if size(step,2)~=size(idx,2)
-                  step=step(1:size(idx,2));  
+                if size(step,2)~=size(jj,2)
+                  step=step(1:size(jj,2));  
                   %return; % medida incompleta
                 end
-                 sc_aux=[time_meas,idx',step',sc_temp,sc_meas];
+                 sc_aux=[time_meas,jj',step',sc_temp,sc_meas];
                 
                 [ozo_sc,so2_sc,ratios]=ds_ozone(ds_raw2counts(sc_aux,config(:,1)),config(:,1));
                 % sustituimos los ratios  
@@ -216,12 +252,12 @@ try
 
             o3.sc_avg=sc;
                             % 7    8        9        10      11         12        13      14
-            o3.sc_avg_legend={ 'time_start' 'time_end' 'idx' 'st0'  'stend'  'inc'...
+            o3.sc_avg_legend={ 'time_start' 'time_end' 'jj' 'st0'  'stend'  'inc'...
                 'temp' 'airm'  'filt'  'o3step'  'o3max'  'so2step'  'so2max' 'calc_step'...
                 'o3stepc' 'o3max' 'normr' 'a'  'b'  'c' 'hg_chg' 'hg_start' 'hg_end'};
                  % 15          16    17     18   19   20    21         22       23
             o3.sc_raw=sc_raw;
-            o3.sc_raw_legend={'date';'flg';'idx';'tmp';'fl1';'fl2';'tim';...
+            o3.sc_raw_legend={'date';'flg';'jj';'tmp';'fl1';'fl2';'tim';...
                 'm2 ';'m3*pressure corr';'cy ';'F0 ';'F1 ';'F2 ';'F3 ';...
                 'F4 ';'F5 ';'F6 ';'o3 ';'so2 ';'o3c ';'so2c ';'Ms9';'Ms10'};
 
@@ -281,14 +317,14 @@ v=[-P(2)/2/P(1),polyval(P,-P(2)/2/P(1))];
 %             sc_meas=sscanf(char(l{ini_med+1:fin_med-1})',fmtsc,[17,Inf])';
 %             time_meas=datefich(1)+sc_meas(:,3)/60/24;
 %             n=size(sc_meas,1);
-%             idx=100*(jj+1)/2+(1:n);
+%             jj=100*(jj+1)/2+(1:n);
 %             sc_temp=repmat(aux_sr(11),n,1);
 %             sc_airm=repmat(aux_sr(:,12),n,1);
 %             
 %             step=aux_start(1):aux_start(3):aux_start(2);
 %             step=[step,aux_start(2):-aux_start(3):aux_start(1)];
 %             sc_meas(:,4)=sc_airm;            
-%             sc_raw=[sc_raw;[time_meas,idx',step',sc_temp,sc_meas]];
+%             sc_raw=[sc_raw;[time_meas,jj',step',sc_temp,sc_meas]];
 %             
 %             sc_raw_legend={'date';'flg';'nds';'tmp';'fl1';'fl2';'tim';...
 %               'm2 ';'m3*pressure corr';'cy ';'F0 ';'F1 ';'F2 ';'F3 ';...

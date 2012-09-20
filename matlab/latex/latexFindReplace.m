@@ -179,6 +179,7 @@ if bol
     % Reads the LaTeX source code
     [fid,msg]=fopen(latexsource,'r');
     if fid==-1
+        disp(latexsource);
         error(msg);
     end
     laso = fread(fid,'uint8=>uint8')';
@@ -194,14 +195,14 @@ if bol
     while i<length(laso)
         i=i+1;
 
-        if laso(i)==37
-            if i>1
-                if laso(i-1)~=92
-                    notincomment=logical(0);
-                end
-            else
-                notincomment=logical(0);
-            end
+         if laso(i)==37
+%             if i>1
+%                 if laso(i-1)~=92
+%                     notincomment=logical(0);
+%                 end
+%             else
+%                 notincomment=logical(0);
+%             end
         elseif or(laso(i)==13,laso(i)==10)
             notincomment=logical(1);
         end
@@ -462,9 +463,8 @@ if bol
     end
 
     % Start replace
-    fid = fopen(latexsource,'w');
-    fwrite(fid,laou);
-    fclose(fid);
+    disp(latexsource);  fid = fopen(latexsource,'w');
+    fwrite(fid,laou);   fclose(fid);
 
 end
 

@@ -1,5 +1,5 @@
 
-function [o3,config,sl_data,hg_data]=readb_ds_develop(bfile,config_file,spectral_config)
+function [o3,config,sl_data,hg_data,loc]=readb_ds_develop(bfile,config_file,spectral_config)
 % Config
 % 1 si no le damos configuracion-> la lee del fichero B
 % 2 si la configuracion es el nombre del fichero ICF la lee del fichero
@@ -12,6 +12,19 @@ function [o3,config,sl_data,hg_data]=readb_ds_develop(bfile,config_file,spectral
 % o3.ozone_ds_legend={  'date'    'hg_flag'    'n'    'sza'    'airm'  'temp' 'flt'...
 %                        'o3'     'r1'      'r2'      'r3'     'r4'    'r5'    'r6'   ...
 %                        'o3'     'r1'      'r2'      'r3'     'r4'    'r5'    'r6'};
+%
+% 
+%
+% Spectral Config--- Variable 5*6  with the folowing contents
+%  6 slits for 5 filters
+%slit->    	0	        0	     0	     0	     0	     0
+%Filter#1	4141	   4142     4144	4150	4151	4158
+%Filter#2	8784	   8794     8811	8827	8844	8858
+%Filter#3	14315	   14305	14302	14304	14303	14307
+%Filter#4	19736	   19635	19511	19413	19319	19238
+%Filter#5	25749	   25709	25676	25644	25607	25581
+%  TODO: ratios in summaries.
+
 
 dsum=[];ds=[];dss=[];timeds=[];timedss=[];ds_l=[];ds_aod=[];
 ds=[];dss=[];ndss=0;timedsum=[];timeds=[];
@@ -60,6 +73,10 @@ rms7=[0 0  0  0  0 -1  1];
 % Ratios=F*W;0.
 W=[rms4;rms5;rms6;rms7;SO2W;O3W]';
 
+
+
+
+
 %leemos el fichero en memoria
 
 s=fileread(bfile);
@@ -87,8 +104,6 @@ jsc=strmatch('sc',l);
 %measures=cell('ds','zs','uq','co');
 
 
-
-
 % READ CONFIGURATION
 % colunna 1 % Configuracion en el fichero
 % columna 2 % configuracion proporcionada
@@ -100,126 +115,68 @@ if any(strmatch('version',buf))==1, %then OK
     lat=str2num(buf(ind(6):ind(7)));
     long=str2num(buf(ind(7):ind(8)));
     pr=str2num(buf(ind(end-1):end));
-end
-% primera configuracio la del fichero B
-[config,TC,DT,extrat,absx,AT]=readb_config(bfile);
-
-
-% Lecura de la segunda configuracion
-if nargin>1 & isnumeric(config_file)  % matriz  de configuraciones
-    %
-    cal_idx=max(find(config_file(1,:)<=datefich(1))); % calibracion mas proxima
-    datestr(config_file(1,cal_idx) )
-
-    if ~isnan(config_file(2:6,cal_idx))
-        TC_=config_file(2:6,cal_idx); end
-    if ~isnan(config_file(13,cal_idx))
-        DT_=config_file(13,cal_idx);  end
-    if ~isnan(config_file(11:12,cal_idx))
-        extrat_=config_file(11:12,cal_idx); end %    B1=extrat(1);B2=extrat(2);
-    if ~isnan(config_file(8:10,cal_idx))
-        absx_=config_file(8:10,cal_idx);    end % A1=absx(1);A2=absx(2);A3=absx(3);
-    if ~isnan(config_file(17:22,cal_idx))
-        AT_=config_file(17:22,cal_idx);     end % atenuacion
-    % revisar
-%     config_file(8:10,2)=absx;
-%     config_file(11:12,2)=extrat;
-%     config_file(2:6,2)=TC;
-%    config_file(17:22,2)=inst(16:21); % atenuation filters
-
-    config(:,2)=config_file(:,cal_idx); %quitamos la fecha
-    TC_=[TC(:)',config_file(26,cal_idx)]'; % temperature coef for lamda1
-elseif  nargin>1 && ischar(config_file) % configuracion del fichero
-        [config_,TC_,DT_,extrat_,absx_,AT_]=read_icf(config_file);
-        config(:,2)=config_;
-elseif nargin>1 && iscellstr(config_file) % dos configuraciones
-    % ignoramos la configuracion del fichero
-    [config_2,TC_2,DT_2,extrat_2,absx_2,AT_2]=read_icf(config_file{2});
-    config(:,2)=config_2;
-    %disp('config 2')
-    %disp(config_file{2})
-    try
-        [config_,TC_,DT_,extrat_,absx_,AT_]=read_icf(config_file{1});
-        config(:,1)=config_;
-    catch
-        disp('cofiguracion del fichero');
+    if isempty(pr)
+       id_pr=findstr(buf,'pr');
+       pr= str2num(buf(id_pr+3:end));
     end
+    loc.lat=lat;
+    loc.long=long;
+    loc.pr=pr;
+    loc.str=buf(ind(5):ind(6));
+    
 else
-    if nargin~=1
-        disp('ERROR de configuracion');
-    end
-end
-% 5420 REM get O3 TC's
-% 5422 FOR J=2 TO 6:INPUT#8,TC(J):NEXT
-% 5424 TC(0)=TC(2)-TC(5)-3.2*(TC(5)-TC(6)):TQ(0)=TC(0)
-% 5426 TC(1)=TC(3)-TC(5)-.5*(TC(4)-TC(5))-1.7*(TC(5)-TC(6)):
-% cambiamos los indices.
-
-
-%Chapuzillas a eliminar
-if isempty(TC) % error en leer la configuracion del fichero
-    TC=TC_';
-    AT=AT_;
-    DT=DT_;
-    config(:,1)=config(:,2)
+    disp('No header');
+    loc.lat=NaN;
+    loc.long=NaN;
+    loc.pr=NaN;
+    loc.str='';
 end
 
-TC=[NaN,NaN,TC];
-TC(1)=TC(3)-TC(6)-3.2*(TC(6)-TC(7));
-TC(2)=TC(5)-TC(6)-.5*(TC(5)-TC(6))-1.7*(TC(6)-TC(7));
-% segunda configuracion
-if size(config,2)==2
-  if isempty(TC_2)
-    TC_=[NaN,NaN,TC_(1:6)'];
-    TC_(1)=TC_(3)-TC_(6)-3.2*(TC_(6)-TC_(7));
-    TC_(2)=TC_(5)-TC_(6)-.5*(TC_(5)-TC_(6))-1.7*(TC_(6)-TC_(7));
-    TC=[TC;TC_];
-    DT=[DT;DT_];
-    AT=[AT,AT_]';
-  else  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%REPROGRAMAR ESTA CHAPUZA
-    TC_=[NaN,NaN,TC_2(1:6)'];
-    TC_(1)=TC_(3)-TC_(6)-3.2*(TC_(6)-TC_(7));
-    TC_(2)=TC_(5)-TC_(6)-.5*(TC_(5)-TC_(6))-1.7*(TC_(6)-TC_(7));
-    TC=[TC;TC_];
-    DT=[DT;DT_2];
-    AT=[AT,AT_2]';
-  end
-else
-    AT=AT(:)';% AT en fila
+% leemos la configuracion arreglar los parametros de entrada
+% argumentos de entrada
+if nargin==1
+    [config,TC,DT,extrat,absx,AT]=process_config(bfile);
+else    
+    [config,TC,DT,extrat,absx,AT]=process_config(bfile,config_file);
 end
-
-
-% otra chapuzilla
-% aï¿½adimos la fecha del fichero al final
-
-if size(config,2)==2
-    config=[config;[datefich(1),datefich(1)]];
-else
-    config=[config;datefich(1)];
-end
-
-
 
 
 % READ HG
-% filtro de hg
-  if isempty(jhgscan)
-   %hg=sscanf(char(l(jhg))','hg %d:%d:%d %f %f %d %f %d ',[8,Inf]);
-   hg=cell2mat(textscan(char(l(jhg))','hg %f:%f:%f %f %f %f %f %f ',...
-       'delimiter',char(13),'multipleDelimsAsOne',1));
-   hg=hg';
-   hg=[hg;nan*hg(1,:)];
+% filtro de hg. 
+  if isempty(jhgscan) % Con la version antigua nunca se escribe la diferencia de pasos??
+% Se asume como maximo 9 campos (version nueva)
+     hg=NaN*ones(length(jhg),9);
+     if ~isempty(jhg)
+     hg(:,1:end-1)=cell2mat(textscan(char(l(jhg))','hg %f:%f:%f %f %f %f %f %f',...
+                            'delimiter',char(13),'multipleDelimsAsOne',1));  hg=hg';
+     else
+     hg=NaN*ones(2,9)';
+     end    
   else
-    jhg=setdiff(jhg,jhgscan);
-    hg=sscanf(char(l(jhg))','hg %d:%d:%d %f %f %d %f %d %d ',[9,Inf]);
-    hg=[hg;nan*hg(1,:)];
+% This only accounts for changing to new sofware after the old one
+     hg=NaN*ones(length(setdiff(jhg,jhgscan)),9);
+     jhg_old=find(jhg<jhgscan(1)); % these are the old ones
+     if ~isempty(jhg_old)
+        idx_old=length(jhg_old);
+        hg(1:idx_old,1:end-1)=cell2mat(textscan(char(l(jhg(jhg_old)))','hg %f:%f:%f %f %f %f %f %f',...
+                            'delimiter',char(13),'multipleDelimsAsOne',1));
+        jhg=setdiff(jhg(1+idx_old:end),jhgscan); % after hgscan follows hg
+     else
+        idx_old=[];       
+        jhg=setdiff(jhg,jhgscan); % after hgscan follows hg
+     end
+   hg(length(jhg_old)+1:end,:)=cell2mat(textscan(char(l(jhg))','hg %f:%f:%f %f %f %f %f %f %f',...
+                            'delimiter',char(13),'multipleDelimsAsOne',1));  hg=hg';                                            
   end
-  time_hg=hg(1,:)*60+hg(2,:)+hg(3,:)/60; %a minutos
+  
+%  aux_date=datevec(datefich(1)); aux_date=repmat(aux_date(1:3),size(hg(1:3,:)',1),2); aux_date(:,4:6)=hg(1:3,:)';
+%  aux_date=datenum(aux_date); aux=NaN*ones(size(hg,1)+1,size(hg,2)); aux(1,:)=aux_date;
+  time_hg=hg(1,:)*60+hg(2,:)+hg(3,:)/60; %a minutos. Lo de sort es un APAÑO
+%   ix_bad=diff(time_hg); hg(ix_bad<0,:)=[]; time_hg=hg(1,:)*60+hg(2,:)+hg(3,:)/60;
   flaghg=abs(hg(5,:)-config(14))<2; % more than 2 steps change
   %  flag_hg=find(diff(flaghg)==-1);   %
   if size(hg,2)>1
         flag_hg=find(diff(flaghg)==-1);   %
-
        
         if isempty(flag_hg)
             time_badhg=[0,0];
@@ -232,7 +189,7 @@ end
             % almacenar la constante en el fichero.
 
             time_badhg=time_hg([flag_hg;flag_hg+1]');
-            time_badhg=[0,time_hg(1);time_badhg];
+            time_badhg=[time_hg(1),time_hg(1);time_badhg];
         end
     else
         time_badhg=[0,0];
@@ -330,7 +287,16 @@ if ~isempty(dss)
     idx_ds=fix(timeds(:,3)/10);
     %TEMPERATURA % asignamos la temperatura al ds tomada del sumario
     ds_temp=dss(11,idx_ds)';
-
+    %filter check
+     if any(dss(14,idx_ds)-(ds(2,:)/64))
+       % to chek that the filter are 0 64....
+       unique(ds(2,:))
+       unique(dss(14,:))
+       disp('error in filter check');
+       
+       ds(2,:)=64*dss(14,idx_ds);
+     end
+         
       % cï¿½lculo de los ï¿½ngulos zenitales y masa ï¿½tica sumarios
     [szadss,m2dss,m3dss]=brewersza(hora',fileinfo(2),fileinfo(3),lat,long);
     [sza,saz,tst_ds,snoon,sunrise,sunset]=sun_pos(timedsum(:,1),lat,-long);
@@ -383,62 +349,56 @@ if ~isempty(dss)
 
     ds=ds';dss=dss';
 
-    %  salidas raw DS
-    o3.dsum_legend={'date';'hgflag';'lat ';'angz';'ang2';'airm';'temp';'filt';'ozo ';'sozo';'so2 ';'sso2';...
-        'ms4 ';'sms4';'ms5 ';'sms5';'ms6 ';'sms6';'ms7 ';'sms7';'ms8 ';'sms8';'ms9 ';'sms9'};
-
-    o3.dsum=[timedss(:,1:2),timedss(:,8)/60,timedss(:,4),...
+    %%  salidas raw DS
+      
+      o3.dsum=[timedss(:,1:2),timedss(:,8)/60,timedss(:,4),...
         dss(:,9:11),dss(:,[14,22,30,21,29]),dss(:,[15,23,16,24,17,25,18,26,19,27,20,28])];
-    %xlswrite(dsum,'',dss_legend)
+      o3.dsum_legend={'date';'hgflag';'lat ';'angz';'ang2';'airm';'temp';'filt';'ozo ';'sozo';'so2 ';'sso2';...
+        'ms4 ';'sms4';'ms5 ';'sms5';'ms6 ';'sms6';'ms7 ';'sms7';'ms8 ';'sms8';'ms9 ';'sms9'};
+      %xlswrite(dsum,'',dss_legend)
 
-     o3.ds_raw_legend={'date';'flg';'nds';'tmp';'fl1';'fl2';'tim';'m2 ';'m3*pressure corr';'cy ';'F0 ';'F1 ';'F2 ';'F3 ';...
-        'F4 ';'F5 ';'F6 ';'r1 ';'r2 ';'r3 ';'r4 '};
      %sustituimos s0 s1 de la medida por m2 m3
      ds(:,4:5)=[m2ds,m3ds*pr/1013];
      ds(:,3)=tst_ds;
-     o3.ds_raw0=[timeds(:,1:3),ds_temp,ds];
-
-
-    %o3.ds_legend={'date';'flg';'nds';'tmp';'fl1';'fl2';'tim';'m2 ';'m3*pressure corr';'cy ';'F0 ';'F1 ';'F2 ';'F3 ';...
-    %    'F4 ';'F5 ';'F6 ';'r1 ';'r2 ';'r3 ';'r4 '};
-    %sustituimos s0 s1 de la medida por m2 m3
-    %ds(:,4:5)=[m2ds,m3ds*pr/1013];
-    %o3.ds_raw=[timeds(:,1:3),ds_temp,ds];
-
-    %xlswrite(ds,'',ds_legend)
-    %   fin de salidas raw
-
-    % Salidas raw SL
-
-
-    %ds re-calculation
-    F=ds(:,7:13); % asilamos las cuetas
-
-    %dead  time correction and filter atenuation.
+     MS9=ds(:,15)-0.5*ds(:,16)-1.7*ds(:,17); % o3 double ratio ==MS(9)
+     MS8=ds(:,14)-3.2*ds(:,17); %:REM SO2 ratio MS(8)
     
+     
+
+     
+     
+     o3.ds_raw0=[timeds(:,1:3),ds_temp,ds,MS8,MS9];
+     o3.ds_raw0_legend={'date';'flg';'nds';'tmp';'fl1';'fl2';'tim';'m2 ';'m3*pressure corr';'cy ';'F0 ';'F1 ';'F2 ';'F3 ';...
+        'F4 ';'F5 ';'F6 ';'r1 ';'r2 ';'r3 ';'r4 ';'r5 ';'r6 '};
     
-%%% Prueba de vectorizar 
-%     l(4,1000)=NaN;
-%     for i=1:1000
-%
-%      tic;F=ds(:,7:13);F4=raw2counts(F,ds(:,2),ds_temp,ds(:,6),DT(1,:),TC(1,:),AT(1,:));l(4,i)=toc;
-%      
-%      tic;F=ds(:,7:13);F3=raw2counts(F,ds(:,2),ds_temp,ds(:,6),DT(1,:),TC(1,:),AT(1,:),spectral_config);l(3,i)=toc;
-%      
-%      tic;F=ds(:,7:13);F2=ds_counts(F,ds(:,2),ds_temp,ds(:,6),DT(1,:),TC(1,:),AT(1,:));l(2,i)=toc;
-%      tic;F=ds(:,7:13);F1=ds_counts(F,ds(:,2),ds_temp,ds(:,6),DT(1,:),TC(1,:),AT(1,:),spectral_config);l(1,i)=toc;
-%     end
-%     
-    
-    
+    %%   fin de salidas raw
+ 
+
+
+    %% ds re-calculation
+    %%% Prueba de vectorizar 
+    %     l(4,1000)=NaN;
+    %     for i=1:1000
+    %
+    %      tic;F=ds(:,7:13);F4=raw2counts(F,ds(:,2),ds_temp,ds(:,6),DT(1,:),TC(1,:),AT(1,:));l(4,i)=toc;
+    %      
+    %      tic;F=ds(:,7:13);F3=raw2counts(F,ds(:,2),ds_temp,ds(:,6),DT(1,:),TC(1,:),AT(1,:),spectral_config);l(3,i)=toc;
+    %      
+    %      tic;F=ds(:,7:13);F2=ds_counts(F,ds(:,2),ds_temp,ds(:,6),DT(1,:),TC(1,:),AT(1,:));l(2,i)=toc;
+    %      tic;F=ds(:,7:13);F1=ds_counts(F,ds(:,2),ds_temp,ds(:,6),DT(1,:),TC(1,:),AT(1,:),spectral_config);l(1,i)=toc;
+    %     end
+    %     
+
+    Fr=ds(:,7:13); % asilamos las cuetas
+    %dead  time correction and filter atenuation. 
     %IF Q14%=0 THEN TE%=-33.27+VAL(TE$)*18.64:IF Q10%=0 THEN TE%=-30+VAL(TE$)*16+.5
-   if nargin <3 || isempty(spectral_config) 
-    F=ds_counts(F,ds(:,2),ds_temp,ds(:,6),DT(1,:),TC(1,:),AT(1,:));
-   else
-    F=ds_counts(F,ds(:,2),ds_temp,ds(:,6),DT(1,:),TC(1,:),AT(1,:),spectral_config);
-   end
-    DS_=F;  % DS_ counts raleyght uncorrected
-    DS=rayleigth_cor(F,pr,m3ds);
+     if nargin <3 || isempty(spectral_config) 
+      F=ds_counts(Fr,ds(:,2),ds_temp,ds(:,6),DT(1,:),TC(1,:),AT(1,:));
+     else
+      F=ds_counts(Fr,ds(:,2),ds_temp,ds(:,6),DT(1,:),TC(1,:),AT(1,:),spectral_config);
+     end
+     DS_=F;  % DS_ counts raleyght uncorrected
+     DS=rayleigth_cor(DS_,pr,m3ds);
     % R=[ 0 0 0  4620    4410    4220    4040 ];
     % w=[0.00  0.00   0.00   -1.00    0.50    2.20   -1.70];
     % Vectorizado
@@ -447,36 +407,41 @@ if ~isempty(dss)
     % w weithgth
 
     % los ratios de fichero
-    MS9=ds(:,15)-0.5*ds(:,16)-1.7*ds(:,17); % o3 double ratio ==MS(9)
-    MS8=ds(:,14)-3.2*ds(:,17); %:REM SO2 ratio MS(8)
-    ratios_orig=[ds(:,14:17),MS8,MS9];
-
+    %  ratios_orig=[ds(:,14:17),MS8,MS9];
+    
     [ozone,so2,ratios]=ozone_cal(DS,m2ds,config(:,1));
     [ozo_rc,ozo_rc_std]=grpstats(ozone,idx_ds,{'mean','std'});
 
 
-    if size(config,2)==2 % segunda configuracion
-        F=ds(:,7:13); % asilamos las cuetas
-        F2=ds_counts(F,ds(:,2),ds_temp,ds(:,6),DT(2,:),TC(2,:),AT(2,:)');
+    if size(config,2)>1 % segunda configuracion
+        Fr=ds(:,7:13); % asilamos las cuetas
+      
+        if nargin <3 || isempty(spectral_config) 
+               F2=ds_counts(Fr,ds(:,2),ds_temp,ds(:,6),DT(2,:),TC(2,:),AT(2,:)');
+        else
+               F2=ds_counts(Fr,ds(:,2),ds_temp,ds(:,6),DT(2,:),TC(2,:),AT(2,:),spectral_config);
+        end
+        
         DS_2=F2;  % DS_ counts raleyght uncorrected
-        DS2=rayleigth_cor(F2,pr,m3ds);
+        DS2=rayleigth_cor(DS_2,pr,m3ds);
         [ozone2,so22,ratios2]=ozone_cal(DS2,m2ds,config(:,2));
 
 
         %ozone_ds=[timeds(:,[1,3,4,5]),ozone,ratios,ozone2,ratios2];
         o3.ozone_ds=[timeds(:,1:5),ds_temp,ds(:,2),ozone,ratios,ozone2,ratios2];
         o3.ozone_ds_legend={  'date'    'hg_flag'    'n'    'sza'    'airm'  'temp' 'flt'...
-                              'o3'    'r1'    'r2'    'r3'    'r4'    'r5'    'r6'   ...
+                              'o3'    'r1'    'r2'    'r3'    'r4'    'r5'    'r6'   ... % ratios (Rayleight corrected !!)
                               'o3'    'r1'    'r2'    'r3'    'r4'    'r5'    'r6'};
         [ozo_c,ozo_std]=grpstats(ozone2,idx_ds,{'mean','std'});
         o3.ozone_s=[timedss(:,1:4),dss(:,[11,14]),ozo_rc,ozo_rc_std,ozo_c,ozo_std];
         o3.ozone_s_legend={'fecha' 'hgflag' 'sza' 'airm' 'tmp' 'flt' 'ozo'	'std'	'ozo_c'	'std_c'};
 
         %time ratios_fichero %cuentas/secod recalculadas
-        o3.ozone_raw=[timeds,ds_temp,ds(:,6),F,ratios,F2,ratios2];
-        o3.ozone_raw_legend={'date'	'hg'    'idx' 'temp' 'flt'	'sza'	'm2'	'm3'	'sza'	'saz'	'tst'	'tsnoon'	'sunrise'	'sunset'...
-                             ' S0'  'S1'	'S2'	'S3'	'S4'	'S5'	'S6'	'R4'	'R5'	'R6'	'R7'	'R8'	'R9'...
-                             's0'	's1'	's2'	's3'	's4'	's5'	's6'	'r4'	'r5'	'r6'	'r7'	'r8'	'r9'...
+        o3.ozone_raw=[timeds(:,1:9),ds(:,2),ds_temp,ds(:,7:13),F,F2];
+        o3.ozone_raw_legend={'date'	'hg'    'idx'   'sza'	'm2'	'm3'	'sza'	'saz'	'tst'	'temp'  'flt'...
+                             'OS0'  'OS1'	'OS2'	'OS3'	'OS4'	'OS5'	'OS6'	...  % cuentas brutas
+                             'iS0'  'iS1'	'iS2'	'iS3'	'iS4'	'iS5'	'iS6'	...  % cuentas recalculadas 1
+                             'fs0'	'fs1'	'fs2'	'fs3'	'fs4'	'fs5'	'fs6'	...  % cuentas recalculadas 2
                              };
 
 
@@ -489,25 +454,28 @@ if ~isempty(dss)
 
         o3.ozone_s=[timedss(:,1:4),dss(:,[11,14,22,30]),ozo_rc,ozo_rc_std];
         o3.ozone_s_legend={'fecha' 'hgflag' 'sza' 'airm' 'tmp' 'flt' 'ozo'	'std'	'ozo_c'	'std_c'};
-
-        o3.ozone_raw=[timeds,ds_temp,ds(:,6),F,ratios_orig,DS_,ratios];
-        o3.ozone_raw_legend={'date'	'hg'	'idx' 'temp' 'flt'	'sza'	'm2'	'm3'	'sza'	'saz'	'tst'	'tsnoon'	'sunrise'	'sunset'...
-                             ' S0'  'S1'	'S2'	'S3'	'S4'	'S5'	'S6'	'R4'	'R5'	'R6'	'R7'	'R8'	'R9'...
-                             's0'	's1'	's2'	's3'	's4'	's5'	's6'	'r4'	'r5'	'r6'	'r7'	'r8'	'r9'...
+        
+        
+        o3.ozone_raw=[timeds(:,1:9),ds(:,2),ds_temp,ds(:,7:13),F,F];
+        o3.ozone_raw_legend={'date'	'hg'    'idx'   'sza'	'm2'	'm3'	'sza'	'saz'	'tst'	'temp'  'flt'...
+                             'OS0'  'OS1'	'OS2'	'OS3'	'OS4'	'OS5'	'OS6'	...
+                             'iS0'  'iS1'	'iS2'	'iS3'	'iS4'	'iS5'	'iS6'	...
+                             'fs0'	'fs1'	'fs2'	'fs3'	'fs4'	'fs5'	'fs6'	...
                              };
 
+        
     end
 
 
 
 else
     warning('Fichero vacio ? no ozone measurements');
-    o3.dsum=[];o3.ds=[];
-    o3.ozone_s=[];
-    o3.ozone_ds=[];
-    o3.ds_raw0=[];
-    o3.dss=[];o3.timeds=[];
-    o3.timedss=[];o3.ds_l=[];
+    o3.dsum=[];o3.ds=[]; o3.ozone_s=[];
+    o3.ozone_ds=[];o3.ds_raw0=[]; o3.dss=[];o3.timeds=[];
+    o3.timedss=[];o3.ds_l=[];o3.ozone_raw=[];
+    o3.ozone_ds_legend=[];o3.dsum_legend=[];
+    o3.ds_raw0_legend=[];o3.ozone_ds_legend=[];
+    o3.ozone_s_legend=[];
 end
 
 if ~isempty(sls)
@@ -566,15 +534,19 @@ if ~isempty(sls)
    MS8=sl(:,14)-3.2*sl(:,17); %:REM SO2 ratio MS(8)
    ratios_orig=[sl(:,14:17),MS8,MS9,sl(:,9),sl(:,13)];
 
-%     figure; plot(100*(ratios_orig-round(ratios))./ratios_orig);
+%     %figure; plot(100*(ratios_orig-round(ratios))./ratios_orig);
+%     
+%     figure;      plot(ratios_orig./ratios,'.'); hline(1);
+%     title([bfile,' ratios_org vs ratios recalculados from raw'] );
 %     legend('ms4','ms5','ms6','ms7','ms8','ms9','w1','w5');
-%     figure;      plot(ratios_orig./ratios,'.');
-%     figure; plot(sl_temp);
+%     
+%     %figure; plot(sl_temp);
 %     Fr=ratio2counts(sl_data.sls_raw);
 %     
-%     figure;plot(timesl(:,1),DS(:,3:7),sl_data.sls_raw(:,1),Fr(:,3:7))
+%     %figure;plot(timesl(:,1),DS(:,3:7),sl_data.sls_raw(:,1),Fr(:,3:7))
 %     m1=grpstats(DS(:,3:7),idx_sl,{'mean'});
-%     figure;plot(100*(round(m1)-Fr(:,3:7))./Fr(:,3:7))
+%     figure;plot(round(m1)./Fr(:,3:7),'.');hline(1)
+%     title([bfile,' cuentas recalculadas  vs cuentas obtenidos del sumario'] );
 
 % cuentas recalculadas con las ctes del fichero/config1
 
@@ -585,7 +557,7 @@ if ~isempty(sls)
      sl_data.sl_c=[timesl,DS,ratios];
      % time cuentas/sec ratios
 
-   if size(config,2)==2
+   if size(config,2)>1
       DS2=ds_counts(sl(:,7:13),sl(:,2),sl_temp,sl(:,6),DT(2,:),TC(2,:),AT(2,:));
       ratios2=[DS2*W,sl(:,9),sl(:,13)];
       sl_data.sl_cr=[timesl,DS2,ratios2];
@@ -643,7 +615,14 @@ if ~isempty(jco)
                     sc_aux=co(jsc(jj+1));
                     lsc=mmstrtok(sc_aux,char(13));
                     aux_time_end=sscanf(lsc{2},'%02d:%02d:%02d');
-                    aux_end=sscanf(lsc{3},'sc: end %f %f %f %f %f %f %f %f %d ');
+                    [aux_end,cnt]=sscanf(lsc{3},'sc: end %f %f %f %f %f %f %f %f %d ');
+                     if cnt~=8
+                         if cnt==0, aux_end=[];end
+                      for ii=cnt+1:8
+                        aux_end(ii)=NaN;
+                      end
+                      aux_end=aux_end(:);
+                    end
                     if ~isempty(aux_end)
                         %40020 REM  VAR1$: Temp       VAR5$: O3
                         %40030 REM  VAR2$: Mu         VAR6$: Min step
@@ -661,7 +640,10 @@ if ~isempty(jco)
                         ini_med=jco(jsc(jj));
                         fin_med=jco(jsc(jj+1));
                         
-                        sc_meas=sscanf(char(l{ini_med+1:fin_med-1})',fmtsc,[17,Inf])';
+                         sc_meas=sscanf(char(l{ini_med+1:fin_med-1})',fmtsc,[17,Inf])';
+                        if isempty(sc_meas)
+                            sc_meas=ones(1,17)*NaN;
+                        end
                         time_meas=datefich(1)+sc_meas(:,3)/60/24;
                         
                         n=size(sc_meas,1);
@@ -682,7 +664,7 @@ if ~isempty(jco)
                             
                             sc_aux(:,18)=ozo_sc;
                             sc_aux(:,19)=so2_sc;
-                            if size(config,2)==2
+                            if size(config,2)>1
                                 [ozo_sc,so2_sc]=ds_ozone(ds_raw2counts(sc_aux,config(:,2)),config(:,2));
                                 sc_aux(:,18)=ozo_sc;
                                 sc_aux(:,19)=so2_sc;
@@ -709,11 +691,15 @@ if ~isempty(jco)
                             hg_end=hgscan(j,:);
                             
                             %aï¿½adir al avg---> completar
-                            if ~isempty(hg_end)
+                            
+                            if ~isempty(hg_end) && ~isempty(hg_start)
                                 sc_flag=hg_end(6)-hg_start(6);
                             else
                                 sc_flag=NaN;
                                 hg_end=NaN;
+                                if isempty(hg_end)   hg_end=NaN; end;
+                                if isempty(hg_start) hg_start=NaN; end;
+                                                     
                             end
                             
                             aux_sc=[aux_sc,v,s.normr,p,sc_flag,hg_start(1),hg_end(1)];
@@ -781,7 +767,7 @@ function [ozone,so2,ratios]=ozone_cal(DS,m2,config)
     B1=config(11);B2=config(12);
     A1=config(8);A2=config(9);A3=config(10);  
     ozone=(ms9-B1)./(10*A1*m2);
-    so2=(ms8-B2)./(A2*A3*m2)-ozone/A2;
+    so2=(ms8-B2)./(A2*A3*m2)-ozone/A2; %revisar
     ratios=[ms4,ms5,ms6,ms7,ms8,ms9];
     
     

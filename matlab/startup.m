@@ -1,3 +1,4 @@
+% check externals 
 % matlabpath(['c:\gordon\lib\matlab;' matlabpath]);
 global lotus_date
 global lat_izo
@@ -12,6 +13,7 @@ c=fix(clock);
 %diary(datestr(date));
 lotus_date=datenum(1899,12,30);
 format compact;
+format shortG;
 long_izo =-0.287968563;
 lat_izo=0.494084967;
 lat_sco=0.496939356;
@@ -44,7 +46,9 @@ set(0,'DefaultfigurePaperPosition',[ 0.63 7.45 19.72 14.79]);
 % %set(0,'DefaultaxesColorOrder',[0,0,0;0,0,1;1,0,0;0,0,1;1,0.5,0.5;1,0,1]);
 
 set(0,'DefaultaxesColorOrder',[0,0,0;0,0,1;1,0,0;0,1,0;1,0.5,1;0.5,0,0.5]);
-set(0,'DefaultaxesLineStyleOrder', '-o|:x|-|o:|.:|-x|+|:.|:+|:x');
+set(0,'DefaultaxesLineStyleOrder', '-o|:x|-|o:|.:|-x|+|:.|:+|:x'); 
+%% marker for brewer plot
+MK=set(plot(1),'Marker');MK{14}='x';MK(15)=MK(2);MK{16}='p';MK(17)=MK(3);
 % 
 % blanco y negro%
 %set(0,'DefaultaxesColorOrder',[0,0,0;0.25,0.25,0.25]);
@@ -56,7 +60,8 @@ set(0,'DefaultaxesLineStyleOrder', '-o|:x|-|o:|.:|-x|+|:.|:+|:x');
 
 %opengl autoselect
 
-set(0,'DefaultFigureWindowStyle','Normal');
+% set(0,'DefaultFigureWindowStyle','Normal');
+% set_figure_toscreen(2)
 % set(0,'DefaultFigureWindowStyle','Docked');
 %pub.format='latex';
 pub.imageFormat='eps' ;

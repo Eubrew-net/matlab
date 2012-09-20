@@ -3,16 +3,18 @@ function [m,s,outl,index]=outliers_bp(data,LIM)
 %function [m,s,outl,index]=outliers_bp(data,LIM)
 % 
 index=[];
-data=data(find(~isnan(data)));
+% no es necesario quitar NaNs (no recomendable -> no coincidencia de indices)
+% data=data(find(~isnan(data)));
+% quantile treats NaNs as missing values and removes them (ver abajo, 33)
 if nargin==1
-    LIM=2.5
+    LIM=2.5;    fprintf('Por defecto, LIM=%3.1f (en boxparams)\n',LIM);
 end
 [param,outl,index]=boxparams(data,LIM);
 
 
 data(index)=[];
-m=mean(data);
-s=std(data);
+m=nanmean(data);
+s=nanstd(data);
 
 function [params, outsideValues,index] = boxparams(x,LIM)
 %  calculate boxplot parameters for data vector x
@@ -28,7 +30,7 @@ function [params, outsideValues,index] = boxparams(x,LIM)
 if nargin==1
     LIM=2.5
 end
-temp = quantile(x,[.25 .5 .75]);
+temp = quantile(x,[.25 .5 .75]); 
 lowerQuartile = temp(1);
 med = temp(2);
 upperQuartile = temp(3);

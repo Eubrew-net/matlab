@@ -13,7 +13,7 @@ if nargin<5,app='wt';end
 status=1;
 
 %if strcmp(fmt,' %15.5E'),
-if (toknb(fmt)==1) & size(a,2)>1,
+if (toknb(fmt,' ')==1) & size(a,2)>1,
  j=[];
  col=size(a,2);
  for i=1:col, j=[j fmt]; end

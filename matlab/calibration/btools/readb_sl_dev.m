@@ -77,8 +77,6 @@ jum=strmatch('um',l);
 jhg=strmatch('hg',l);
 jhgscan=strmatch('hgscan',l);
 jsl=strmatch('sl',l);
-
-
 jsc=strmatch('sc',l);
 
 %measures=cell('ds','zs','uq','co');
@@ -90,108 +88,10 @@ jsc=strmatch('sc',l);
 % colunna 1 % Configuracion en el fichero
 % columna 2 % configuracion proporcionada
 %read header
-
-buf=l{1}; % get first line, should be version...
-if any(strmatch('version',buf))==1, %then OK
-    ind=find(buf==char(13));
-    lat=str2num(buf(ind(6):ind(7)));
-    long=str2num(buf(ind(7):ind(8)));
-    pr=str2num(buf(ind(end-1):end));
-end
-% primera configuracio la del fichero B
-[config,TC,DT,extrat,absx,AT]=readb_config(bfile);
-
-
-% Lecura de la segunda configuracion
-if nargin>1 & isnumeric(config_file)  % matriz  de configuraciones
-    %
-    cal_idx=max(find(config_file(1,:)<=datefich(1))); % calibracion mas proxima
-    datestr(config_file(1,cal_idx) )
-
-    if ~isnan(config_file(2:6,cal_idx))
-        TC_=config_file(2:6,cal_idx); end
-    if ~isnan(config_file(13,cal_idx))
-        DT_=config_file(13,cal_idx);  end
-    if ~isnan(config_file(11:12,cal_idx))
-        extrat_=config_file(11:12,cal_idx); end %    B1=extrat(1);B2=extrat(2);
-    if ~isnan(config_file(8:10,cal_idx))
-        absx_=config_file(8:10,cal_idx);    end % A1=absx(1);A2=absx(2);A3=absx(3);
-    if ~isnan(config_file(17:22,cal_idx))
-        AT_=config_file(17:22,cal_idx);     end % atenuacion
-    % revisar
-%     config_file(8:10,2)=absx;
-%     config_file(11:12,2)=extrat;
-%     config_file(2:6,2)=TC;
-%    config_file(17:22,2)=inst(16:21); % atenuation filters
-
-    config(:,2)=config_file(:,cal_idx); %quitamos la fecha
-    TC_=[TC(:)',config_file(26,cal_idx)]'; % temperature coef for lamda1
-elseif  nargin>1 && ischar(config_file)
-        [config_,TC_,DT_,extrat_,absx_,AT_]=read_icf(config_file);
-        config(:,2)=config_;
-elseif nargin>1 && iscellstr(config_file)
-    % ignoramos la configuracion del fichero
-    [config_2,TC_2,DT_2,extrat_2,absx_2,AT_2]=read_icf(config_file{2});
-    config(:,2)=config_2;
-    %disp('config 2')
-    %disp(config_file{2})
-    try
-        [config_,TC_,DT_,extrat_,absx_,AT_]=read_icf(config_file{1});
-        config(:,1)=config_;
-    catch
-        disp('cofiguracion del fichero');
-    end
-else
-    if nargin~=1
-        disp('ERROR de configuracion');
-    end
-end
-% 5420 REM get O3 TC's
-% 5422 FOR J=2 TO 6:INPUT#8,TC(J):NEXT
-% 5424 TC(0)=TC(2)-TC(5)-3.2*(TC(5)-TC(6)):TQ(0)=TC(0)
-% 5426 TC(1)=TC(3)-TC(5)-.5*(TC(4)-TC(5))-1.7*(TC(5)-TC(6)):
-% cambiamos los indices.
-if isempty(TC)
-    % error en leer la configuracion del fichero
-    TC=TC_';
-    AT=AT_;
-    DT=DT_;
-    config(:,1)=config(:,2)
-end
-TC=[NaN,NaN,TC];
-TC(1)=TC(3)-TC(6)-3.2*(TC(6)-TC(7));
-TC(2)=TC(5)-TC(6)-.5*(TC(5)-TC(6))-1.7*(TC(6)-TC(7));
-% segunda configuracion
-if size(config,2)==2
-  if isempty(TC_2)
-    TC_=[NaN,NaN,TC_(1:6)'];
-    TC_(1)=TC_(3)-TC_(6)-3.2*(TC_(6)-TC_(7));
-    TC_(2)=TC_(5)-TC_(6)-.5*(TC_(5)-TC_(6))-1.7*(TC_(6)-TC_(7));
-    TC=[TC;TC_];
-    DT=[DT;DT_];
-    AT=[AT,AT_]';
-  else  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%REPROGRAMAR ESTA CHAPUZA
-    TC_=[NaN,NaN,TC_2(1:6)'];
-    TC_(1)=TC_(3)-TC_(6)-3.2*(TC_(6)-TC_(7));
-    TC_(2)=TC_(5)-TC_(6)-.5*(TC_(5)-TC_(6))-1.7*(TC_(6)-TC_(7));
-    TC=[TC;TC_];
-    DT=[DT;DT_2];
-    AT=[AT,AT_2]';
-  end
-else
-    AT=AT(:)';% AT en fila
-end
+% leemos la configuracion;
+[config,TC,DT,extrat,absx,AT]=process_config(bfile,config_file);
 
 % a�adimos la fecha del fichero al final
-
-if size(config,2)==2
-    config=[config;[datefich(1),datefich(1)]];
-else
-    config=[config;datefich(1)];
-end
-
-
-
 
 % READ HG
 % filtro de hg

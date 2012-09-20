@@ -6,7 +6,7 @@ function [j,i]=findm_min(A,B,delta)
 j=[];
 i=[];
 %h=waitbar(0,'Find M esto puede tardar');
-tic;
+
 %p=progressbar();
 for ii=1:length(B)
    %waitbar(ii/length(B),h);
@@ -23,7 +23,6 @@ for ii=1:length(B)
    end
          
 end 
-toc
 
 
 %close(h);

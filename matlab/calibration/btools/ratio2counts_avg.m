@@ -2,7 +2,12 @@ function F=ratio2counts(sls)
     % Del programa de analisis de SL.
     % entramos con los sumarios
     % SLSUMARY-> 
-    MS=sls(:,17:24); %el uno es el MS4-> restar 3
+    % Alberto Modificada para poder entrar con el fichero AVG
+    if size(sls,2)==20
+        MS=sls(:,7:13);  % fichero AVG
+    else
+        MS=sls(:,17:24); % salida avg de readavg el uno es el MS4-> restar 3
+    end
     %  ratios=[ms4,ms5,ms6,ms7,ms8,ms9,sl(:,9),sl(:,13)];
     %           1   2   3   4   5   6   F(3)     F(7)
     % F 1->7
@@ -20,7 +25,11 @@ function F=ratio2counts(sls)
     F(:,9)=MS(:,6);      % ms(9)
     
     F(:,1)=diaj2(sls(:,1));
-    F(:,2)=sls(:,13);
+    if size(sls,2)==20
+        F(:,2)=mean(sls(:,4:5),2);
+    else
+        F(:,2)=sls(:,13);
+    end
     % F(7) tiene que ser igual a MS8 !!
 %     
 %       F8c=log(MS(:,8))*1E4/log(10);

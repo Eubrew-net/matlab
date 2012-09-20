@@ -1,4 +1,4 @@
-function [h,Lr] = rline
+function [h,Lr] = rline(varargin)
 % LSLINE Add least-squares fit line to scatter plot.
 %   LSLINE superimposes the least squares line on each line object
 %   in the current axis (Except LineStyles '-','--','.-'.)
@@ -33,8 +33,10 @@ for k = 1:length(lh)
        newline = refline(beta);
        set(newline,'Color',datacolor);
        x=get(newline,'XData');y=get(newline,'YData');
-       t=text(x(1),y(1),sprintf('  y=%.6f x+ %.6f r=%.3f',[beta;p(1)]));
+       if isempty(varargin)
+       t=text(x(1),y(1),sprintf('  y=%.6f x+ %.6f r=%.6f',[beta;p(1)]));
        set(t,'Color',datacolor);
+       end
        if nargout > 0
            h(count) = newline;
        end

@@ -64,17 +64,18 @@ disp_lines=[
 ];
 tic
 for i=1:length(s)
-     name_old=sscanf(s(i).name,'W%01d%01d%03d%02d.%03d');
+     name_old=sscanf(upper(s(i).name),'W%01d%01d%03d%02d.%03d');
 
      if length(name_old)<=1
         name_old=sscanf(s(i).name,'%02d%01d%03d%02d.%03d');
      end
      if length(name_old)==4
-       name_old=sscanf(s(i).name,'W%01d%01d%03d%02d%*02c.%03d');
+       name_old=sscanf(upper(s(i).name),'W%01d%01d%03d%02d%*02c.%03d');
        if length(name_old)==4
-       name_old=sscanf(s(i).name,'W%01d%01d%03d%02d%*03c.%03d');
+       name_old=sscanf(upper(s(i).name),'W%01d%01d%03d%02d%*03c.%03d');
        end  
      end
+    try 
      line=fileread(s(i).name);
      line_no=sscanf(line,'%f');
 
@@ -97,10 +98,14 @@ for i=1:length(s)
          if SUCCESS~=1
             disp(MESSAGE);
          end
-     else
+      else
          disp(sprintf('%s: %f, %s','linea no registrada',line_no(1),s(i).name));
          plot(line_no(2:2:end),line_no(3:2:end)); title(sprintf('%.5f',line_no(1)));
      end
+    catch
+        warning(s(i).name);
+    end
+    
 end
 toc
 rename(origen)

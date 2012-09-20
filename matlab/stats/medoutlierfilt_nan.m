@@ -1,4 +1,4 @@
-function [stats_data,filtered_data] = medoutlierfilt_nan(x,outlier_cut,plot_state)
+function [stats_data,filtered_data] = medoutlierfilt_nan(x,outlier_cut,plot_state,si_no)
 %puts nan on oulier of every column
 %MEDOUTLIERFILT - remove outliers from a multivariate data set using the
 %   median of each column
@@ -20,9 +20,10 @@ function [stats_data,filtered_data] = medoutlierfilt_nan(x,outlier_cut,plot_stat
 %   Cranfield Univeristy
 
 
+% if nargin  ==  4
 
 if nargin < 3
-    plot_state  = 1; 
+    plot_state  = 1; si_no = 0; 
 end
 
 if nargin < 2
@@ -47,11 +48,11 @@ for i = 1:num_column
     current_column = sorted_data(:,i);
     
     % calculate the 25th percentile
-    stats_data(1, i)  = median(current_column(find(current_column<median(current_column))));
+    stats_data(1, i)  = nanmedian(current_column(find(current_column<nanmedian(current_column))));
     % calculate the 50th percentile
-    stats_data(2,i)  = median(current_column);
+    stats_data(2,i)  = nanmedian(current_column);
     % calculate the 75th percentile
-    stats_data(3,i)  = median(current_column(find(current_column>median(current_column))));
+    stats_data(3,i)  = nanmedian(current_column(find(current_column>nanmedian(current_column))));
     % calculate the interquartile range of each column
     stats_data(4, i) =  stats_data(3, i) - stats_data(1, i);
     % calculate the semi interquartile range
@@ -108,33 +109,36 @@ end
 %display statistics for original data
 
 
-if plot_state  == 1
 
 
+if si_no == 1
 disp(['Column:                              ' num2str(1:num_column     , '%f\t')]);
-disp(['Mean:                                ' num2str(mean(x)          , '%f\t')]);
-disp(['SD:                                  ' num2str(std(x)           , '%f\t')]);
+disp(['Mean:                                ' num2str(nanmean(x)       , '%f\t')]);
+disp(['SD:                                  ' num2str(nanstd(x)        , '%f\t')]);
 disp(['Quartile1 (25th):                    ' num2str(stats_data(1,:)  , '%f\t')]);
 disp(['Quartile1 (50th):                    ' num2str(stats_data(2,:)  , '%f\t')]);
 disp(['Quartile1 (75th):                    ' num2str(stats_data(3,:)  , '%f\t')]);
 disp(['Inter quartile range:                ' num2str(stats_data(4,:)  , '%f\t')]);
 disp(['Semi Interquartile Deviation:        ' num2str(stats_data(5,:)  , '%f\t')]);
 disp(['Number of outliers :                 ' num2str((num_outliers)   , '%f\t')]);
-
-
+if plot_state  == 1
 
 % boxplots to compare orignal and filtered data sets. 
 
-
+figure; 
 subplot(1, 2, 1)
 boxplot(x,'notch','on')
 title('With outliers')
 subplot(1, 2, 2)
 boxplot(filtered_data,'notch','on')
 title('Minus outliers')
+end
 
 end
 
+% else
+% stats_data = []; filtered_data = x; return
+% end
 
 
 

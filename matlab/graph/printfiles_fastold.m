@@ -1,5 +1,5 @@
 
-function Options=printfiles(n0,n1,patern)
+function Options=printfiles(n0,n1,patern,Options)
 
 Options.Format='eps';   %'Format'  a string specifies the output format. Defaults to 'eps'. For 
 Options.Preview='tiff'; %'Preview' one of the strings 'none', 'tiff' specifies a preview for EPS files. Defaults to 'none'.  
@@ -33,7 +33,7 @@ Options.FontEncoding='latin1'; %one of the strings 'latin1', 'adobe' specifies t
 Options.SeparateText=0 ;       %one of 0 or 1 specifies that the text objects are stored in separate
                                %file as EPS with the base filename having '_t' appended.end
 
-mkdir(patern); cwd=pwd; cd(patern);
+mkdir('figures'); cwd=pwd; cd('figures');
 try
  for i=n0:n1
     h=figure(i);
@@ -41,8 +41,7 @@ try
 %     grid on;
     figura=[patern,'_',label];%,num2str(i)];
     
-    set(h,'WindowStyle','normal');
-    
+    set(h,'WindowStyle','normal');    
     set(h,'PaperUnits','centimeters');
     set(h,'PaperPositionMode','Auto')
   
@@ -50,7 +49,7 @@ try
     previewfig(h,Options);
     exportfig(h,[strtok(figura,'.')],Options);
 %    save as fig file
-%    saveas(h,[patern,label,num2str(i)],'fig');
+    saveas(h,[patern,label,num2str(i)],'fig');
 
     
 %     saveas(h,[patern,num2str(i)],'fig');

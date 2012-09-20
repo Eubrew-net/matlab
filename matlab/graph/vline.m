@@ -68,10 +68,10 @@ else
     switch nargin
     case 1
         linetype='r:';
-        label=num2str(x);
+        label='';
     case 2
         linetype=in1;
-         label=num2str(x);
+        label='';
     case 3
         linetype=in1;
         label=in2;

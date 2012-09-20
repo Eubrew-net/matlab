@@ -1,7 +1,8 @@
-%function [x,r,ab,rp,data]=ratio_min_ozone(a,b,min,name_a,name_b)
-% calcula el ratio entre series temporales
-% el ratio es respecto a b
-% b puede  y a pudede tener varias columnas
+function [x,r,ab,rp,data,osc_out,osc_smooth,outliers]=ratio_min_ozone(a,b,n_min,name_a,name_b,varargin)
+% function [x,r,ab,rp,data,osc_out,osc_smooth,outliers]=ratio_min_ozone(a,b,n_min,name_a,name_b,varargin)
+% Calcula el ratio entre series temporales (el ratio es respecto a b)
+% b puede y a pueden tener varias columnas
+% 
 % x= elementos comunes
 % r= ratio
 % ab= diferecia absoluta
@@ -9,12 +10,63 @@
 %
 % Special Version for ozone measurements
 % input argument:  date, ozone,airm, sza,ms9,sms9, temperature, filter
+% 
+% 
+%   INPUTS:
+% 
+% -------- Necesarios (como siempre) --------
+% - a, instrumento
+% - b, referencia
+% - n_min, tsync
+% - name_a, string con el nombre del instrumento
+% - name_b, string con el nombre de la referencia
+% 
+% -------- Opcionales ---------
+% - OSC_lim. Por defecto [300 1600]
+% - plot_flag. Por defecto 1 (ploteo de individuales)
+% 
+%  MODIFICADO: 
+% 
+% Juanjo 12/04/2011: Se añade control de inputs opcionales a la funcion. Uso de inputparser
+% 
+% Juanjo 17/04/2012: En el caso de que name_a=name_b (o nargin=3), no ploteos
+% 
+% Ejemplo:
+%     [x,r,rp,ra,dat,ox,osc_smooth_old]=ratio_min_ozone(inst1_b(:,[1,6,3,2,8,9,4,5]),ref2_b(:,[1,6,3,2,8,9,4,5]),...
+%                                                                              5,brw_str{n_inst},brw_str{n_ref});   
 
-function [x,r,ab,rp,data,osc_out,osc_smooth]=ratio_min_ozone(a,b,n_min,name_a,name_b)
+%% Validacion de input's
+arg = inputParser;   % Create an instance of the inputParser class
+arg.FunctionName='ratio_min_ozone';
+
+arg.addRequired('a', @isfloat);
+arg.addRequired('b', @isfloat);
+arg.addRequired('n_min', @isfloat);
+arg.addRequired('name_a', @ischar);
+arg.addRequired('name_b', @ischar);
+
+arg.StructExpand = false;
+arg.addParamValue('OSC_lim', [300 1600], @isfloat); % Por defecto [300 1600]
+arg.addParamValue('plot_flag', 1, @(x)(x==1 || x==0)); % Por defecto 1 (ploteo de individuales)
+
+   try
+     arg.parse(a, b, n_min, name_a, name_b, varargin{:});
+     mmv2struct(arg.Results); Args=arg.Results;
+     chk=1;
+   catch
+     errval=lasterror;
+     chk=0;
+   end
+
 % calcula el ratio entre respuestas o lamparas
 MIN=60*24;
+
+%a(find(a(:,2)<190 | a(:,2)>500),:)=NaN;
+%b(find(b(:,2)<190 | b(:,2)>500),:)=NaN;
+
+
 %n_min=10;
-[aa,bb]=findm(a(:,1),b(:,1),n_min/MIN);
+[aa,bb]=findm_min(a(:,1),b(:,1),n_min/MIN);
 c=a(aa,1);
 % PORQUE NO RULA no busca todos !!!
 % 3 minutos 1/( 3  *7E-4)
@@ -28,9 +80,11 @@ data_l=size(a,2);
 
 
 
-r=[c,(a(aa,2:end)./b(bb,2:end))];
+r=[c,(a(aa,2:end)./b(bb,2:end)),b(bb,2).*b(bb,3),b(bb,4)];
 ab=[c,(a(aa,2:end)-b(bb,2:end))];
 rp=[c,100*(a(aa,2:end)-b(bb,2:end))./b(bb,2:end)];
+
+
 x=[data,rp(:,2:end)];
 
 % dos posibilidades 1 sin temperatura y filtro
@@ -46,39 +100,44 @@ end
 
 % ratio ozone slant path
   
-    
-    osc_ranges=[300,550,850,1250,1500];
-    osc_int=[200,400,700,1000,1500];
-    osc_grp=[osc<400, osc>=400 & osc<700, osc>=700 & osc<=1000,osc>1000 & osc<1100,osc>1100];
+try 
+   osc_ranges=[300,550,850,1250,1500];
+    %osc_int=[200,400,700,1000,1500];
+   osc_grp=[osc<400, osc>=400 & osc<700, osc>=700 & osc<=1000,osc>1000 & osc<1500,osc>1500 | isnan(osc)];
    [osc_x,aux]=find(osc_grp');
     osc_x=osc_ranges(osc_x);
     [m,s,n,er,name]=grpstats(rp(:,2),osc_x,{'mean','std','numel','sem','gname'});
-     x=str2num(char(name));
-     osc_ratio=[x/1000,m,s,n,er];
+    aux_x=str2num(char(name));
+     osc_ratio=[aux_x/1000,m,s,n,er];
      % relleno con NaN
      osc_out=NaN*ones(length(osc_ranges)+2,6);
      for ii=1:length(osc_ranges)
-         jj=find(x==osc_ranges(ii),1);
+         jj=find(osc_x==osc_ranges(ii),1);
          if ~isempty(jj) & ii<size(osc_ratio,1)
           osc_out(ii+1,2:end)=osc_ratio(ii,:);
          end
      end
     [m1,s1,n1,er1,name1]=grpstats(rp(:,2),[],{'mean','std','numel','sem','gname'});
      osc_=[NaN,m1,s1,n1,er1];
-     osc_out(7,2:end)=osc_;
-
+     osc_out(end,2:end)=osc_;
+   catch
+       warning('osc')
+   end
 % ratio ozone slant path % Matthias Method
   
 
     y=mean_smooth(osc,rp(:,2),0.125);
+    [m_,s_,outliers.r,outliers.idx]=outliers_bp(y(:,5)-rp(:,2));
     osc_smooth=sortrows([osc,y(:,1:end)],1);
+    
      
-     
-if nargin>3
+if  nargin~=3 && ~strcmp(name_a,name_b)
     f=figure;
     set(f,'Tag','RATIOo_1');
     subplot(2,2,1);
     ploty(data(:,[1,3,3+data_l-1]),'.');grid;title('medidas');
+    hold on;
+    plot(a(:,1),a(:,2),'-',b(:,1),b(:,2),':');
     datetick;
     if nargin==2
         name_a=inputname(1);
@@ -93,13 +152,12 @@ if nargin>3
     if size(b,2)~=size(a,2) & size(b,2)==2
         b=[b(:,1),repmat(b(:,2),1,size(a,2)-1)];
     end
-
     subplot(2,2,2);
     plot(data(:,3),data(:,3+data_l-1),'x');
     rline;
     grid;title([name_a,' vs ',name_b]);
 
-
+% rp(find(rp(:,2)<-1.4),:)=NaN;
     subplot(2,3,4);
     ploty(rp(:,1:2));grid;title(['ratio %',name_a,' vs ',name_b]);
     datetick;
@@ -111,117 +169,179 @@ if nargin>3
     title('difference vs time difference (min) ');
     xlabel('min');
     
-    f=figure;
-    set(f,'Tag','RATIO_2');
-    try
-        
-     gscatter(osc,rp(:,2),diaj(data(:,1)));
-     set(gca,'Xlim',[250,1250]);
+    f=figure;    set(f,'Tag','RATIO_day');
+    try        
+     P=gscatter(osc,rp(:,2),diaj(data(:,1)));
+     set(findobj(gca,'Type','Line'),'MarkerSize',5);
+     set(findobj(gcf,'Tag','legend'),'Location','EastOutside')
+    opts.selected.Marker='x';     opts.selected.Color='k';
+    interactivelegend(P,cellstr(num2str(unique(diaj(data(:,1))))),opts);
+     set(gca,'Xlim',OSC_lim,'Ylim',[-3,3]);
      xlabel('Ozone slant path');
-     ylabel(' % ratio');
-     title( [name_a,' - ',name_b,'/ ',name_b])
+     ylabel(' % Relative differences');
+     title(sprintf('(%s - %s) / %s.  Grouped by day',name_a,name_b,name_b))
      box on;
     catch % falla cuando hay un solo dia revisar
      plot(osc,rp(:,2),'.');
-     set(gca,'Xlim',[250,1550]);
+     set(gca,'Xlim',OSC_lim);
      xlabel('Ozone slant path');
-     ylabel(' % ratio');
+     ylabel(' % Relative differences');
      title( [name_a,' - ',name_b,'/ ',name_b])
      box on;
     end
-    hold on;
-    errorbar(x,m,2*s,'s-');
+%     hold on;
+%     errorbar(aux_x,m,2*s,'s-');
     grid;
    
-   f=figure;
-   set(f,'Tag','RATIO_3'); 
-
-    j=find(data(:,1)-fix(data(:,1))>=0.5);
-    hold on;
-    plot(sza(j),rp(j,2),'o');
-    j=find(data(:,1)-fix(data(:,1))<0.5);
-    plot(sza(j),rp(j,2),'+');
+    
+    f=figure;   set(f,'Tag','RATIO_SZA'); 
+    j=data(:,1)-fix(data(:,1))>=0.5;
+    %hold on;
+    %plot(sza(j),rp(j,2),'o');
+    %j=find(data(:,1)-fix(data(:,1))<0.5);
+    %plot(sza(j),rp(j,2),'+');
+    gscatter(sza,rp(:,2),{diaj(data(:,1)),j},[],'o+'); set(findobj(gcf,'Tag','legend'),'Location','NorthEast');
     xlabel('solar zenith angle');
-    ylabel(' % ratio');
-    title( [name_a,' - ',name_b,'/ ',name_b])
-    legend('AM','PM');
-    box on;
-    grid;
-    %figure;
-    f=figure; 
-    set(f,'Tag','RATIO_SMOOTH'); 
+    ylabel(' % Relative differences');
+    title(sprintf('(%s - %s) / %s.  AM=+ PM=o',name_a,name_b,name_b))
+    box on;  grid;
+    
+     f=figure;      set(f,'Tag','RATIO_SMOOTH'); 
      aux2=(matadd(osc_smooth(:,[6,7]),-osc_smooth(:,2)));
-     errorfill(osc_smooth(:,1)',osc_smooth(:,2)',osc_smooth(:,3)','b')
+     jk=find(~isnan(osc_smooth(:,1)));
+     errorfill(osc_smooth(jk,1)',osc_smooth(jk,2)',osc_smooth(jk,3)','b')
      hold on
-     errorfill(osc_smooth(:,1)',osc_smooth(:,2)',abs([aux2(:,1),aux2(:,2)])','r')
+     errorfill(osc_smooth(jk,1)',osc_smooth(jk,2)',abs([aux2(jk,1),aux2(jk,2)])','r')
      box on;
      grid;
-     set(gca,'Xlim',[250,1550]);
-     set(gca,'YLim',[-3,3]);
+     set(gca,'Xlim',OSC_lim,'YLim',[-3,3]);
      xlabel('Ozone slant path');
-     ylabel(' % ratio');
-     title( [name_a,' - ',name_b,'/ ',name_b])
+     ylabel(' % Relative differences');
+     title(sprintf('(%s - %s) / %s',name_a,name_b,name_b))
      grid on;
      
      figure
      set(f,'Tag','RATIO_ERRORBAR');
-         errorbar(x,m,2*s,'s-');
+     
+         errorbar(aux_x,m,2*s,'s-');
          grid;
          box on;
-         set(gca,'Xlim',[250,1550]);
-         set(gca,'YLim',[-3,3]);
+         set(gca,'Xlim',OSC_lim,'YLim',[-3,3]);
          xlabel('Ozone slant path');
-         ylabel(' % ratio');
-        title( [name_a,' - ',name_b,'/ ',name_b])
+         ylabel(' % Relative differences');
+        title(sprintf('(%s - %s) / %s',name_a,name_b,name_b))
    
     %figure by filter 
-    f=figure;
-    set(f,'Tag','RATIO_BOTH');
+    filter_name={'NoFilt','Filt#1','Filt#2','Filt#3','Filt#4','Filt#5'};
+    f=figure;    set(f,'Tag','RATIO_FILTER_INST');
     if size(b,2)==8;   
     try
-     
-         gscatter(osc,rp(:,2),data(:,end)) %,data(:,end-data_l+1)],'','+o');
-         set(gca,'Xlim',[250,1550]);
-         xlabel('Ozone slant path');
-         ylabel(' % ratio');
-         title( [name_a,' - ',name_b,'/ ',name_b])
-         box on;
-        catch % falla cuando hay un solo dia revisar
-         plot(osc,rp(:,2),'.');
-         set(gca,'Xlim',[250,1550]);
-         xlabel('Ozone slant path');
-         ylabel(' % ratio');
-         title( [name_a,' - ',name_b,'/ ',name_b])
-         box on;
-     end
-        hold on;
-        errorbar(x,m,2*s,'s-');
-       grid;
+     gscatter(osc,rp(:,2),data(:,9),'','',5); 
+     l=legend(gca,filter_name{unique(data(:,9))/64+1},'Orientation','Horizontal','Location','NorthEast');
+     set(l,'FontSize',12);
+     set(gca,'Xlim',OSC_lim,'YLim',[-3 3]); hline(0,'-k');
+     grid;   box on;
+     xlabel('Ozone slant path');     ylabel(' % Relative differences');
+     title(sprintf('(%s-%s) / %s : #%s Filters',name_a,name_b,name_b,name_a));
+    catch % falla cuando hay un solo dia revisar
+     plot(osc,rp(:,2),'.');
+     set(gca,'Xlim',OSC_lim,'YLim',[-3 3]); hline(0,'-k');
+     grid;   box on;
+     xlabel('Ozone slant path');     ylabel(' % Relative differences');
+     title(sprintf('(%s-%s) / %s : #%s Filters',name_a,name_b,name_b,name_a));
+    end
+    
+    fbox=figure;    set(fbox,'Tag','RATIO_FILTER_BOX');
+    [mf,sf,nf,erf,namef]=grpstats(rp(:,2),data(:,9),{'mean','std','numel','sem','gname'});
+    x_=str2num(char(namef));
+    errorbar(x_,mf,2*sf,'s-'); 
+    [mf,sf,nf,erf,namef]=grpstats(rp(:,2),data(:,end),{'mean','std','numel','sem','gname'});
+    x_=str2num(char(namef));     
+    hold on;    errorbar(x_,mf,2*sf,'ro-');
+    
+    legend({['Ratio ',name_a,' filter: Mean +/- 2SD'],['Ratio',name_b,' filter: Mean +/- 2SD']}); box off
+    set(gca,'XTick',unique(data(:,9))','XTickLabel',x_); 
+
+    %figure by temp 
+    f=figure;    set(f,'Tag','RATIO_TEMP_INST');    
+       P=gscatter(osc,rp(:,2),data(:,8),'','',5);  %,data(:,end-data_l+1)],'','+o');
+       set(gca,'Ylim',[-3 3]); grid
+       set(findobj(gca,'Type','Line'),'MarkerSize',5);
+       set(findobj(gcf,'Tag','legend'),'Location','EastOutside')
+    opts.selected.Marker='x';     opts.selected.Color='k';
+    interactivelegend(P,cellstr(num2str(unique(diaj(data(:,1))))),opts);
+       xlabel('Ozone slant path'); ylabel(' % Relative differences');
+       title(sprintf('(%s - %s) / %s . Temperature',name_a,name_b,name_b))
+        
+    f=figure;   set(f,'Tag','RATIO_FILTER_REF');    
+    try
+     gscatter(osc,rp(:,2),data(:,end),'','',5); 
+     l=legend(gca,filter_name{unique(data(:,9))/64+1},'Orientation','Horizontal','Location','NorthEast');
+     set(l,'FontSize',12);
+     set(gca,'Xlim',OSC_lim,'YLim',[-3 3]); hline(0,'-k');
+     grid;   box on;
+     xlabel('Ozone slant path');     ylabel(' % Relative differences');
+     title(sprintf('(%s-%s) / %s : #%s Filters',name_a,name_b,name_b,name_b));
+    catch % falla cuando hay un solo dia revisar
+     plot(osc,rp(:,2),'.');
+     set(gca,'Xlim',OSC_lim);
+     xlabel('Ozone slant path');
+     ylabel(' % Relative differences');
+     title(sprintf('(%s-%s) / %s : #%s Filters',name_a,name_b,name_b,name_b));
+     box on;
+    end
+    
     end
     
     %figure by day
-    
+  if plot_flag     
     f=figure;
     set(f,'Tag','RATIO_DAY');
     
     dias=unique(diaj(data(:,1)));
-    nplots=ceil(length(dias)/2);
+%     nplots=ceil(length(dias)/2);
+        nplots=ceil(length(dias)/2);
     ndias=length(dias);
-    b=[];
-    for i=1:ndias
-      subplot(2,nplots,i);  
-      j=find(diaj(data(:,1))==dias(i));
-            [f]=mmplotyy(diajul(data(j,1)),[data(j,3),data(j,3+data_l-1)],'.-',...
-            rp(j,2),'g.',[-3,3]);    
-       mmplotyy([name_a,' - ',name_b,'/ ',name_b]);
-       set(f(1),'Marker','x');
-     %if i==1 legend( name_a,name_b,-1);end
-     box on;
-     grid;
+    b=[]; idx=1
+    for f=f:f+nplots
+        figure(f)
+          for s=1:2  
+            if s+(idx-1)*2>length(dias), continue 
+            else
+             subplot(2,1,s);  
+             j=find(diaj(data(:,1))==dias(s+(idx-1)*2));
+             h=mmplotyy(diajul(data(j,1)),[data(j,3),data(j,3+data_l-1)],'k.-',...
+                        rp(j,2),'g.',[-3,3]);  
+             set(h(1),'Marker','x','Color','r');    grid; 
+            end
+          end
+        suptitle([name_a,' - ',name_b,'/ ',name_b]);
+        idx=idx+1;
     end  
    % [aux,ll(1)]=suplabel('day');
    % [aux,ll(2)]=suplabel(' Ozone DU','y');
    % [aux,ll(3)]=suplabel([name_a,'(x) , ',name_b,'(.)'],'t');
    % set(ll,'FontSize',18);
  end
+end
+
+if chk
+    % Se muestran los argumentos que toman los valores por defecto
+  disp('--------- Validation OK --------------') 
+  disp('List of arguments given default values:') 
+  if ~numel(arg.UsingDefaults)==0
+     for k=1:numel(arg.UsingDefaults)
+        field = char(arg.UsingDefaults(k));
+        value = arg.Results.(field);
+        if isempty(value),   value = '[]';   
+        elseif isfloat(value), value = num2str(value); end
+        disp(sprintf('   ''%s''    defaults to %s', field, value))
+     end
+  else
+     disp('               None                   ')
+  end
+  disp('--------------------------------------') 
+else
+     disp('NO INPUT VALIDATION!!')
+     disp(sprintf('%s',errval.message))
 end

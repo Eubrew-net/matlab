@@ -65,7 +65,7 @@ end
     fclose(f);
     s=char(s)';
     [p,n,e,v]=fileparts(bfile);
-    fileinfo=sscanf(fullfile([n,e,v]),'%c%03d%02d.%03d');
+    fileinfo=sscanf([n,e],'%c%03d%02d.%03d');
     datefich=datejul(fileinfo(3),fileinfo(2));
     datestr(datefich(1))
 
@@ -148,6 +148,7 @@ if nargin>1
 elseif ischar(config_file)  %
     [config_2,TC_2,DT_2,extrat_2,absx_2,AT_2]=read_icf(config_file);
     config(:,2)=config_2;
+    warning('only one configuratio used');
 elseif iscellstr(config_file)
     % ignoramos la configuracion del fichero
     [config_2,TC_2,DT_2,extrat_2,absx_2,AT_2]=read_icf(config_file{2});
