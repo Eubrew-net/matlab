@@ -34,9 +34,13 @@ TNumTotal=NaN*ones(1,length(darks));
 for j=1:length(darks);
     try        
       DarkCount(j)=sscanf(darks{j},'%*s%*s%f');
-        
-      d{j}=s(end_dk(j)+1:ends(j)-1);
+             
+      d{j}=s(end_dk(j)+1:ends(j)-1); malos=findstr(d{j},'%');
       DataNum=sscanf(d{j},'%f%*c%d%*c%d%*c%f%*c%f');
+       
+      if ~isempty(malos)       
+         DataNum=DataNum(1:end-4,:);
+      end
       DataNumR{j}=reshape(DataNum,5,length(DataNum)/5)';
       DataNumRFH{j}=[F+DataNumR{j}(:,1)/(24*60) DataNumR{j}(:,2:5)];
         
