@@ -111,7 +111,7 @@ try
     end
     [rs_data,OutRS]=rs_avg(rsfile,date_range,flag);
 catch
-    disp(['ERROR',rsfile]); rs_data=[];
+    disp(['ERROR',rsfile]); rs_data=[]; OutRS=NaN;
 end
 
 %% Power supply
