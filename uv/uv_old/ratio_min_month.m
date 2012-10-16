@@ -61,7 +61,7 @@ if nargin>3
     plot(data(:,3),data(:,3+data_l-1),'cx');
     hold on
     plot(mdata.media(:,6),mdata.media(:,7),'o')
-    [h,r,t]=rline;
+    [h,r]=rline;
     set(h(1),'linewidth',3);
     grid;title([name_a,' vs ',name_b]);
 
