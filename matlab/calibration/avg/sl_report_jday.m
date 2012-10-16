@@ -37,6 +37,7 @@ arg.addParamValue('date_range', [], @isfloat); % por defecto, no control de fech
 arg.addParamValue('fplot',0, @isfloat); % por defecto, no plot
 arg.addParamValue('hgflag',1, @isfloat); % por defecto, depurando
 arg.addParamValue('diaj_flag',1, @(x)(x==0 || x==1)); % por defecto, dia juliano
+arg.addParamValue('events_raw','', @iscell); % por defecto, no events
 
 % validamos los argumentos definidos:
 try
@@ -188,7 +189,20 @@ sl_median(:,2)=[]; sl_median=sortrows(sl_median,1);
     legend([p1(1),p2,p3],'R6 daily median ','R6 smooth 7','R6 summaries','Location','Best');
     title(['Standard Lamp R6   ',brw_name{idx_inst}]);
     if ~diaj_flag
-    datetick('x','mm/dd/yy','keeplimits','keepticks');  
+        if ~isempty(events_raw)
+           dates=cell2mat(events_raw(:,2)); indx=dates>=sl_median(1,1) & dates<=sl_median(end,1); 
+           if any(indx)
+              h=vline_v(dates(indx),'-k',events_raw(indx,3)); set(h,'LineWidth',2);
+           end
+        end
+        datetick('x','mm/dd/yy','keeplimits','keepticks');
+    else
+        if ~isempty(events_raw)
+           dates=cell2mat(events_raw(:,2)); indx=dates>=sl_median(1,1) & dates<=sl_median(end,1); 
+           if any(indx)
+              h=vline_v(diaj(dates(indx)),'-k',events_raw(indx,3)); set(h,'LineWidth',2);
+           end                           
+        end
     end
     grid;    xlabel('Date');   ylabel('SL R6  ratios');
     set(gca,'LineWidth',1);%,'XTick',diaj(sl_medianplot(:,1))%,'XTickLabel',diaj(sl_medianplot(:,1))
