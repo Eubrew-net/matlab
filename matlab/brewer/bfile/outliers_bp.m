@@ -9,13 +9,17 @@ index=[];
 if nargin==1
     LIM=2.5;    fprintf('Por defecto, LIM=%3.1f (en boxparams)\n',LIM);
 end
+
+if all(isnan(data))  %boxparams fails on a vector of NaN
+    m=NaN;s=NaN;outl=[];index=[];
+else
 [param,outl,index]=boxparams(data,LIM);
 
 
 data(index)=[];
 m=nanmean(data);
 s=nanstd(data);
-
+end
 function [params, outsideValues,index] = boxparams(x,LIM)
 %  calculate boxplot parameters for data vector x
 % LIM intercquartile range
