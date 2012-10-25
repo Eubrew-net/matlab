@@ -19,7 +19,7 @@ function DT_analysis(Cal,ozone_raw0,config,varargin)
 %   Optional:
 %       - date_select: un date_range, pero en dia juliano. Se usan sólo los
 %                      días especificados !!
-%       - DTv_       : Vector de dos elementos. Valores de DT a comparar.
+%       - DTv         : Vector de dos elementos. Valores de DT a comparar.
 %                      Si no especificamos nada, se comparan las dos calibraciones
 %                     (config1 y config2), si lo pasamos como argumento, entonces se
 %                      compara la misma calibración (ver n_config) con los 2 DT's
