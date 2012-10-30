@@ -281,7 +281,7 @@ end
 
 
 %% FIGURAS
-
+try
 if plot_flag
     
    fh=figure; set(fh,'tag','FI_TIME');
@@ -363,6 +363,9 @@ grid;
 legend(label_filter(2:end),'Location','North','orientation','horizontal');
 %legend(label_lamda); 
 
+end
+catch
+    disp('Figure Error');
 end
 
 %% FI STATS
