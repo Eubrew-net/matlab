@@ -156,7 +156,7 @@ ref=summary{n_ref}(jday,:);
          ms9=o3_c(:,21);    % no filter corr.(Cuidado!! Hasta que no se adopte filter_corr siempre)
          o3ref=o3_c(:,13);  % usually not SL corrected: o3_c(:,7)
          m_inst=o3_c(:,16); % ozone airmass from inst.
-         m_ref =o3_c(:,4); % ozone airmass from ref.
+         m_ref =o3_c(:,4);  % ozone airmass from ref.
            
 %        
          ozone_slant=o3_c(:,7).*o3_c(:,4)/1000;  % ozone and airmass from reference
@@ -187,7 +187,7 @@ ref=summary{n_ref}(jday,:);
          % TODO -----------> SEPARAR LAS FIGURAS DEL PROCESO
          f=figure;
          set(f,'Tag','CAL_2P')
-         subplot(3,1,1:2); j_nan=isnan(ozone_slant);
+         s1=subplot(3,1,1:2); j_nan=isnan(ozone_slant);
          plot(ozone_slant(~j_nan)*1000,ms9(~j_nan),'k+','MarkerSize',6);
          [lin_all,hcal_all,stats_all]=robust_line; set(lin_all,'LineWidth',2)
          set(findobj(get(gca,'Children'),'Type','text'),'Position',[ozone_slant(1)*1000+1, min(ms9)])
@@ -196,26 +196,27 @@ ref=summary{n_ref}(jday,:);
          try
           plot(ozone_slant(j)*1000,ms9(j),'ro','MarkerSize',4);
           [lin_parc,hcal_parc,stats_parc]=robust_line;
-          set(gca,'Xlim',[0,1900]); set(lin_parc,'LineStyle','-.');
-          legend('off');
+          set(gca,'Xlim',[0,1900],'XTickLabel',[]); set(lin_parc,'LineStyle','-.');
+          legend('off'); 
          catch
           legend('no data');
           stats_parc.resid=NaN*ozone_slant;
           msg=lasterror;disp(msg.message)
          end
          try
-            titulo=[file_setup.brw_str{instrumento},' calibrated to ',file_setup.brw_str{referencia}]
-            title(titulo);
-         catch
-             msg=lasterror;  
-            disp(msg.message)  
+            title(sprintf('%s calibrated to %s. Airmass range: [%3.1f - %3.1f]. Ozone range: [%d - %d]',...
+                           file_setup.brw_str{instrumento},file_setup.brw_str{referencia},...
+                           min(m_ref(j)),max(m_ref(j)),min(fix(o3ref(j))),max(fix(o3ref(j)))));
+         catch exception
+            fprintf('Error: %s, brewer %s\n',exception.message,file_setup.brw_str{instrumento}); 
             title('XXX');
          end
 %          line=hcal{n_inst};
          aux=stats_all.resid;         aux2=stats_parc.resid;
-         subplot(3,1,3);
+         s2=subplot(3,1,3);
          plot(ozone_slant(~j_nan)*1000,aux,'k+','MarkerSize',6);
          hold on; plot(ozone_slant(j)*1000,aux2,'ro','MarkerSize',4);
+         linkprop([s1,s2],'XLim');
 %          plot(ozone_slant(~isnan(ms9(j)))*1000,aux,'k.',ozone_slant(~isnan(ms9))*1000,aux2,'rx');
 %          plot(ozone_slant(ms9(j))*1000,aux,'k.',ozone_slant(ms9)*1000,aux2,'rx');
          hline([0,-50,50],'k-');
