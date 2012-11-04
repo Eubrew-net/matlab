@@ -93,17 +93,17 @@ lamda_nominal=[3032.06 3063.01 3100.53 3135.07 3168.09 3199.98];% from dsp_repor
 for ii=brw            
   i= find(Cal.brw==ii);
   jx=find(wv_matrix(:,2)==i);
-  figure
+  figure; set(gcf,'Tag','Wavelength');
   plot(wv_matrix(jx,1),matadd(wv_matrix(jx,4:9),-lamda_nominal),'*');% mean(wv_matrix(1:5,4:9),1) 
-  ylabel(' (A) Wavelengh - Nominal wavelength');
-  title(sprintf('Brewer %s\n Nominal Wavelenghts (A): %s',Cal.brw_name{i},num2str(lamda_nominal))); % round(mean(wv_matrix(jx,4:9),1)*10)/10
+  ylabel('Wavelengh - Nominal wavelength (A)');
+  title(sprintf('%s\n Nominal Wl(A): %s',Cal.brw_name{i},num2str(lamda_nominal))); % round(mean(wv_matrix(jx,4:9),1)*10)/10
   legend(mmcellstr(sprintf(' Slit%01d|',[0,2:6])),'Location','SouthWest');
   datetick('x',12,'KeepLimits','KeepTicks'); grid;  lh=hline([0.1,-0.1]); set(lh,'LineWidth',2);
 
-  figure
+  figure; set(gcf,'Tag','FWHM');
   plot(wv_matrix(jx,1),matadd(wv_matrix(jx,10:15),-mean(wv_matrix(jx,10:15),1)),'*')
-  ylabel(' (A) FHWM - mean (FHWM)');
-  title(['Brewer # ',Cal.brw_name{i},'. Mean FHWM (A): ',num2str(round(mean(wv_matrix(jx,10:15),1)*100)/100)])
+  ylabel('FWHM - mean (FWHM), (A)');
+  title([Cal.brw_name{i},'. Mean FWHM (A): ',num2str(round(mean(wv_matrix(jx,10:15),1)*100)/100)])
   legend(mmcellstr(sprintf(' Slit%01d|',[0,2:6])));
   datetick('x',12,'KeepLimits','KeepTicks'); grid;  lh=hline([0.05,-0.05]); set(lh,'LineWidth',2);
 end
