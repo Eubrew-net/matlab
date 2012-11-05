@@ -73,7 +73,17 @@ elseif  nargin>1 && ischar(config_file) % 1 fichero configuracion/ matriz de con
     end
     
 elseif nargin>1 && iscellstr(config_file) % dos configuraciones
-    
+%    Config1
+    [fpath,ffile,fext]=fileparts(config_file{1});
+    if strcmp(fext,'.cfg')
+      [config_1,TC_1,DT_1,extrat_1,absx_1,AT_1]=read_icf(config_file{1},datefich(1));
+    else
+      [config_1,TC_1,DT_1,extrat_1,absx_1,AT_1]=read_icf(config_file{1});     
+    end
+    config(:,1)=config_1;
+    TC_1=tc_coeff(TC_1);   
+
+%    Config2
     [fpath,ffile,fext]=fileparts(config_file{2});
     if strcmp(fext,'.cfg')
       [config_2,TC_2,DT_2,extrat_2,absx_2,AT_2]=read_icf(config_file{2},datefich(1));
@@ -82,15 +92,6 @@ elseif nargin>1 && iscellstr(config_file) % dos configuraciones
     end
     config(:,2)=config_2;
     TC_2=tc_coeff(TC_2);   
-    
-    if strcmp(fext,'.cfg')
-      [config_1,TC_1,DT_1,extrat_1,absx_1,AT_1]=read_icf(config_file{1},datefich(1));
-    else
-      [config_1,TC_1,DT_1,extrat_1,absx_1,AT_1]=read_icf(config_file{1});     
-    end
-    
-    config(:,1)=config_1;
-    TC_1=tc_coeff(TC_1);   
     
 elseif nargin==1
     TC_1=TC_B; TC_2=NaN*TC_1;
