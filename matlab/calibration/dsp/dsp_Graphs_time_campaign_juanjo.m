@@ -10,7 +10,14 @@ eval(file_setup);   load(data);
 %%
 idx=0;
 for  brwi=1:Cal.n_brw
-    dsp_s=dsp_summary{brwi};
+    if brwi>length(dsp_summary)
+        continue
+    else
+        dsp_s=dsp_summary{brwi};
+        if isempty(dsp_s)
+           continue
+        end
+    end
     dsp_s_info=cell2mat(cellfun(@(x) datenum(x,'dd-mmm-yyyy'),dsp_s.info,'UniformOutput',false))';
 
     if ~isempty(dsp_s_info)
@@ -38,6 +45,9 @@ wv_matrix(wv_matrix(:,1)==0,:)=[];
 lamda_nominal=[3032.06 3063.01 3100.53 3135.07 3168.09 3199.98];% from dsp_report
 for i=1:Cal.n_brw                   
   jx=find(wv_matrix(:,2)==Cal.brw(i));
+  if isempty(jx)
+     continue
+  end
   figure
   plot(wv_matrix(jx,1),matadd(wv_matrix(jx,4:4+5),-lamda_nominal),'*');% mean(wv_matrix(1:5,4:9),1) 
   ylabel(' (A) Wavelengh - Nominal wavelength');
