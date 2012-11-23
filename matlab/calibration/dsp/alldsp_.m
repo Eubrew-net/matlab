@@ -75,7 +75,7 @@ for slits=minslit:maxslit,
 
             daystr=sprintf('%03d',days);
             filename=sprintf('W%d%d%03d%02d%s',lnes,slits,days,year,brew);
-            [a,s]=liesfile([dspp filename],1,2);
+            [a,s]=liesfile(fullfile(dspp,filename),1,2);
 
 
             if isempty(a),
