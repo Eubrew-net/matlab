@@ -47,10 +47,17 @@ else
     bfile_p=fpath;
 end
 
-for day=CALC_DAYS
+index_day=1;
+for dd=CALC_DAYS
     bfile_f=[]; o3=[];config_=[];sl_=[];hg_=[];
+    if dd>366 
+        yr=year(dd); day=diaj(dd); 
+    elseif dd<0
+       yr=abs(floor(dd/365)); day=dd;
+    else
+       yr=cal_year; day=dd;
+    end       
     if day<0
-       yr=abs(floor(day/365));
        if isempty(fpath)
           bfile_path=fullfile(setup.path_root,'..',sprintf('20%02d',cal_year-2001),bfile_p);
           bfile_f=sprintf('B%03d%02d.%s',365+day,cal_year-2001,brw_str{b_idx});  
@@ -65,13 +72,18 @@ for day=CALC_DAYS
           bfile_f=fullfile(bfile_path,'..',strcat('bdata',brw_str{b_idx}),num2str(cal_year-1),bfile_f);    
        end
     else
-       if isempty(fpath)
-          bfile_path=fullfile(setup.path_root,bfile_p);
+       if dd>366 
+          path_root=fullfile(setup.path_root,'..',sprintf('%04d',yr));
        else
-          bfile_path=fullfile(bfile_p,num2str(cal_year),'Bfiles');
+          path_root=setup.path_root;           
        end
-       index_day=day-CALC_DAYS(1)+1;
-       bfile_f=sprintf('B%03d%02d.%03d',day,cal_year-2000,brw(b_idx));  
+       if isempty(fpath)
+          bfile_path=fullfile(path_root,bfile_p);
+       else
+          bfile_path=fullfile(bfile_p,num2str(yr),'Bfiles');
+       end
+%        index_day=day-CALC_DAYS(1)+1;
+       bfile_f=sprintf('B%03d%02d.%03d',day,yr-2000,brw(b_idx));  
        bfile_f=fullfile(bfile_path,bfile_f);
 %       if ~exist(bfile_f)
 %          bfile_f=sprintf('B%03d%02d.%03d',day,cal_year-2000,brw(b_idx));  
@@ -147,6 +159,7 @@ for day=CALC_DAYS
       disp('Error assigning variables');
       log{index_day}={'ERROR',bfile,brw_name{b_idx},'Variables',sfc_flag,' ',''};
     end
+    index_day= index_day+1;
 end
 disp(brw(b_idx));
 
