@@ -18,6 +18,6 @@ function h=plot_smooth(osc_smooth_a,osc_smooth_b,osc_smooth_c)
      set(gca,'Xlim',[250,1550]);
      set(gca,'YLim',[-3,3]);
      xlabel('Ozone slant path (DU)');
-     ylabel(' Relative Difference (%)');
+     ylabel('Ozone Relative Difference (%)');
      grid on;
      
