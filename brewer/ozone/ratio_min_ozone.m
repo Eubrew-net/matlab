@@ -67,6 +67,15 @@ MIN=60*24;
 
 %n_min=10;
 [aa,bb]=findm_min(a(:,1),b(:,1),n_min/MIN);
+
+if isempty(aa)
+   fprintf('No common data between #%s and #%s for tsync=%d min.\r\n',name_a,name_b,n_min);
+   x=NaN*ones(1,23); r=NaN*ones(1,10); rp=NaN*ones(1,8); ab=NaN*ones(1,8);
+   data=NaN*ones(1,16); osc_out=NaN*ones(1,6); osc_smooth=NaN*ones(1,7);
+
+   return
+end
+
 c=a(aa,1);
 % PORQUE NO RULA no busca todos !!!
 % 3 minutos 1/( 3  *7E-4)
