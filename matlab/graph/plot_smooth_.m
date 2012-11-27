@@ -68,6 +68,6 @@ function h=plot_smooth_(osc_smooth_a,osc_smooth_b,varargin)
  
  xlabel('Ozone slant path');  ylabel('Ozone Relative Differences (%)');
  set(gca,'YLim',[-2,2]);
- set(h,'LineWidth',2);
+ set(h(h~=0),'LineWidth',2);
  box on;  grid;
          
