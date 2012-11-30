@@ -23,7 +23,7 @@ if ~isempty(summary{inst})
     if size(A.new,1)>1
        [a b]=ismember(fix(summary{inst}(:,1)),fix(A.new(:,1))); 
        if b~=0
-          A_new=A.new(b,inst+1);    A_old=nanmean(A.old(:,inst+1));           
+          A_new=A.new(b,inst+1);  A_old=A.old(b,inst+1);%    A_old=nanmean(A.old(:,inst+1));           
        else
           A_new=NaN;    A_old=NaN; 
        end
@@ -33,12 +33,19 @@ if ~isempty(summary{inst})
     if isstruct(ETC_C)
        [a b]=ismember(fix(summary{inst}(:,1)),fix(ETC_C.new(:,1))); 
        if b~=0
-          ETC_C=ETC_C.new(b,2:end);           
+          ETC_Cnew=ETC_C.new(b,2:end);           
        else
-          ETC_C=[NaN,NaN,NaN,NaN,NaN,NaN];
+          ETC_Cnew=[NaN,NaN,NaN,NaN,NaN,NaN];
+       end
+       
+       [a b]=ismember(fix(summary_old{inst}(:,1)),fix(ETC_C.old(:,1))); 
+       if b~=0
+          ETC_Cold=ETC_C.old(b,2:end);           
+       else
+          ETC_Cold=[NaN,NaN,NaN,NaN,NaN,NaN];
        end
     else
-       ETC_C=ETC_C;           
+       ETC_Cnew=ETC_C;           ETC_Cold=ETC_C;           
     end
 
     for filtro=1:6%, filtro   
@@ -47,10 +54,10 @@ if ~isempty(summary{inst})
                     
        j=find(summary{inst}(:,5)==64*(filtro-1)); 
        if ~isempty(j)
-           if size(ETC_C,1)>1
-              corETC(j)=ETC_C(j,filtro);
+           if size(ETC_Cnew,1)>1
+              corETC(j)=ETC_Cnew(j,filtro);
            else
-              corETC(j)=ETC_C(filtro);               
+              corETC(j)=ETC_Cnew(filtro);               
            end
            
            if length(A_new)>1
@@ -72,14 +79,14 @@ if ~isempty(summary{inst})
     
        jo=find(summary_old{inst}(:,5)==64*(filtro-1));
        if ~isempty(jo)
-           if size(ETC_C,1)>1
-              corETC_old(jo)=ETC_C(j,filtro);
+           if size(ETC_Cold,1)>1
+              corETC_old(jo)=ETC_Cold(j,filtro);
            else
-              corETC_old(jo)=ETC_C(filtro);               
+              corETC_old(jo)=ETC_Cold(filtro);               
            end
            
            if length(A_old)>1
-              cor_old(jo)=ETC_C(filtro)./(10*A_old(j).*summary_old{inst}(jo,3))';
+              cor_old(jo)=corETC_old(jo)./(10*A_old(jo).*summary_old{inst}(jo,3));
            else
               cor_old(jo)=ETC_C(filtro)./(10*A_old.*summary_old{inst}(jo,3))';
            end
