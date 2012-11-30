@@ -66,7 +66,7 @@ sls=cell2mat(sl{idx_inst});
 if ~isempty(cell2mat(sl{idx_inst}))
     sls=cell2mat(sl{idx_inst});
 else
-    sl_mov=NaN; sl_median=NaN; oulier=NaN; R6=NaN;
+    sl_mov=NaN*ones(1,11); sl_median=NaN*ones(1,11); oulier=NaN; R6=NaN*ones(1,3);
     fprintf('Brewer#%s: No SL data \n',brw_name{idx_inst});
     return
 end

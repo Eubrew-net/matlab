@@ -109,8 +109,12 @@ for i=1:length(Cal.brw)
              A.old(idx,i+1)= cfg.old{i}(8);% si falta algun fichero -> NaN
              ETC.old(idx,i+1)=cfg.old{i}(11);
              SL_R.old(idx,i+1)=Cal.SL_OLD_REF(i);
-             for f=1:6
-                 F_corr{i}.old(idx,f+1)=Cal.ETC_C{i}(f);                              
+             try
+                 for f=1:6
+                     F_corr{i}.old(idx,f+1)=Cal.ETC_C{i}(f);                                                                            
+                 end
+             catch exception
+                 fprintf('(Warning: %s) \n',exception.message);
              end
           end
        end
@@ -149,8 +153,12 @@ for i=1:length(Cal.brw)
              A.new(idx,i+1)= cfg.new{i}(8);% si falta algun fichero -> NaN
              ETC.new(idx,i+1)=cfg.new{i}(11);               
              SL_R.new(idx,i+1)=Cal.SL_NEW_REF(i);
-             for f=1:6
-                 F_corr{i}.new(idx,f+1)=Cal.ETC_C{i}(f);                              
+             try
+                for f=1:6
+                    F_corr{i}.new(idx,f+1)=Cal.ETC_C{i}(f);                              
+                end
+             catch exception
+                fprintf('(Warning: %s)  ',exception.message);
              end
           end
                     
