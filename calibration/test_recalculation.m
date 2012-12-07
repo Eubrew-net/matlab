@@ -1,5 +1,5 @@
 function [cal,summary,summary_old]=test_recalculation(Cal,ninst,ozone_ds,A,SL_R,SL_B,varargin)
-%function [cal,summary,summary_old]=test_recalculation(Cal,ninst,ozone_ds,A,SL_R,SL_B,varargin)
+
 %% Data recalculation for summaries  and individual observations
 % Summaries are recalculated from individual measurements
 % * SL corretion
@@ -75,18 +75,6 @@ end
   idx=ismember(fecha_days,fecha);
   ozone(idx)=ozone_ds{ninst}; 
    
-%% filter correction TODO
-% %   FC=1:5;
-%   A_factor=cellfun(@(x,A1) 10*A1*x(:,5),ozone_ds{ninst},num2cell(A.new(idx,ninst)),'UniformOutput',false);
-
-%   F=repmat(FC,length(fecha),1);
-%   F=num2cell(F,2);
-%   
-%   %correccion para MS9 
-%   f_c=cellfun(@(x,F) F(1+x(:,7)/64),ozone_ds{ninst},F,'UniformOutput',false);
-%   %correccion para ozono
-%   f_o=cellfun(@(x,F,AF) F(1+x(:,7)/64)./AF',ozone_ds{ninst},F,A_factor,'UniformOutput',false);
-
 %%
 if ~isempty(fecha)
 
@@ -133,14 +121,17 @@ else
     summary=repmat(NaN,1,9);    summary_old=repmat(NaN,1,9);
 end
 
-%% TODO
+%%  Medidas individuales
+% Aplicamos a las medidas individuales los mismos filtros que al recalcular los sumarios
 cal=[];
-%   %medidas individuales
-%   cidx=cellfun(@(x,y) ismember(x,y),idx,idx_good,'UniformOutput',false);
-%   %cal=[ozone1(j,),ozo_c(j)];
-%   cal{ninst}=cellfun(@(x,y,idx) [x(idx,[1,2,3,4,5,6,7,15,14,21]),y(idx)],ozone_ds{ninst},ozo_c,cidx,'UniformOutput',false);
+ss=cellfun(@(x) find(x==0),j,'UniformOutput',false);  
+[t,l]=cellfun(@(a,b) ismember(a,b),idx,ss,'UniformOutput',false); 
 
-% end
+
+cal_idx=cellfun(@(x) x==0,t,'UniformOutput',false);
+%                   time idx_dj idx_group sza airm temp filter ozone ms9 ms9o ozone_corrected
+cal=cell2mat(cellfun(@(x,y,z) [x(z,[1,2,3,4,5,6,7,15,14,21]),y(z)],...
+                                      ozone,ozo_c,cal_idx,'UniformOutput',false));
 
 if chk
     % Se muestran los argumentos que toman los valores por defecto
