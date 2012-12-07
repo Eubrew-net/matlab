@@ -127,12 +127,12 @@ cal=[];
 ss=cellfun(@(x) find(x==0),j,'UniformOutput',false);  
 [t,l]=cellfun(@(a,b) ismember(a,b),idx,ss,'UniformOutput',false); 
 
-
 cal_idx=cellfun(@(x) x==0,t,'UniformOutput',false);
-%                   time idx_dj idx_group sza airm temp filter ozone ms9 ms9o ozone_corrected
-cal=cell2mat(cellfun(@(x,y,z) [x(z,[1,2,3,4,5,6,7,15,14,21]),y(z)],...
+%                   time idx_dj sza airm temp filter ozone ms9 ms9o ozone_corrected
+cal=cell2mat(cellfun(@(x,y,z) [x(z,[1,2,4,5,6,7,15,14,21]),y(z)],...
                                       ozone,ozo_c,cal_idx,'UniformOutput',false));
 
+%%                                  
 if chk
     % Se muestran los argumentos que toman los valores por defecto
   disp('--------- Validation OK --------------') 
@@ -150,4 +150,3 @@ if chk
   end
   disp('--------------------------------------') 
 end
-
