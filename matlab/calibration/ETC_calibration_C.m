@@ -159,7 +159,7 @@ ref=summary{n_ref}(jday,:);
          m_ref =o3_c(:,4);  % ozone airmass from ref.
            
 %        
-         ozone_slant=o3_c(:,7).*o3_c(:,4)/1000;  % ozone and airmass from reference
+         ozone_slant=o3ref.*m_ref/1000;  % ozone and airmass from reference
 %         ozone_slant=o3_c(:,11).*o3_c(:,16)/1000; %air mass from instrument
        %ozone scale, group ozone slant values in 0.05 intervals  
           ozone_scale=fix(ozone_slant/.05)*.05;
