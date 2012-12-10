@@ -17,8 +17,8 @@ function  [A,ETC,SL_B,SL_R,F_corr,cfg]=read_cal_config_new(config,file_setup,sl_
 %   - A    : three fields struct: new (2nd config), old (1st config) & b (B config).
 %           (Cal.Date.CALC_DAYS x length(Cal.brw)+1) matrix. 1st column=date. NaN when no data
 %   - ETC  : three fields struct: new (2nd config), old (1st config) & b (B config).
-%           (Cal.Date.CALC_DAYS x length(Cal.brw)+1) matrix. 1st column=date. NaN when no data
-%   - SL_B : Daily means (Cal.Date.CALC_DAYS x length(Cal.brw)+1) matrix. 
+%           (Cal.Date.CALC_DAYS x Cal.n_brw+1) matrix. 1st column=date. NaN when no data
+%   - SL_B : Daily means (Cal.Date.CALC_DAYS x Cal.n_brw+1) matrix. 
 %           Two fields struct: new (2nd config) & old (1st config). If not, old=new.
 %           1st column=date. Used for SL correcting ozone 
 %           If cfg=matrix->taken from there, if not, taken from setup (Cal.ETC_C)
@@ -32,13 +32,13 @@ else
    disp('incorrect input');    return;
 end
 
-n_=length(Cal.brw)+1; d_=length(Cal.Date.CALC_DAYS);
+n_=Cal.n_brw+1; d_=length(Cal.Date.CALC_DAYS);
 
 A=struct('new',{NaN*ones(d_,n_)},'old',{NaN*ones(d_,n_)},'b',{NaN*ones(d_,n_)});
 ETC=struct('new',{NaN*ones(d_,n_)},'old',{NaN*ones(d_,n_)},'b',{NaN*ones(d_,n_)});
 SL_R=struct('new',{NaN*ones(d_,n_)},'old',{NaN*ones(d_,n_)});
 SL_B=struct('new',{NaN*ones(d_,n_)},'old',{NaN*ones(d_,n_)});
-for i=1:length(Cal.brw)
+for i=1:Cal.n_brw
     F_corr{i}=struct('new',{NaN*ones(d_,7)},'old',{NaN*ones(d_,7)});
 end
 cfg={};
@@ -52,7 +52,7 @@ end
 
 % exist()
 
-for i=1:length(Cal.brw)
+for i=1:Cal.n_brw
     [xx,bb,ext]=fileparts(Cal.brw_config_files_new{i});% to check config style
     try
         a=cell2mat(config{i}');
