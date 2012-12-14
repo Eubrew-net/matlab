@@ -70,11 +70,13 @@ for  idx=brw
             salida{indx,brwi}=salida_;    
             % cal_step detail es el elemento penúltimo.
             % date Brw idx wl_0 wl_2 wl_3 wl_4 wl_5 wl_6 fwhm_0 fwhm_2 fwhm_3 fwhm_4 fwhm_5 fwhm_6 cal_ozonepos ozonepos o3_0 o3_2 o3_3 o3_4 o3_5 o3_6
-            wv_matrix(indx,:)=[info_,brwi,indx,salida_.QUAD{end-1}.thiswl,salida_.QUAD{end-1}.fwhmwl/2,...
+            wv_matrix.QUAD(indx,:)=[info_,brwi,indx,salida_.QUAD{end-1}.thiswl,salida_.QUAD{end-1}.fwhmwl/2,...
                                salida_.QUAD{end-1}.cal_ozonepos,salida_.QUAD{end-1}.ozone_pos,salida_.QUAD{end-1}.o3coeff];             
+            wv_matrix.CUBIC(indx,:)=[info_,brwi,indx,salida_.CUBIC{end-1}.thiswl,salida_.CUBIC{end-1}.fwhmwl/2,...
+                               salida_.CUBIC{end-1}.cal_ozonepos,salida_.CUBIC{end-1}.ozone_pos,salida_.CUBIC{end-1}.o3coeff];             
 %             wv.res(:,:,indx)=NaN*ones(size(res_,1),size(res_,2)+1); wv.res(:,2:end,indx)=res_(:,:,1); wv.res(:,1,indx)=repmat(info_,size(res_,1),1);
 %             wv.detail(:,:,indx)=NaN*ones(size(res_,1),size(res_,2)+1); wv.res(:,2:end,indx)=res_(:,:,1); wv.res(:,1,indx)=repmat(info_,size(res_,1),1);
-            wv.salida_QUAD{indx}=salida_.QUAD; wv.info{indx}=info_;
+            wv.salida_QUAD{indx}=salida_.QUAD; wv.salida_CUBIC{indx}=salida_.CUBIC; wv.info{indx}=info_;
                            
             indx=indx+1;                               
         end
@@ -92,18 +94,18 @@ end
 lamda_nominal=[3032.06 3063.01 3100.53 3135.07 3168.09 3199.98];% from dsp_report
 for ii=brw            
   i= find(Cal.brw==ii);
-  jx=find(wv_matrix(:,2)==i);
+  jx=find(wv_matrix.QUAD(:,2)==i);
   figure; set(gcf,'Tag','Wavelength');
-  plot(wv_matrix(jx,1),matadd(wv_matrix(jx,4:9),-lamda_nominal),'*');% mean(wv_matrix(1:5,4:9),1) 
+  plot(wv_matrix.QUAD(jx,1),matadd(wv_matrix.QUAD(jx,4:9),-lamda_nominal),'*');% mean(wv_matrix.QUAD(1:5,4:9),1) 
   ylabel('Wavelengh - Nominal wavelength (A)');
-  title(sprintf('%s\n Nominal Wl(A): %s',Cal.brw_name{i},num2str(lamda_nominal))); % round(mean(wv_matrix(jx,4:9),1)*10)/10
+  title(sprintf('%s\n Nominal Wl(A): %s',Cal.brw_name{i},num2str(lamda_nominal))); % round(mean(wv_matrix.QUAD(jx,4:9),1)*10)/10
   legend(mmcellstr(sprintf(' Slit%01d|',[0,2:6])),'Location','SouthWest');
   datetick('x',12,'KeepLimits','KeepTicks'); grid;  lh=hline([0.1,-0.1]); set(lh,'LineWidth',2);
 
   figure; set(gcf,'Tag','FWHM');
-  plot(wv_matrix(jx,1),matadd(wv_matrix(jx,10:15),-mean(wv_matrix(jx,10:15),1)),'*')
+  plot(wv_matrix.QUAD(jx,1),matadd(wv_matrix.QUAD(jx,10:15),-mean(wv_matrix.QUAD(jx,10:15),1)),'*')
   ylabel('FWHM - mean (FWHM), (A)');
-  title([Cal.brw_name{i},'. Mean FWHM (A): ',num2str(round(mean(wv_matrix(jx,10:15),1)*100)/100)])
+  title([Cal.brw_name{i},'. Mean FWHM (A): ',num2str(round(mean(wv_matrix.QUAD(jx,10:15),1)*100)/100)])
   legend(mmcellstr(sprintf(' Slit%01d|',[0,2:6])));
   datetick('x',12,'KeepLimits','KeepTicks'); grid;  lh=hline([0.05,-0.05]); set(lh,'LineWidth',2);
 end
