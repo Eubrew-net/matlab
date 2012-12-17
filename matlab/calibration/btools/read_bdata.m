@@ -17,7 +17,7 @@ function [ozone,log,missing]=read_bdata(brewer,setup,fpath,spectral_setup)
 %                   Si no existe B_dep, entonces será Bdddyy.###, como
 %                   habitualmente
 
-b_idx=brewer;
+b_idx=brewer;  fprintf('\n\rBrewer: %s\n\r',setup.brw_name{b_idx});
 if isstruct(setup)
    mmv2struct(setup); 
    mmv2struct(setup.Date); 
@@ -161,7 +161,6 @@ for dd=CALC_DAYS
     end
     index_day= index_day+1;
 end
-disp(brw(b_idx));
 
 ozone.dsum=dsum;
 ozone.ozone_sum=ozone_sum;

@@ -60,7 +60,7 @@ if isempty(fecha)
   [pat,name,ext,ve]=fileparts(file); 
   fileinfo=sscanf([name,ext],'%*3c%03d%02d.%03d');
   datefich=datejul(fileinfo(2),fileinfo(1));
-  fecha=datefich(1)
+  fecha=datefich(1);
   config(53)=fecha;
 else   
 try
@@ -80,7 +80,7 @@ else
  configfile=load(file); 
  cal_idx=max(find(configfile(1,:)<=datefich(1))); % calibracion mas proxima por debajo
  config=configfile(:,cal_idx);
- datestr(configfile(1,cal_idx))
+ datestr(configfile(1,cal_idx));
 end
 
     if ~isnan(config(2:6))

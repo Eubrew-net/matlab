@@ -44,7 +44,7 @@ TC_B=tc_coeff(TC_B);
 % matriz de configuracion fecha+ icf
 if nargin>1 & isnumeric(config_file)  % matriz  de configuraciones
     cal_idx=max(find(config_file(1,:)<=datefich(1))); % calibracion mas proxima
-    datestr(config_file(1,cal_idx) )
+%     datestr(config_file(1,cal_idx) )
     if ~isnan(config_file(2:6,cal_idx))
         TC_=config_file(2:6,cal_idx); end
     if ~isnan(config_file(13,cal_idx))
