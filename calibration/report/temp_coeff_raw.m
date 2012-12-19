@@ -84,13 +84,14 @@ arg.addRequired('setup_file');
 arg.addRequired('sl'); 
 
 % input param - value
-arg.addParamValue('plot_flag',0, @(x)(x==0 || x==1)); % por defecto no plots
-arg.addParamValue('outlier_flag', 0, @(x)(x==0 || x==1)); % por defecto no depuracion
-arg.addParamValue('intensity_flag', 0, @(x)(x==0 || x==1)); % por defecto no depuracion
-arg.addParamValue('date_range', [], @isfloat); % por defecto, no control de fechas
-arg.addParamValue('temp_flag', [], @isfloat); % por defecto todas la temperaturas 
+arg.addParamValue('plots',1, @(x)(x==0 || x==1));                   % por defecto, plots
+arg.addParamValue('plot_flag',0, @(x)(x==0 || x==1));              % por defecto no additional plots
+arg.addParamValue('outlier_flag', 0, @(x)(x==0 || x==1));          % por defecto no depuracion
+arg.addParamValue('intensity_flag', 0, @(x)(x==0 || x==1));        % por defecto no depuracion
+arg.addParamValue('date_range', [], @isfloat);                     % por defecto, no control de fechas
+arg.addParamValue('temp_flag', [], @isfloat);                      % por defecto todas la temperaturas 
 arg.addParamValue('TCB', [], @(x)(size(x,1)==5 || size(x,2)==5 )); % por defecto esta vacio
-arg.addParamValue('N_TC', [], @(x)(size(x,1)==5 || size(x,2)==5 )); % por defecto esta vacio% depuracion
+arg.addParamValue('N_TC', [], @(x)(size(x,1)==5 || size(x,2)==5 ));% por defecto esta vacio% depuracion
 % validamos los argumentos definidos:
 try
   arg.parse(setup_file,sl,varargin{:});
@@ -329,30 +330,31 @@ F0_aux=NaN*ones(size(F0,1),11);
 F0_aux(:,1:9)=F0; F0_aux(:,[10 11])=indx(:,:);
 mean_F0=grpstats(F0_aux,{F0_aux(:,end-1) F0_aux(:,end)},'mean');
 
-%%testing procedure  
-f=figure;  
-set(f,'tag','TEMP_OLD_VS_NEW');
+if plots
+%% testing procedure  
+  f=figure;  
+  set(f,'tag','TEMP_OLD_VS_NEW');
 
-plot(mean_F0(:,2),mean_F0(:,9),'ro','MarkerSize',6);
-hold on;
-plot(mean_FN(:,2),mean_FN(:,9),'go','MarkerSize',6);
+  plot(mean_F0(:,2),mean_F0(:,9),'ro','MarkerSize',6);
+  hold on;
+  plot(mean_FN(:,2),mean_FN(:,9),'go','MarkerSize',6);
 % idx=F_orig(:,end)>1000;
-plot(F_orig(:,2),F_orig(:,9),'k+');
-line(get(gca,'XTick'),b_orig(1,7)+b_orig(2,7)*get(gca,'XTick'),'LineWidth',2,'Color','k','Marker','none')
+  plot(F_orig(:,2),F_orig(:,9),'k+');
+  line(get(gca,'XTick'),b_orig(1,7)+b_orig(2,7)*get(gca,'XTick'),'LineWidth',2,'Color','k','Marker','none')
 % [a,r6tc]=rline(1); % input lo que sea. Si no hay input, el comportamiento de siempre
 
-plot(FN(:,2),FN(:,9),'gx','MarkerSize',3);
-line(get(gca,'XTick'),b(1,7)+b(2,7)*get(gca,'XTick'),'LineWidth',2,'Color','g','Marker','none')
-plot(F0(:,2),F0(:,9),'rx','MarkerSize',3);
-line(get(gca,'XTick'),b_tc0(1,7)+b_tc0(2,7)*get(gca,'XTick'),'LineWidth',2,'Color','r','Marker','none')
-hold off;
+  plot(FN(:,2),FN(:,9),'gx','MarkerSize',3);
+  line(get(gca,'XTick'),b(1,7)+b(2,7)*get(gca,'XTick'),'LineWidth',2,'Color','g','Marker','none')
+  plot(F0(:,2),F0(:,9),'rx','MarkerSize',3);
+  line(get(gca,'XTick'),b_tc0(1,7)+b_tc0(2,7)*get(gca,'XTick'),'LineWidth',2,'Color','r','Marker','none')
+  hold off;
 %plot(FN1(:,2),FN1(:,9),'gp');
 %plot(FN2(:,2),FN2(:,9),'ys'); 
 
-legend({sprintf('R6, TC=0  :  y = %06.1f + %3.1fT',b_tc0(1,end),b_tc0(2,end)),...
-        sprintf('R6, TC new: y = %06.1f + %3.1fT',b(1,end),b(2,end)),...
-        sprintf('R6, TC old: y = %06.1f + %3.1fT',b_orig(1,end),b_orig(2,end))},'Location','SouthWest');
-xlabel('Temperature'); ylabel('R6');  title('R6 ratios, original TC vs. calculated TC');
+  legend({sprintf('R6, TC=0  :  y = %06.1f + %3.1fT',b_tc0(1,end),b_tc0(2,end)),...
+          sprintf('R6, TC new: y = %06.1f + %3.1fT',b(1,end),b(2,end)),...
+          sprintf('R6, TC old: y = %06.1f + %3.1fT',b_orig(1,end),b_orig(2,end))},'Location','SouthWest');
+  xlabel('Temperature'); ylabel('R6');  title('R6 ratios, original TC vs. calculated TC');
 
 %% FIGURES-------------> PASARLO A FUNCION EXTERNA
 % f=figure;
@@ -371,14 +373,14 @@ xlabel('Temperature'); ylabel('R6');  title('R6 ratios, original TC vs. calculat
 
 
 %%
-f=figure;
-set(f,'Tag','TEMP_COEF_DESC');
-orient landscape;
-suptitle(brw_name{n_inst})
+  f=figure;
+  set(f,'Tag','TEMP_COEF_DESC');
+  orient landscape;
+  suptitle(brw_name{n_inst})
 
-subplot(2,4,1:2)
-ploty(Fr(:,[1,3:end-2]),'.');
-set(gca,'LineWidth',1);
+  subplot(2,4,1:2)
+  ploty(Fr(:,[1,3:end-2]),'.');
+  set(gca,'LineWidth',1);
 ylabel('Counts');
 xlabel('day');
 text(repmat(min(Fr(:,1))+.1,5,1),nanmean(Fr(:,3:end-2)),...
@@ -426,127 +428,122 @@ orient portrait;
 
 
 %% cambio % respecto al valor medio
-if plot_flag
-   figure; 
-   subplot(2,2,3)
-   plot(Fr(:,2),100*matdiv(matadd(Fr(:,3:end-2),-nanmean(Fr(:,3:end-2))),nanmean(Fr(:,3:end-2))),'.');
-   ylabel(' %ratio to mean SL (cnts/sec)');xlabel('Temperature'); grid;
-   legend({'sl#0','sl#2','sl#3','sl#4','sl#5'},'Location','North','Orientation','Horizontal');
+  if plot_flag
+     figure; 
+     subplot(2,2,3)
+     plot(Fr(:,2),100*matdiv(matadd(Fr(:,3:end-2),-nanmean(Fr(:,3:end-2))),nanmean(Fr(:,3:end-2))),'.');
+     ylabel(' %ratio to mean SL (cnts/sec)');xlabel('Temperature'); grid;
+     legend({'sl#0','sl#2','sl#3','sl#4','sl#5'},'Location','North','Orientation','Horizontal');
 
-   subplot(2,2,1)
-   mmplotyy(Fr(:,1),100*matdiv(matadd(Fr(:,3:end-2),-nanmean(Fr(:,3:end-2))),nanmean(Fr(:,3:end-2))),'.',Fr(:,2),'k+');
-   ylabel(' %ratio to mean SL (cnts/sec)');xlabel('Time'); grid;
-   datetick('keeplimits');
+     subplot(2,2,1)
+     mmplotyy(Fr(:,1),100*matdiv(matadd(Fr(:,3:end-2),-nanmean(Fr(:,3:end-2))),nanmean(Fr(:,3:end-2))),'.',Fr(:,2),'k+');
+     ylabel(' %ratio to mean SL (cnts/sec)');xlabel('Time'); grid;
+     datetick('keeplimits');
 % subplot(2,2,1)
 % plot(Fr(:,1),100*matdiv(matadd(Fr(:,3:end-2),-nanmean(Fr(:,3:end-2))),nanmean(Fr(:,3:end-2))),'.');
 % ylabel(' ratio to mean (%) SL counts/seconds');xlabel('Time');
 % legend({'sl#0','sl#2','sl#3','sl#4','sl#5'},'Location','South','Orientation','Horizontal');
 
-   subplot(2,2,2)
-   plot(Fr(:,1),100*matdiv(matadd(Fr(:,end-1:end),-nanmean(Fr(:,end-1:end))),nanmean(Fr(:,end-1:end))),'.');
-   ylabel(' %ratio to mean SL ratios');xlabel('Time'); grid;
-   legend({'R6','R5'},'Location','Best','HandleVisibility','Off');
-   datetick('keeplimits');
+     subplot(2,2,2)
+     plot(Fr(:,1),100*matdiv(matadd(Fr(:,end-1:end),-nanmean(Fr(:,end-1:end))),nanmean(Fr(:,end-1:end))),'.');
+     ylabel(' %ratio to mean SL ratios');xlabel('Time'); grid;
+     legend({'R6','R5'},'Location','Best','HandleVisibility','Off');
+     datetick('keeplimits');
    
-   subplot(2,2,4)
-   plot(Fr(:,2),100*matdiv(matadd(Fr(:,end-1:end),-nanmean(Fr(:,end-1:end))),nanmean(Fr(:,end-1:end))),'.');
-   ylabel(' %ratio to mean SL ratios');xlabel('Temperature'); grid;
-   legend({'R6','R5'},'Location','Best','HandleVisibility','Off');
+     subplot(2,2,4)
+     plot(Fr(:,2),100*matdiv(matadd(Fr(:,end-1:end),-nanmean(Fr(:,end-1:end))),nanmean(Fr(:,end-1:end))),'.');
+     ylabel(' %ratio to mean SL ratios');xlabel('Temperature'); grid;
+     legend({'R6','R5'},'Location','Best','HandleVisibility','Off');
 
 %%
-f=figure;
-set(f,'tag','TEMP_day');
-orient tall;
-suptitle(brw_name{n_inst})
-line_st={};
+     f=figure;
+     set(f,'tag','TEMP_day');
+     orient tall;
+     suptitle(brw_name{n_inst})
+     line_st={};
 
 
-ndays=length(unique(fix(Fr(~isnan(Fr(:,1)),1))));
-nrep=ceil(ndays/20);
-c=hot(ceil(ndays/nrep)+5);
-for ii=0:5
-    subplot(3,2,ii+1)
-    if ii==5       ii=ii+1;  end
-    
-    plot(F_orig(:,2),F_orig(:,3+ii),'x','MarkerSize',1);
-    try
-     [h,line_st{ii+1},s]=report_robust_line;
-    catch
-      line_st{ii+1}=[NaN,NaN];
-    end
-    hold on
-    %[h]=gscatter(Fr(:,2),Fr(:,3+ii),fix(Fr(:,1)/nrep)*nrep,c,[],10);
-    [h]=gscatter(F_orig(:,2),F_orig(:,3+ii),{year(fix(F_orig(:,1)/nrep)*nrep),diaj(fix(F_orig(:,1)/nrep)*nrep)},c,[],10);
-     legend('hide');
-    if ii==2
-      lg=legend('show');
-       set(lg,'Location','NorthEast','HandleVisibility','off');
-    end
-    set(gca,'LineWidth',1);
-    if ii==6
-     title('MS9 ');       
-     xlabel('PMT Temperature (ºC)');
-    else
-     title(['slit #',num2str(ii+2),' ',num2str(line_st{ii+1}(2))]);
-    end
-    if ii==4
-     xlabel('PMT Temperature (ºC)');
-    end
-end
-
-suptitle(sprintf('%s: %s',brw_name{n_inst},'Temperature coeff.'));
-
+     ndays=length(unique(fix(Fr(~isnan(Fr(:,1)),1))));
+     nrep=ceil(ndays/20);
+     c=hot(ceil(ndays/nrep)+5);
+     for ii=0:5
+         subplot(3,2,ii+1)
+         if ii==5       ii=ii+1;  end
+         plot(F_orig(:,2),F_orig(:,3+ii),'x','MarkerSize',1);
+         try
+          [h,line_st{ii+1},s]=report_robust_line;
+         catch
+           line_st{ii+1}=[NaN,NaN];
+         end
+         hold on
+         %[h]=gscatter(Fr(:,2),Fr(:,3+ii),fix(Fr(:,1)/nrep)*nrep,c,[],10);
+         [h]=gscatter(F_orig(:,2),F_orig(:,3+ii),{year(fix(F_orig(:,1)/nrep)*nrep),diaj(fix(F_orig(:,1)/nrep)*nrep)},c,[],10);
+         legend('hide');
+         if ii==2
+           lg=legend('show');
+           set(lg,'Location','NorthEast','HandleVisibility','off');
+         end
+         set(gca,'LineWidth',1);
+         if ii==6
+          title('MS9 ');       
+          xlabel('PMT Temperature (ºC)');
+         else
+          title(['slit #',num2str(ii+2),' ',num2str(line_st{ii+1}(2))]);
+         end
+         if ii==4
+          xlabel('PMT Temperature (ºC)');
+         end
+     end
+     suptitle(sprintf('%s: %s',brw_name{n_inst},'Temperature coeff.'));
 end
 
 %%
-f=figure;
-set(f,'tag','TEMP_day_new');
-orient tall;
-suptitle(brw_name{n_inst})
-line_st={};
+     f=figure;
+     set(f,'tag','TEMP_day_new');
+     orient tall;
+     suptitle(brw_name{n_inst})
+     line_st={};
+     
+     ndays=length(unique(fix(Fr(~isnan(Fr(:,1)),1))));
+     nrep=ceil(ndays/20);
+     c=bone(ceil(ndays/nrep)+5);
 
-ndays=length(unique(fix(Fr(~isnan(Fr(:,1)),1))));
-nrep=ceil(ndays/20);
-c=bone(ceil(ndays/nrep)+5);
-
-for ii=0:5
- subplot(3,2,ii+1)
- if ii==5 
-     ii=ii+1;
- end
- plot(FN(:,2),FN(:,3+ii),'x','MarkerSize',1);
- [hl,line_st{ii+1},s]=report_robust_line;
- hold on
- 
- [h]=gscatter(FN(:,2),FN(:,3+ii),{year(fix(F_orig(:,1)/nrep)*nrep),diaj(fix(F_orig(:,1)/nrep)*nrep)},c,[],10);
+     for ii=0:5
+      subplot(3,2,ii+1)
+      if ii==5 
+          ii=ii+1;
+      end
+      plot(FN(:,2),FN(:,3+ii),'x','MarkerSize',1);
+      [hl,line_st{ii+1},s]=report_robust_line;
+      hold on
+      [h]=gscatter(FN(:,2),FN(:,3+ii),{year(fix(F_orig(:,1)/nrep)*nrep),diaj(fix(F_orig(:,1)/nrep)*nrep)},c,[],10);
   
 % Si queremos la legenda en todos los subplots
 % lg=legend('show');
 % set(lg,'Location','NorthEast','HandleVisibility','off');
 
 % Si solo queremos la legenda en uno de los 6 subplots
- legend('hide');
+      legend('hide');
 %  if ii==2
 %  lg=legend('show');
 %  set(lg,'Location','NorthEast','HandleVisibility','off');
 %  end
- set(gca,'LineWidth',1);
-  if ii==6
-     pos_y=get(gca,'Ylim');      pos_x=get(gca,'Xlim');
-     h=text( min(pos_x)+2, max(pos_y),'MS9 '); set(h,'BackgroundColor','w');       
-     xlabel('PMT Temperature (ºC)');
-  else
-     pos_y=get(gca,'Ylim');      pos_x=get(gca,'Xlim');
-     h=text( min(pos_x)+2,min(pos_y)+30,sprintf('slit#%d slp: %f cts/sc/ºC',(ii+2),(line_st{ii+1}(2))));
-     set(h,'BackgroundColor','w');
-  end
- if ii==4
-     xlabel('PMT Temperature (ºC)');
- end
+      set(gca,'LineWidth',1);
+       if ii==6
+          pos_y=get(gca,'Ylim');      pos_x=get(gca,'Xlim');
+          h=text( min(pos_x)+2, max(pos_y),'MS9 '); set(h,'BackgroundColor','w');       
+          xlabel('PMT Temperature (ºC)');
+       else
+          pos_y=get(gca,'Ylim');      pos_x=get(gca,'Xlim');
+          h=text( min(pos_x)+2,min(pos_y)+30,sprintf('slit#%d slp: %f cts/sc/ºC',(ii+2),(line_st{ii+1}(2))));
+          set(h,'BackgroundColor','w');
+       end
+      if ii==4
+          xlabel('PMT Temperature (ºC)');
+      end
+     end
+     suptitle(sprintf('%s: %s',brw_name{n_inst},'Temperature coeff new.'));
 end
-
-suptitle(sprintf('%s: %s',brw_name{n_inst},'Temperature coeff new.'));
-
 if chk
     % Se muestran los argumentos que toman los valores por defecto
   disp('--------- Validation OK --------------') 
