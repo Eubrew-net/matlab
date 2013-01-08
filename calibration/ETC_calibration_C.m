@@ -98,7 +98,7 @@ end
 if ~isempty(szasync)
         SZA_SYNC=szasync;
 else
-        SZA_SYNC=0.03
+        SZA_SYNC=0.03;
 end
 
 blinddays={};
@@ -189,7 +189,7 @@ ref=summary{n_ref}(jday,:);
          set(f,'Tag','CAL_2P')
          s1=subplot(3,1,1:2); j_nan=isnan(ozone_slant);
          plot(ozone_slant(~j_nan)*1000,ms9(~j_nan),'k+','MarkerSize',6);
-         [lin_all,hcal_all,stats_all]=robust_line; set(lin_all,'LineWidth',2)
+         [lin_all,hcal_all,stats_all]=robust_line; set(lin_all,'LineWidth',2);
          set(findobj(get(gca,'Children'),'Type','text'),'Position',[ozone_slant(1)*1000+1, min(ms9)])
          set(findobj(get(gca,'Children'),'Type','line'),'HandleVisibility','Off');
          hold on
@@ -259,7 +259,7 @@ ref=summary{n_ref}(jday,:);
          end
          % two point 1/airmass regression
          figure;
-         plot(1000./(m_inst.*o3ref),1000*ms9c./(m_inst.*o3ref),'x')
+         plot(1000./(m_inst.*o3ref),1000*ms9c./(m_inst.*o3ref),'x');
          y=ms9c./m_ref; x=[o3ref,1./m_ref];
         [b1,bi1,res,resi,st]=regress(y,x);
         gscatter(1./(o3ref.*m_inst),res,o3_c(:,18)) 
@@ -289,64 +289,55 @@ ref=summary{n_ref}(jday,:);
          else
             j=find(ozone_scale>abs(OSC_MAX(2)));
          end
-         f=figure;
-         set(f,'Tag','CAL_1P')
+         f=figure; set(f,'Tag','CAL_1P')
          plot(ozone_slant,(ms9-o3p),'+','MarkerSize',2);
          hold on;
          y=mean_smooth(ozone_slant,(ms9-o3p),0.12,1);
          hold on;
          plot(ozone_slant(j),(ms9(j)-o3p(j)),'*','MarkerSize',5);
-         set(gca,'Xlim',[0.2,1.9]);
-         grid on;
+         set(gca,'Xlim',[0.2,1.9]); grid;
          title(sprintf('ETC determinatio  vs Ozone Slant Path \r\n %s vs. %s',file_setup.brw_name{instrumento},file_setup.brw_name{referencia}));
-         xlabel('Ozone slant path (DU)');
-         ylabel('ETC');
+         xlabel('Ozone slant path (DU)');         ylabel('ETC');
          hline(nanmedian(y(j,1)),'r',num2str(nanmedian(y(j,1))));
          hline(nanmedian(y(:,1)),'b',num2str(nanmedian(y(:,1))));
+         
          %% ETC temperatura
          figure
          [mt,st,nd,nam]=grpstats((ms9-o3p),o3_c(:,17),0.5);
          plot(cellfun(@str2num,nam),mt,'x');
          rline
          %% todo el rango
-         ETC_NEW_=nanmedian(y(:,1))
+         ETC_NEW_=nanmedian(y(:,1));
          ETC_NEW_ERR_=nanstd(y(:,1))/sqrt(length(y(:,1)));
          
          ETC(2).NEW=ETC_NEW_;
          ETC(2).NEW_ERR=ETC_NEW_ERR_;
-         
-         
-         
+                         
               
-         %% one point calibration  solo el rango seleccionado
-                
-         f=figure;
-         set(f,'Tag','CAL_2P_HIST')
-         hist(ms9(j)-o3p(j));
+         %% one point calibration  solo el rango seleccionado               
          ETC_CALC=ms9(j)-o3p(j);
-         vline(fix(nanmedian(ETC_CALC)),'r');
-         vline(fix(nanmean(ETC_CALC)),'b');
-         ETC_NEW=nanmedian(ETC_CALC)
-         ETC_NEW_ERR=nanstd(ETC_CALC)/sqrt(length(ETC_CALC));
-         
-         ETC(1).NEW=ETC_NEW;
-         ETC(1).NEW_ERR=ETC_NEW_ERR;
-         
-         
+         ETC_NEW=nanmedian(ETC_CALC);    ETC_NEW_ERR=nanmedian(abs(ETC_CALC-nanmedian(ETC_CALC)));
+%        ETC_NEW_ERR=nanstd(ETC_CALC)/sqrt(length(ETC_CALC));
+         ETC(1).NEW=ETC_NEW;         ETC(1).NEW_ERR=ETC_NEW_ERR;
+             
+         %% Histograma
+         f=figure;  set(f,'Tag','CAL_2P_HIST')
+         hist(ETC_CALC);
+         vline_v(round(nanmedian(ETC_CALC)),'r-',sprintf('Median: %6.1f',round(nanmedian(ETC_CALC))));
+         vline_v(round(nanmean(ETC_CALC))  ,'b-',sprintf('Mean: %6.1f',round(nanmean(ETC_CALC))));
+                          
          %% ploteo bonito
-         f=figure;
-         set(f,'Tag','CAL_2P_SCHIST')
-         ETC_CALC=ms9(j)-o3p(j);
-         h=scatterhist(ozone_slant(j),(ETC_CALC));
+         f=figure;    set(f,'Tag','CAL_2P_SCHIST')
+         h=scatterhist(ozone_slant(j),ETC_CALC);
          axes(h(1)); set(h(1),'LineWidth',1);
-         %hline(ETC_NEW,'r-',num2str(fix(ETC_NEW)));
-         hline(nanmean(ETC_CALC),'b-',num2str(fix(nanmean(ETC_CALC))));
-         title(sprintf('%s ETC DETERMINATION from RBCC-E reference %s',file_setup.brw_name{instrumento},file_setup.brw_name{referencia}))
+         hline(ETC_NEW,'b-',sprintf('%d \\pm %d',round(ETC(1).NEW),round(ETC(1).NEW_ERR)));
+%          hline(nanmean(ETC_CALC),'b-',num2str(fix(nanmean(ETC_CALC))));
+         title(sprintf('%s ETC Transfer from RBCC-E reference %s',file_setup.brw_name{instrumento},file_setup.brw_name{referencia}))
          xlabel('ozone slant path','HandleVisibility','On');        
          ylabel('ETC =  MS9 - A1*{O_{3REF}}*M2','HandleVisibility','On'); 
 
         
-        %%evaluation with the new ETC
+        %% evaluation with the new ETC
          o3_new=(ms9-ETC_NEW)./(o3_c(:,16)*10*A);
          o3_c=[o3_c,o3_new];
          
