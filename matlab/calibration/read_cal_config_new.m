@@ -43,8 +43,8 @@ for i=1:Cal.n_brw
 end
 cfg={};
 
-if mean(Cal.Date.CALC_DAYS)>7000                                % fecha matlab
-   fecha_days=Cal.Date.CALC_DAYS;                               % todos los días considerados
+if any(Cal.Date.CALC_DAYS>366)                                % fecha matlab
+   fecha_days=fix(Cal.Date.CALC_DAYS);                               % todos los días considerados
    
 else                                                            % dia juliano
    fecha_days=Cal.Date.CALC_DAYS+datenum(Cal.Date.cal_year,1,0);% todos los días considerados
