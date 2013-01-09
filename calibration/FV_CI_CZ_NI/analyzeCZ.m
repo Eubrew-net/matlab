@@ -54,28 +54,27 @@ end
 
 %% CZ FILES    
 CZFiles=dir(path);
-FilesCZ=[]; FilesCZ_m=[];
-for i=1:length(CZFiles)
-    FilesCZ=[FilesCZ;cellstr(CZFiles(i,1).name)];
-    FilesCZ_m=[FilesCZ_m;brewer_date(str2num(CZFiles(i).name(3:end-4)))];    
-end
-if isempty (FilesCZ)
-    disp('No CZ Files');
-end
 
+    dir_cell=struct2cell(CZFiles); FilesCZ=dir_cell(1,:);
+    myfunc_clean=@(x)regexp(x, '^(cz|hl|hs)\d{5}[.]\d*','ignorecase')';     clean=@(x)~isempty(x); 
+    remove=find(cellfun(clean,cellfun(myfunc_clean,FilesCZ, 'UniformOutput', false))==0);
+    FilesCZ(remove)=[];  CZFiles(remove)=[];
+    myfunc=@(x)sscanf(x,'%*2c%3d%2d.%*d')';    
+    A=cell2mat(cellfun(myfunc,FilesCZ, 'UniformOutput', false)');
+    if isempty (FilesCZ)
+       disp('No CZ Files'); return
+    end
+    
 % control de fechas
 if ~isempty(date_range)
-   indx=FilesCZ_m(:,1)<date_range(1); 
-   FilesCZ(indx)=[]; FilesCZ_m(indx,:)=[];
+%                  Año    Dia
+   dates=datejuli(A(:,2),A(:,1));    
+   FilesCZ(dates<date_range(1))=[]; dates(dates<date_range(1))=[];
    if length(date_range)>1
-      indx=FilesCZ_m(:,1)>date_range(2);
-      FilesCZ(indx)=[];
-   end
-   
+      FilesCZ(dates>date_range(2))=[]; dates(dates>date_range(2))=[];
+   end   
    if isempty(FilesCZ)
-      disp('No files in date range');
-      datestr(date_range);
-      return;
+      disp('No CZ Files in date range'); return
    end   
 end
 
