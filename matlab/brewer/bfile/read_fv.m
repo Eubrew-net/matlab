@@ -38,6 +38,7 @@ if nargin==1
 end
 [s]=fileread(fv_file);
 [fv_path,fv_name,fv_inst]=fileparts(fv_file);
+ fv_name=upper(fv_name);
  fecha=sscanf(fv_name,'FV%03d%02d');
  fecha_fv=datenum(fecha(2)+2000,0,fecha(1));
  inst=sscanf(fv_inst,'.%03d');
