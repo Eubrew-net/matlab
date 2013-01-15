@@ -6,7 +6,7 @@ file_latex=fullfile('.','latex',cell2mat(brwid));
 [a b c]=xlsread(filename,sheet,'A1:J90',@setNaNempty);
     
 
-checklist=c(1:82,[1 2 3 4 5 6 8 9 10]);
+checklist=c(1:90,[1 2 3 4 5 6 8 9 10]);
 % checklist=checklist(21,:);
 
 for r=1:size(checklist,1)
