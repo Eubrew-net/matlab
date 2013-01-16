@@ -225,10 +225,11 @@ if depuracion
     interactivelegend(P,cellstr(num2str(diaj(FHj))));
 end
 
-figure
+figure;
 Cp=size(CLongRatiosPFiles,2);
 [m,s,n,n_]=grpstats(CLongRatiosPFiles(:,2:end),fix(CLongRatiosPFiles(:,1)/100)*100,0.5);
-figure
+
+figure;  set(gcf,'Tag','CI_ratios');
 errorbar(repmat(diaj2(FHj),1,size(m,1)),m',s','o')
 legend(n_,'location','best')
 
