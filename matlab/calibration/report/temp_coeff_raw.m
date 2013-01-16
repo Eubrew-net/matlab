@@ -428,7 +428,6 @@ orient portrait;
 
 
 %% cambio % respecto al valor medio
-  if plot_flag
      figure; 
      subplot(2,2,3)
      plot(Fr(:,2),100*matdiv(matadd(Fr(:,3:end-2),-nanmean(Fr(:,3:end-2))),nanmean(Fr(:,3:end-2))),'.');
@@ -456,6 +455,7 @@ orient portrait;
      legend({'R6','R5'},'Location','Best','HandleVisibility','Off');
 
 %%
+  if plot_flag
      f=figure;
      set(f,'tag','TEMP_day');
      orient tall;
