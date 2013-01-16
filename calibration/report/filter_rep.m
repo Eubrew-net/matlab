@@ -455,8 +455,9 @@ end
 f=figure; set(f,'tag','FI_wavelength');
 r=matdiv(100*matadd(media,-mean(media)),media);
 
-plot(lamda,r,'*-.');
-hold on; plot(lamda,mean(r,2),'s-');
+p=plot(lamda,r,'*-.');
+set(p(1),'Color','r'); set(p(2),'Color','g'); set(p(3),'Color','m'); set(p(4),'Color','b'); set(p(5),'Color','k');
+hold on; plot(lamda,mean(r,2),'s-','MarkerFaceColor','k');
 set(gca,'XLim',[3020 3212],'XTick',lamda,'XTickLabel',round(lamda)./10,...
         'GridLineStyle','-.','Linewidth',1);
 ylabel('Difference to mean, {\it%}'); xlabel('wavelength {\it(nm)}');
