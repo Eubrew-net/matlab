@@ -127,20 +127,20 @@ title(['R6 Temperature dependence Brewer#', Cal.brw_str{Cal.n_inst}]);
 ylabel('Standard Lamp R6 ratio'); xlabel('Temperature');
 
 %%
-ix=sort(findobj('tag','TEMP_COEF_DESC')); 
-printfiles_report(ix',Cal.dir_figs,'aux_pattern',ix,'Width',15,'Height',7,'LockAxes',0,'no_export');
+% ix=sort(findobj('tag','TEMP_COEF_DESC')); 
+% printfiles_report(ix',Cal.dir_figs,'aux_pattern',ix,'Width',15,'Height',7,'LockAxes',0,'no_export');
 
-ix=sort(findobj('tag','TEMP_day_new')); 
-printfiles_report(ix',Cal.dir_figs,'aux_pattern',ix,'Width',14,'Height',9,'LockAxes',0,'no_export');
+% ix=sort(findobj('tag','TEMP_day_new')); 
+% printfiles_report(ix',Cal.dir_figs,'aux_pattern',ix,'Width',14,'Height',9,'LockAxes',0,'no_export');
 
 ix=sort(findobj('tag','TEMP_OLD_VS_NEW'));
 printfiles_report(ix',Cal.dir_figs,'aux_pattern',ix,'Width',12.5,'Height',6.5);
 
-% ix=sort(findobj('tag','TEMP_COMP_DATE'));
-% printfiles_report(ix',Cal.dir_figs,'aux_pattern',ix,'Width',12.5,'Height',6.5);
-% 
-% ix=sort(findobj('tag','TEMP_COMP_TEMP'));
-% printfiles_report(ix',Cal.dir_figs,'aux_pattern',ix,'Width',12.5,'Height',6.5);
+ix=sort(findobj('tag','TEMP_COMP_DATE'));
+printfiles_report(ix',Cal.dir_figs,'aux_pattern',ix,'Width',12.5,'Height',6.5);
+ 
+ix=sort(findobj('tag','TEMP_COMP_TEMP'));
+printfiles_report(ix',Cal.dir_figs,'aux_pattern',ix,'Width',12.5,'Height',6.5);
 
 close all
 
@@ -166,7 +166,7 @@ save(Cal.file_save,'-APPEND','temperature');
 tc_table={}; 
  for t=1:length(NTC)
     tc_table{t}=[round(config_orig(2:6)'*10^4)/10^4                             %'Current'
-                 round(-(ajuste{t}.cero(1:5,2)-ajuste{t}.cero(1,2))'*10^4)/10^4 %'Calculated'
+                       NTC{1}                                                   %'Calculated'
                  round(config_def(2:6)'*10^4)/10^4];                            %'Final'
 
     if t==1, t=[]; indx=1;  else t=t-1; indx=indx+1;  end

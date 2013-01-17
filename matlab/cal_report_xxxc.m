@@ -79,9 +79,13 @@ matrix2latex_config([config_orig(2:end),config_def(2:end)],...
  makeHtmlTable([config_orig,config_def],[],cellstr(leg),[Cal.brw_config_files(Cal.n_inst,1),Cal.brw_config_files(Cal.n_inst,2)])
 
 %% DT analysis
- DT_analysis(Cal,ozone_raw0,config,'plot_flag',1);
+ DT_analysis(Cal,ozone_raw0,config,'plot_flag',1);% ,'DTv',[38 41]
 
-% %%
+%%
+% figure(findobj('tag','DT_comp'));
+% set(get(gca,'title'),'FontSize',8);
+% printfiles_report(gcf,Cal.dir_figs,'LockAxes',0,'Height',6);
+% 
 % figure(findobj('tag','raw_counts_187')); title('Day 18711');
 % set(findobj(gcf,'Tag','legend'),'FontSize',8);
 % printfiles_report(gcf,Cal.dir_figs,'Width',8,'Height',6,'LockAxes',0);
@@ -103,12 +107,16 @@ for ii=[Cal.n_ref(2),Cal.n_inst]
       [sl_mov_o{ii},sl_median_o{ii},sl_out_o{ii},R6_o{ii}]=sl_report_jday(ii,sl,Cal.brw_str,...
                                'date_range',datenum(Cal.Date.cal_year,3,1),...
                                'outlier_flag',0,'hgflag',1,'fplot',1);
-      fprintf('%s Old constants: %5.2f\n',Cal.brw_name{ii},nanmedian(R6_o{ii}(diajul(R6_o{ii}(:,1))>=Cal.calibration_days{ii,3}(1),2)));
+      fprintf('%s Old constants: %5.0f +/-%5.1f\n',Cal.brw_name{ii},...
+                  nanmedian(R6_o{ii}(diajul(R6_o{ii}(:,1))>=Cal.calibration_days{ii,3}(1),2)),...
+                  nanstd(   R6_o{ii}(diajul(R6_o{ii}(:,1))>=Cal.calibration_days{ii,3}(1),2)));
 % new instrumental constants
       [sl_mov_n{ii},sl_median_n{ii},sl_out_n{ii},R6_n{ii}]=sl_report_jday(ii,sl_cr,Cal.brw_str,...
                                'date_range',datenum(Cal.Date.cal_year,3,1),...
                                'outlier_flag',0,'hgflag',1,'fplot',0);
-      fprintf('%s New constants: %5.2f\n',Cal.brw_name{ii},nanmedian(R6_n{ii}(diajul(R6_n{ii}(:,1))>=Cal.calibration_days{ii,3}(1),2)));
+      fprintf('%s New constants: %5.0f +/-%5.1f\n',Cal.brw_name{ii},...
+                  nanmedian(R6_n{ii}(diajul(R6_n{ii}(:,1))>=Cal.calibration_days{ii,3}(1),2)),...
+                  nanstd(   R6_n{ii}(diajul(R6_n{ii}(:,1))>=Cal.calibration_days{ii,3}(1),2)));
     else
       [sl_mov_n{ii},sl_median_n{ii},sl_out_n{ii},R6_n{ii}]=sl_report_jday(ii,sl_cr,Cal.brw_str,...
                                'date_range',datenum(Cal.Date.cal_year,3,1),...
@@ -149,7 +157,6 @@ hg_report(Cal.n_inst,hg,Cal,'outlier_flag',1,'date_range',[]);
 
 %% READ Configuration
 close all
-% [A,ETC,SL_B,cfg,icf_brw]=read_cal_config(config,Cal,sl_s);
 [A,ETC,SL_B,SL_R,cfg]=read_cal_config_new(config,Cal,{sl_median_o,sl_median_n});
 
 try
@@ -172,10 +179,9 @@ end
 for i=[Cal.n_inst Cal.n_ref(2)]
     cal{i}={}; summary{i}={}; summary_old{i}={};
     if i==Cal.n_inst
-%     [cal{i},summary{i},summary_old{i}]=summary_reprocess(Cal,i,ozone_ds,ozone_sum,A,sl_s,1);
+
     [cal{i},summary{i},summary_old{i}]=test_recalculation(Cal,i,ozone_ds,A,SL_R,SL_B,'flag_sl',1);
     else
-%     [cal{i},summary{i},summary_old{i}]=summary_reprocess(Cal,i,ozone_ds,ozone_sum,A,sl_s,1);
     [cal{i},summary{i},summary_old{i}]=test_recalculation(Cal,i,ozone_ds,A,SL_R,SL_B,'flag_sl',1);
     end
 end
@@ -240,9 +246,9 @@ if ~isempty(blinddays)
 [ETC_SUG,o3c_SUG,m_etc_SUG]=ETC_calibration_C(Cal,summary_old,A.old(Cal.n_inst),...
                    Cal.n_inst,n_ref,5,.8,0.01,blinddays);
 tableform({'ETCorig','ETCnew 1p','ETCnew 2p','O3Abs (ICF)','O3Abs 2p','O3Abs dsp'},...
-          [fix([ETC.old(n_inst),ETC_SUG(1).NEW,ETC_SUG(1).TP(1), 10000*A.old(n_inst),ETC_SUG(1).TP(2),10000*A.new(Cal.n_inst)])
+          [round([ETC.old(n_inst),ETC_SUG(1).NEW,ETC_SUG(1).TP(1), 10000*A.old(n_inst),ETC_SUG(1).TP(2),10000*A.new(Cal.n_inst)])
 %         solo el rango seleccionado
-           fix([ETC.old(n_inst),ETC_SUG(2).NEW,ETC_SUG(2).TP(1), 10000*A.old(n_inst),ETC_SUG(2).TP(2),10000*A.new(Cal.n_inst)])]);
+           round([ETC.old(n_inst),ETC_SUG(2).NEW,ETC_SUG(2).TP(1), 10000*A.old(n_inst),ETC_SUG(2).TP(2),10000*A.new(Cal.n_inst)])]);
 %         todo el rango
 
 
@@ -299,7 +305,7 @@ else
     osc_smooth_ini=NaN*ones(1,7);     osc_smooth_inisl=NaN*ones(1,7);
 end
 
-latexcmd(fullfile(Cal.file_latex,['cal_etc_',brw_str{n_inst}]),'\ETCblind',num2str(fix(ETC_SUG(1).NEW)),...
+latexcmd(fullfile(Cal.file_latex,['cal_etc_',brw_str{n_inst}]),'\ETCblind',num2str(round(ETC_SUG(1).NEW)),...
              '\ETCSOblind',config_def(12),'\SOABSblind',config_def(10),'\OtresSOABSblind',config_def(9),...
              '\NobsCalblind',size(o3c_SUG,1));
 
@@ -332,11 +338,11 @@ end
 [ETC_NEW,o3c_NEW,m_etc_NEW]=ETC_calibration_C(Cal,summary,A.new(Cal.n_inst),...
                    Cal.n_inst,n_ref,5,0.8,0.01,finaldays);
 tableform({'ETCorig','ETCnew 1p','ETCnew 2p','O3Abs (ICF)','O3Abs 2p','O3Abs dsp'},...
-          [fix([ETC.old(n_inst),ETC_NEW(1).NEW,ETC_NEW(1).TP(1), 10000*A.old(n_inst),ETC_NEW(1).TP(2),10000*A.new(Cal.n_inst)])
+          [round([ETC.old(n_inst),ETC_NEW(1).NEW,ETC_NEW(1).TP(1), 10000*A.old(n_inst),ETC_NEW(1).TP(2),10000*A.new(Cal.n_inst)])
 %         solo el rango seleccionado
-           fix([ETC.old(n_inst),ETC_NEW(2).NEW,ETC_NEW(2).TP(1), 10000*A.old(n_inst),ETC_NEW(2).TP(2),10000*A.new(Cal.n_inst)])]);
+           round([ETC.old(n_inst),ETC_NEW(2).NEW,ETC_NEW(2).TP(1), 10000*A.old(n_inst),ETC_NEW(2).TP(2),10000*A.new(Cal.n_inst)])]);
 %         todo el rango
-latexcmd(fullfile(['>',Cal.file_latex],['cal_etc_',brw_str{n_inst}]),'\ETCfin',num2str(fix(ETC_NEW(1).NEW)),...
+latexcmd(fullfile(['>',Cal.file_latex],['cal_etc_',brw_str{n_inst}]),'\ETCfin',num2str(round(ETC_NEW(1).NEW)),...
     '\ETCSOfin',config_def(12),'\SOABSfin',config_def(10),'\OtresSOABSfin',config_def(9),...
     '\NobsCalfin',size(o3c_NEW,1));
 etc{Cal.n_inst}.new=ETC_NEW;
@@ -469,7 +475,7 @@ hold on; plot(summary{Cal.n_inst}(:,1),summary{Cal.n_inst}(:,6),'b.','MarkerSize
 legend(gca,Cal.brw_name{Cal.n_ref(2)},Cal.brw_name{Cal.n_inst},'Location','Best',...
                                                                'Orientation','Horizontal');
 ylabel('Total Ozone (DU)'); xlabel('Date'); grid;
-title('El Arenosillo (Spain), 5 - 15 July, 2011');
+title(Cal.campaign);
 datetick('x',6,'keepLimits','KeepTicks');
 
 % blind days: suggested config.
