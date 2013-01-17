@@ -70,7 +70,6 @@ end
 %% Num hg's & Num hp's
 hgs=read_custom(sprintf('./bdata%s',Cal.brw_str{Cal.n_inst}),sprintf('B*.%s',Cal.brw_str{Cal.n_inst}),...
                            'hg','printfile',0,'date_range',datenum(Cal.Date.cal_year,1,[Cal.Date.day0 Cal.Date.dayend]));
-
 hps=read_custom(sprintf('./bdata%s',Cal.brw_str{Cal.n_inst}),sprintf('B*.%s',Cal.brw_str{Cal.n_inst}),...
                            'hpscan','printfile',0,'date_range',datenum(Cal.Date.cal_year,1,[Cal.Date.day0 Cal.Date.dayend]));
 
@@ -78,15 +77,10 @@ hps=read_custom(sprintf('./bdata%s',Cal.brw_str{Cal.n_inst}),sprintf('B*.%s',Cal
 [mean_hp N_hp] = grpstats(fix(hps),fix(hps),{'nanmean','numel'});
 
 data=sortrows(cat(1,[mean_hp N_hp repmat(1,length(N_hp),1)],[mean_hg N_hg repmat(2,length(N_hg),1)]));
-
 clr='kr'; symb='ox'; grps=unique(data(:,3)); leg={'Hg','Hp'};
-% label_1={'Day','Num Hg'};
 if ~isempty(data)
     figure; gscatter(data(:,1),data(:,2),data(:,3),clr(grps),symb(grps))
     datetick('x',6,'keepLimits','KeepTicks'); legend(leg{grps}); grid; 
-
-%     label_2=cellstr(datestr(mean));
-%     makeHtmlTable([mean-datenum(2012,1,1), N],[],label_2,label_1);
 else
     disp('No Hg''s');
 end
@@ -182,7 +176,7 @@ catch exception
 end
 
 %% CI REPORT
-br=sprintf('%03d',Cal.brw(Cal.n_inst));
+close all; br=sprintf('%03d',Cal.brw(Cal.n_inst));
 try
     [LRatPFHT Error]=analyzeCI(fullfile(Cal.path_root,['bdata',br],['CI*.',br]),...
                            fullfile(Cal.path_root,['bdata',br],'CI18711.xxx'),'depuracion',0,...
