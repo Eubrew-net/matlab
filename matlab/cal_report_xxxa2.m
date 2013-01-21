@@ -208,7 +208,9 @@ filter{Cal.n_inst}.ETC_FILTER_COR=round(ETC_FILTER_CORRECTION(2,:).*(sign(ETC_FI
 
 save(Cal.file_save,'-APPEND','filter');
 
-latexcmd(fullfile(Cal.file_latex,['cal_filter_',Cal.brw_str{Cal.n_inst}]),'\NFI',size(fi,1));
+NFI=size(fi,1); 
+NFIcamp=length(find(ismember(fi_avg(:,1),datenum(Cal.Date.cal_year,1,Cal.calibration_days{Cal.n_inst,1}))==1));
+latexcmd(fullfile(Cal.file_latex,['cal_filter_',Cal.brw_str{Cal.n_inst}]),'\NFI',NFI,'\NFIcamp',NFIcamp);
 
 label_2={'filter #1','filter #2','filter #3','filter #4','filter #5'};
 ETC_FILTER_CORR2cell={};
