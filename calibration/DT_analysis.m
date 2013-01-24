@@ -214,7 +214,7 @@ end
        [ozo_rc1,ozo_rc1_std]=grpstats([data(:,1),ozone1,data(:,6),data(:,8)],idx_ds,{'mean','std'});
        [ozo_rc2,ozo_rc2_std]=grpstats([data(:,1),ozone2,data(:,6),data(:,8)],idx_ds,{'mean','std'});
       
-       ozono_1=[ozono_1;ozo_rc1]; ozono_2=[ozono_2;ozo_rc2];
+       ozono_1=[ozono_1;ozo_rc1];              ozono_2=[ozono_2;ozo_rc2];
        ozono_std1=[ozono_std1;ozo_rc1_std]; ozono_std2=[ozono_std2;ozo_rc2_std];
    end       
 
@@ -224,13 +224,11 @@ end
   ozono_std1=ozono_std1(:,:);
    
   figure; set(gcf,'Tag','DT_comp')
-  x=gscatter(ozono_2(:,2).*ozono_2(:,4),(ozono_1(:,2)-ozono_2(:,2))*100./ozono_2(:,2),ozono_2(:,3),'','',7,'on','OSC','Ozone Relative Diff. (%)');
+  gscatter(ozono_2(:,2).*ozono_2(:,4),(ozono_1(:,2)-ozono_2(:,2))*100./ozono_2(:,2),ozono_2(:,3),'','',7,'on','OSC','Ozone Relative Diff. (%)');
   set(gca,'XLim',[200 1800]);
   grid; box on; h=hline(0,'k-');set(h,'LineWidth',2);
-  title(sprintf('%s: Ozone Config 1 vs Config 2 \n CONFIG 1: ETC=%d, A=%6.4f, DT=%3.1e; CONFIG 2: ETC=%d, A=%6.4f, DT=%3.1e',...
-                 Cal.brw_name{Cal.n_inst},extrat1(1),absx1(1),DTv(1),extrat2(1),absx2(1),DTv(2)));  
-  
-             
+  title(sprintf('%s: Ozone Config 1 vs Config 2 (relative percentage diffs)\n CONFIG 1: ETC=%d, A=%6.4f, DT=%3.1e; CONFIG 2: ETC=%d, A=%6.4f, DT=%3.1e',...
+                 Cal.brw_name{Cal.n_inst},extrat1(1),absx1(1),DTv(1),extrat2(1),absx2(1),DTv(2)));                 
              
              
 function DS=ds_counts(F,Filtro,temp,CY,DT,TC,AF,SAF)
