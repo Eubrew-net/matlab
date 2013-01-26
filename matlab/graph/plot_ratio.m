@@ -90,8 +90,8 @@ for i=1:length(interv)-1
     catch
         idx=[];
     end
-    media=[media;nanmean(data(idx,:))];
-    sigma=[sigma;nanstd(data(idx,:))];        
+    media=[media;nanmean(data(idx,:),1)];
+    sigma=[sigma;nanstd(data(idx,:),0,1)];        
     N=[N;length(idx)];    
 end
 outp.media=NaN*ones(size(media,1),11); outp.sigma=NaN*ones(size(sigma,1),11);
