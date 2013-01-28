@@ -4,6 +4,14 @@ function [ozone,log,missing]=read_bdata(brewer,setup,fpath,spectral_setup)
 % INPUT: 
 % - brw_id
 % - setup. De aquí toma configuración y dates
+% - fpath filepath
+%   if empty the files are in BFILES else ->campaing data
+%   else
+%     XXX is the brewer instrument
+%     or if year of the file == cal_year 
+%            fpathXXX -> 
+%     are in fpathXXX/YYYY
+%
 % - spectral_setup ??
 % 
 % OUTPUT:
@@ -11,12 +19,15 @@ function [ozone,log,missing]=read_bdata(brewer,setup,fpath,spectral_setup)
 % - log
 % - missing (NaN para ficheros ausentes, 0 para OK, 1 para error)
 % 
+%
+%
+%
 % MODIFICADO:
 % Juanjo (05/2011): modificado para considerar en primer lugar ficheros 
 %                   depurados, Bdddyy_dep.###
 %                   Si no existe B_dep, entonces será Bdddyy.###, como
 %                   habitualmente
-
+% Alberto .
 b_idx=brewer;  fprintf('\n\rBrewer: %s\n\r',setup.brw_name{b_idx});
 if isstruct(setup)
    mmv2struct(setup); 
@@ -50,7 +61,10 @@ end
 index_day=1;
 for dd=CALC_DAYS
     bfile_f=[]; o3=[];config_=[];sl_=[];hg_=[];
-    if dd>366 
+   
+    
+    
+    if dd>366  % matlab date 
         yr=year(dd); day=diaj(dd); 
     elseif dd<0
        yr=abs(floor(dd/365)); day=dd;
@@ -72,7 +86,7 @@ for dd=CALC_DAYS
           bfile_f=fullfile(bfile_path,'..',strcat('bdata',brw_str{b_idx}),num2str(cal_year-1),bfile_f);    
        end
     else
-       if dd>366 
+       if dd>366 % fecha matlab
           path_root=fullfile(setup.path_root,'..',sprintf('%04d',yr));
        else
           path_root=setup.path_root;           
@@ -80,7 +94,11 @@ for dd=CALC_DAYS
        if isempty(fpath)
           bfile_path=fullfile(path_root,bfile_p);
        else
-          bfile_path=fullfile(bfile_p,num2str(yr),'Bfiles');
+          if yr~=cal_year 
+           bfile_path=fullfile([bfile_p,brw_str{b_idx}],num2str(yr));
+          else 
+           bfile_path=fullfile([bfile_p,brw_str{b_idx}]);
+          end
        end
 %        index_day=day-CALC_DAYS(1)+1;
        bfile_f=sprintf('B%03d%02d.%03d',day,yr-2000,brw(b_idx));  
