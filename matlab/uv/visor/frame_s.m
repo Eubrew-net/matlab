@@ -100,15 +100,18 @@ case 'stop'
       kf=cellfun(@(x) strmatch(x,f),{'file','resp','inst','filter','spikes'});
       f(kf)=[];
       for i=1:length(f); 
-           command=['uv_trash.',char(f(i)),'(:,',num2str(i_trash),')=','uv.',char(f(i)),'(:,',num2str(Value),');']
-
-        try
+         command=['uv_trash.',char(f(i)),'(:,',num2str(i_trash),')=','uv.',char(f(i)),'(:,',num2str(Value),');'];
+         try    
           eval(command);
           eval(['uv.',char(f(i)),'(:,',num2str(Value),')=[];']) ; 
         catch
           disp('error')
           disp(command);
           disp(['uv.',char(f(i)),'(:,',num2str(Value),')=[];']);
+          if(strcmp(f{i},'duv'))
+              disp('WARNING duv has to be transposed n columns = n scans');
+              eval(['uv.',char(f(i)),'(',num2str(Value),',:)=[];']) ; 
+          end
         end
       end;      
          
