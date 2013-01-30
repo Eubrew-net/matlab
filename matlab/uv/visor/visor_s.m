@@ -31,13 +31,17 @@ function visor_s(action)
             plotuv(uv(Value))
          end 
    case 'dep'
-      h=frame(uv(Value));
-      waitfor(h);
-      uv(Value)=uv_work;
-      clear uv_work;
-      set(gcbf,'UserData',uv); %grabamos los cambios
-      plotuv(uv(Value));
-       
+      try
+       h=frame(uv(Value));
+       waitfor(h);
+       uv(Value)=uv_work;
+       clear uv_work;
+       set(gcbf,'UserData',uv); %grabamos los cambios
+       plotuv(uv(Value));
+      catch
+        disp(Value)
+        disp('Visor must be executed on an standalone window no dock');
+      end
     case 'save'
        save uv
        save uv_work

@@ -96,15 +96,25 @@ case 'stop'
       end   
 
       f=fieldnames(uv);
-      for i=1:length(f)-1; % spikes no hay que eliminarlo va aparte         
-        command=['uv_trash.',char(f(i)),'(:,',num2str(i_trash),')=','uv.',char(f(i)),'(:,',num2str(Value),');']
-        eval(command);
-        eval(['uv.',char(f(i)),'(:,',num2str(Value),')=[];']) ;       
+      %eliminamos los campos que no se borran.
+      kf=cellfun(@(x) strmatch(x,f),{'file','resp','inst','filter','spikes'});
+      f(kf)=[];
+      for i=1:length(f); 
+           command=['uv_trash.',char(f(i)),'(:,',num2str(i_trash),')=','uv.',char(f(i)),'(:,',num2str(Value),');']
+
+        try
+          eval(command);
+          eval(['uv.',char(f(i)),'(:,',num2str(Value),')=[];']) ; 
+        catch
+          disp('error')
+          disp(command);
+          disp(['uv.',char(f(i)),'(:,',num2str(Value),')=[];']);
+        end
       end;      
          
       year=uv.date(1,1);
       dayj=uv.date(2,1);
-      file_s=sprintf('uvt%3d%2d',dayj,year)
+      file_s=sprintf('uvt%03d%02d',dayj,year)
       eval([' ',file_s,'=uv_trash;']);
       eval(['save ',file_s,' ',file_s]); %guardamos el scan a borrar
       if ~isempty(uv.spikes)
