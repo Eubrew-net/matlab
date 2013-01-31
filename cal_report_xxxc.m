@@ -85,7 +85,7 @@ matrix2latex_config([config_orig(2:end),config_def(2:end)],...
 % figure(findobj('tag','DT_comp'));
 % set(get(gca,'title'),'FontSize',8);
 % printfiles_report(gcf,Cal.dir_figs,'LockAxes',0,'Height',6);
-% 
+%
 % figure(findobj('tag','raw_counts_187')); title('Day 18711');
 % set(findobj(gcf,'Tag','legend'),'FontSize',8);
 % printfiles_report(gcf,Cal.dir_figs,'Width',8,'Height',6,'LockAxes',0);
@@ -128,7 +128,7 @@ for ii=[Cal.n_ref(2),Cal.n_inst]
 end
 % anadimos el sl
 save(Cal.file_save,'-APPEND','sl_mov_o','sl_median_o','sl_out_o','R6_o',...
-                             'sl_mov_n','sl_median_n','sl_out_n','R6_o');
+                             'sl_mov_n','sl_median_n','sl_out_n','R6_n');
 
 sl_report{Cal.n_inst}.sl_mov_n=sl_mov_n{Cal.n_inst};         sl_report{Cal.n_inst}.sl_mov_o=sl_mov_o{Cal.n_inst};
 sl_report{Cal.n_inst}.sl_median_n=sl_median_n{Cal.n_inst};   sl_report{Cal.n_inst}.sl_median_o=sl_median_o{Cal.n_inst};
