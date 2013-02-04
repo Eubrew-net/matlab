@@ -239,18 +239,15 @@ sl_median(:,2)=[]; sl_median=sortrows(sl_median,1);
     grid;    xlabel('Date');    ylabel('SL I_5  ratios');
     set(gca,'LineWidth',1); % ,'XTick',diaj(sl_medianplot(:,1)))%,'XTickLabel',diaj(sl_medianplot(:,1))
 
-    % INT
-    f=figure;
-    set(f,'tag','SL_TEMP_report');
-    %suptitle('SAUNA 2    -Sodankyla 2007-');
-    title(['Standard Lamp R6 vs temperature   ',brw_name{idx_inst}]);
-    set(f,'tag','SL_TEMP_report');
+    % Temperature
+    f=figure;    set(f,'tag','SL_TEMP_report');
+    plot(sls(:,13),sls(:,22),'.'); hold on; 
+    rl=rline; set(rl,'LineWidth',2);
+    set(findobj(gca,'Type','Text'),'BackgroundColor','w','Color','r','FontSize',10,'FontWeight','Bold');
+    set(findobj(gca,'Marker','.'),'Marker','None');
     gscatter(sls(:,13),sls(:,22),5*fix(diaj(sls(:,1))/5));
-    title(['Standard Lamp R6 vs temperature   ',brw_name{idx_inst}]);
-
-    grid;
-    xlabel('PMT Temperature (C\circ)');
-    ylabel('SL R6 ratios');
+    title(['Standard Lamp R6 vs temperature   ',brw_name{idx_inst}]);   grid;
+    xlabel('PMT Temperature (C\circ)'); ylabel('SL R6 ratios');
    end
 
 % if chk

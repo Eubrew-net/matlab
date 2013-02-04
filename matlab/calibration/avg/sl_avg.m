@@ -161,11 +161,12 @@ temp=mean(sla(:,4:5),2);
 %   %datetick('x',12,'keepticks','keeplimits');
 %   grid
 
-f=figure;
-set(f,'tag','SL_TEMP');
-
-hold on
+f=figure; set(f,'tag','SL_TEMP');
 try
+    plot(temp,sla(:,12),'.'); hold on; 
+    rl=rline; set(rl,'LineWidth',2);
+    set(findobj(gca,'Type','Text'),'BackgroundColor','w','Color','r','FontSize',10,'FontWeight','Bold');
+    set(findobj(gca,'Marker','.'),'Marker','None');
     h=gscatter(temp,sla(:,12),{year(sla(:,1)),month(sla(:,1))},'','.ox+sp',10,'on');%5+(1:12)
     set(gca,'FontSize',11,'FontWeight','Bold','GridLineStyle','-.');
     text=findobj(gcf,'Type','Text');  %set(text(end),'FontWeight','bold');
@@ -174,7 +175,7 @@ try
     title(sprintf('%s%s','Standard Lamp Test by month, ',file(regexp(file,'AVG')-3:regexp(file,'AVG')+6)),...
         'FontSize',12,'FontWeight','bold');
     set(findobj(gcf,'Tag','legend'),'Location','Best');
-    grid; box on;
+    grid; box on;       
 catch
     disp('mensual plot error');
     disp(file);
