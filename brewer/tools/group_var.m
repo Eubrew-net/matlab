@@ -18,10 +18,10 @@ end
 
 t=tabulate(aux(:,2));
 tp=mmcellstr(sprintf('%4.1f %% |',t(:,3)));
-try
- label_pie=cellfun(@(a,b) [a,', ',b],label',tp,'UniformOutput',false);
- pie(t(:,3),label_pie);
-catch
- pie(t(:,3));
-end
+% try
+%  label_pie=cellfun(@(a,b) [a,', ',b],label',tp,'UniformOutput',false);
+%  pie(t(:,3),label_pie);
+% catch
+%  pie(t(:,3));
+% end
 %[m,s,n]=grpstats(aux,aux(:,end),{'mean','std','numel'});         
