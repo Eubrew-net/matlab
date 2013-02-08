@@ -101,7 +101,7 @@ spark_spacing=  (1.5*fontsize(1)/72);                % distance between successi
 text_height =  (2*fontsize(1)/72);                  % height of all text boxes, distance between text boxes
 sep = (0.5*fontsize(1)/72);
 
-fig_height = (size(m,1))*(spark_height + spark_spacing)+text_height+sep;
+fig_height = (size(m,1))*(spark_height + spark_spacing)/1.5+text_height+sep;
 
 spark_width  = (spark_width/72);                   % width of sparkline
 value_width = 0.5*length([sprintf(numformat,pi)]) * (fontsize(end)/72);                   % width of sparkline labels
@@ -194,10 +194,13 @@ for(i = 1:size(m,1))                                % for all the rows in the in
     % average and std
     mean_=nanmean(m(i,:));
     mean_2=nanmean(m(i,t<0.7));
+    j1=find(~isnan(m(i,:)),1,'first');
+    jend=find(~isnan(m(i,:)),1,'last');
+    
     
     %Draw the rnage box in the background if requested
     if(exist('range','var'))
-        rbox = patch(t([1,1,end,end]),range([1,2,2,1]),[0.8 0.8 0.8]);
+        rbox = patch(t([j1,j1,jend,jend]),range([1,2,2,1]),[0.8 0.8 0.8]);
         set(rbox,'EdgeColor','w')
         hold on
     end
@@ -206,8 +209,8 @@ for(i = 1:size(m,1))                                % for all the rows in the in
     lines=plot(t,m(i,:), '-k', ...                  
          t(minxi), m(i,minxi), 'b.', ...            % highlight the min and max values blue
          t(maxxi), m(i,maxxi), 'b.', ...
-         t(1), m(i,1), 'r.', ...                    % highlight the end values red
-         t(end), m(i,end), 'r.');
+         t(j1), m(i,j1), 'r.', ...                    % highlight the end values red
+         t(jend), m(i,jend), 'r.');
     
     % format the axes
     set(lines,'LineWidth',2);
@@ -222,24 +225,24 @@ for(i = 1:size(m,1))                                % for all the rows in the in
            
     % add values for the left and right end
     if(showstart)
-    if isnan(m(i,end))
-        k=find(~isnan(m(i,:)),1,'last');
-        if ~isempty(k)
-          m(i,end)=m(i,k);
-        end
-    end
+%     if isnan(m(i,end))
+%         k=find(~isnan(m(i,:)),1,'last');
+%         if ~isempty(k)
+%           m(i,end)=m(i,k);
+%         end
+%     end
     annotation('textbox', [x_left, y_thiselement, value_width, text_height], ...
-               'string', sprintf(numformat,m(i,1)), ...
+               'string', sprintf(numformat,m(i,j1)), ...
                'HorizontalAlignment', 'right', ...
                'LineStyle', 'none', ...
                'Color', 'r', 'FontSize', fontsize(end));
     end
     annotation('textbox', [x_right, y_thiselement, value_width, text_height], ...
-               'string', sprintf(numformat,m(i,end)), ...
+               'string', sprintf(numformat,m(i,jend)), ...
                'LineStyle', 'none', ...
                'Color', 'r', 'FontSize', fontsize(end));
            
-    % add values for the minumum and maximum 
+    % add values for median 
     if(maxmin)
     annotation('textbox', [x_min, y_thiselement, value_width, text_height], ...
                'string', sprintf(numformat,mean_), ...
