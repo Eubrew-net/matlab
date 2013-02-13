@@ -91,6 +91,7 @@ arg.addParamValue('outlier_flag', 0, @(x)(x==0 || x==1)); % por defecto no depur
 arg.addParamValue('date_range', [], @isfloat); % por defecto, no control de fechas
 arg.addParamValue('config',[], @isfloat); % por defecto, nominal (ver linea 151)
 arg.addParamValue('plot_flag', 0, @(x)(x==0 || x==1)); % por defecto, no plot
+arg.addParamValue('path_to_file', '.', @isstr); % por defecto, current directory
 
 % validamos los argumentos definidos:
 try
@@ -133,9 +134,9 @@ end
 
 %% Lectura de datos
 if length(brw_str)==3;
-   fioavg=['.',filesep(),'bfiles',filesep(),brw_str,filesep(),'FIOAVG.',brw_str];
+   fioavg=fullfile(path_to_file,'bfiles',brw_str,['FIOAVG.',brw_str]);
    if ~exist(fioavg,'file');
-     fioavg=['.',filesep(),'bdata', brw_str,filesep(),'FIOAVG.',brw_str];
+      fioavg=fullfile(path_to_file,['bdata' brw_str],['FIOAVG.',brw_str]);
    end
 else
    fioavg=brw_str;

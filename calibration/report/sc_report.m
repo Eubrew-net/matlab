@@ -108,7 +108,7 @@ if isempty(sc_data)
     if isempty(data_path)
        data_path=['.',filesep(),'bdata',brw_str,filesep(),'B*.',brw_str];
     else
-       data_path=[data_path,'B*.',brw_str];
+       data_path=fullfile(data_path,['B*.',brw_str]);
     end
     
     try
