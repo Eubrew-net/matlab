@@ -31,6 +31,7 @@ arg.addRequired('brw_str');
 arg.addRequired('brw_config_files');
 
 % Input param - value
+arg.addParamValue('path_to_file', '.', @isstr); % por defecto, current directory
 arg.addParamValue('outlier_flag',{'','','','','','',''},@(x)(any(strcmp(x,{'sl','dt','rs','ap','hg','h2o','op'})) || isempty(cell2mat(x))));
 arg.addParamValue('date_range', [], @(x)isfloat(x)); % por defecto, no control de fechas
 arg.addParamValue('SL_REF', NaN, @isfloat); % por defecto no SL_REF
@@ -63,8 +64,8 @@ catch
     chk=0;
 end
                                                       
-bfilepath=['.',filesep(),'bdata' brw_str];
-bfileSpath=['.',filesep(),'bfiles',filesep(),brw_str];
+ bfilepath =fullfile(path_to_file,['bdata' brw_str]);
+ bfileSpath=fullfile(path_to_file,'bfiles',brw_str);
 
 %% Standard Lamp report
 try
