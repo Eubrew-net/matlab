@@ -118,6 +118,8 @@ try
 %          naux=naux+1;   
 %         end
      end
+     figura=strrep(figura,' ','_');
+     
      set(h,'WindowStyle','normal');
      set(h,'PaperUnits','centimeters');
      set(h,'PaperPositionMode','Auto')
@@ -126,10 +128,12 @@ try
      if any(strcmp(varargin,'no_export'))
         applytofig(h,Options);
         print(h,'-depsc','-tiff','-r300','-cmyk',[figura,'.eps']);
+        
      else
         exportfig(h,strtok(figura,'.'),Options);
      end
      saveas(h,figura,'fig');
+     saveas(h,figura,'png');
 end
 cd(cwd);
 catch
