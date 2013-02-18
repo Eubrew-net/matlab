@@ -21,6 +21,7 @@ function [sl_mov,sl_median,oulier,R6]=sl_report_jday(idx_inst,sl,brw_name,vararg
 % 
 % Juanjo 14/09/2011: Se añade condicional del tipo if isempty() return 
 %                    para salir en caso de no data
+% Juanjo 18/02/2013: Se añade R5 vs Temp. plot
 
 %% Validacion de argumentos de entrada
 arg = inputParser;   % Create instance of inputParser class.
@@ -241,13 +242,24 @@ sl_median(:,2)=[]; sl_median=sortrows(sl_median,1);
 
     % Temperature
     f=figure;    set(f,'tag','SL_TEMP_report');
-    plot(sls(:,13),sls(:,22),'.'); hold on; 
+    ha=tight_subplot(2,1,.05,[.1 .1],[.1,.1]);   
+
+    axes(ha(1)); plot(sls(:,13),sls(:,22),'.'); hold on; 
     rl=rline; set(rl,'LineWidth',2);
     set(findobj(gca,'Type','Text'),'BackgroundColor','w','Color','r','FontSize',10,'FontWeight','Bold');
     set(findobj(gca,'Marker','.'),'Marker','None');
-    gscatter(sls(:,13),sls(:,22),5*fix(diaj(sls(:,1))/5));
-    title(['Standard Lamp R6 vs temperature   ',brw_name{idx_inst}]);   grid;
-    xlabel('PMT Temperature (C\circ)'); ylabel('SL R6 ratios');
+    gscatter(sls(:,13),sls(:,22),5*fix(diaj(sls(:,1))/5),'','.',10,'off');
+    set(gca,'XtickLabel',[]); xlabel(' '); ylabel('SL R6 ratios'); grid;
+    title(['Standard Lamp ratios vs temperature: Brw id. ',brw_name{idx_inst}]); 
+    
+    axes(ha(2)); plot(sls(:,13),sls(:,21),'.'); hold on; 
+    rl=rline; set(rl,'LineWidth',2);
+    set(findobj(gca,'Type','Text'),'BackgroundColor','w','Color','r','FontSize',10,'FontWeight','Bold');
+    set(findobj(gca,'Marker','.'),'Marker','None');
+    gscatter(sls(:,13),sls(:,21),5*fix(diaj(sls(:,1))/5),'','.',10,'on');
+    xlabel('PMT Temperature (C\circ)'); ylabel('SL R5 ratios'); grid;
+    set(findobj(gcf,'Tag','legend'),'FontSize',7); linkprop(ha,'XLim');
+    
    end
 
 % if chk

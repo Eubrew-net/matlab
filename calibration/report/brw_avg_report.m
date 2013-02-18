@@ -17,7 +17,8 @@ function [sl_data,dt_data,rs_data,ap_data,hg_data,h2o_data,op_data,OUTliers]=brw
 %   111110 : Isa, Introducida Matriz Outliers, a partir de los nuevos outputs
 %                OutR6F5R5,OutHTLT,OutRS,OutHTSL5V,OutHG,OutMSFW
 %                Introducido el OUTput OUTliers
-%   
+%   150113 : Juanjo, added path_to_file optional argument. Default: current directory
+% 
 %   TODO: reportar tambien los outlier. 
 % 
 %   Ejemplo:  brw_avg_report(...,'flag_outlier_sl','flag_outlier_dt');     

@@ -21,6 +21,7 @@
 %     disp('OUTLIERS R5, sigma');
 
 % 12/11/2010 Isabel  Introducido nuevo output para los outliers.
+% 18/02/2013 Juanjo  Añadida regression para R5 vs Temp.
 
 %%
 function [sla,OutR6R5F5]=sl_avg(file,date_range,ref,outlier_flag)
@@ -163,22 +164,29 @@ temp=mean(sla(:,4:5),2);
 
 f=figure; set(f,'tag','SL_TEMP');
 try
-    plot(temp,sla(:,12),'.'); hold on; 
+    ha=tight_subplot(2,1,.05,[.1 .1],[.1,.1]);   
+    
+    axes(ha(1)); plot(temp,sla(:,12),'.'); hold on; 
     rl=rline; set(rl,'LineWidth',2);
     set(findobj(gca,'Type','Text'),'BackgroundColor','w','Color','r','FontSize',10,'FontWeight','Bold');
     set(findobj(gca,'Marker','.'),'Marker','None');
-    h=gscatter(temp,sla(:,12),{year(sla(:,1)),month(sla(:,1))},'','.ox+sp',10,'on');%5+(1:12)
+    gscatter(temp,sla(:,12),{year(sla(:,1)),month(sla(:,1))},'','.ox+sp',10,'off');
+    set(gca,'FontSize',11,'FontWeight','Bold','GridLineStyle','-.','XtickLabel',[]);
+    xlabel('');    ylabel('R6','FontSize',12,'FontWeight','bold');
+    title(sprintf('%s%s','Standard Lamp Tests by month, ',file(regexp(file,'AVG')-3:regexp(file,'AVG')+6)),...
+        'FontSize',12,'FontWeight','bold');    grid; box on;       
+    
+    axes(ha(2)); plot(temp,sla(:,11),'.'); hold on; 
+    rl=rline; set(rl,'LineWidth',2);
+    set(findobj(gca,'Type','Text'),'BackgroundColor','w','Color','r','FontSize',10,'FontWeight','Bold');
+    set(findobj(gca,'Marker','.'),'Marker','None');
+    gscatter(temp,sla(:,11),{year(sla(:,1)),month(sla(:,1))},'','.ox+sp',10,'on');%5+(1:12)
     set(gca,'FontSize',11,'FontWeight','Bold','GridLineStyle','-.');
-    text=findobj(gcf,'Type','Text');  %set(text(end),'FontWeight','bold');
-    xlabel('Temperature','FontSize',12,'FontWeight','bold');
-    ylabel('R6','FontSize',12,'FontWeight','bold');
-    title(sprintf('%s%s','Standard Lamp Test by month, ',file(regexp(file,'AVG')-3:regexp(file,'AVG')+6)),...
-        'FontSize',12,'FontWeight','bold');
-    set(findobj(gcf,'Tag','legend'),'Location','Best');
-    grid; box on;       
-catch
-    disp('mensual plot error');
-    disp(file);
+    xlabel('Temperature','FontSize',12,'FontWeight','bold');    ylabel('R5','FontSize',12,'FontWeight','bold');
+    set(findobj(gcf,'Tag','legend'),'FontSize',7);    grid; box on;   linkprop(ha,'XLim');
+     
+catch exception
+      fprintf('%s in File %s',exception.message,file);
 end
 
 %% Outliers
