@@ -67,7 +67,11 @@ if ~isempty(uv1.time) && ~ isempty(uv2.time)
         x2=x(:,1);
         ratio=[ratio,y2];
         uv=[ uv,[x2,y]];
-        duv=[duv;uv1.duv(i1(i),4),uv2.duv(i2(i),4)];
+        try
+         duv=[duv;uv1.duv(4,i1(i)),uv2.duv(4,i2(i))];   
+        catch % old version trasposed matrix
+         duv=[duv;uv1.duv(i1(i),4),uv2.duv(i2(i),4)];
+        end
         l=[l,x2];
         lamda=l;
         time=[time;[ uv1.time(1,i1(i)),uv2.time(1,i2(i))]];
