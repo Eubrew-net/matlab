@@ -73,7 +73,7 @@ for i=1:length(s)
         resp_file=response;
     end
 
-    file=s(i).name
+    file=s(i).name;
     file_path=fileparts(path);
     file_info=sscanf(upper(file),'UV%03d%02d.%03d');        
     
