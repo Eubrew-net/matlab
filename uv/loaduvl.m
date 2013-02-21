@@ -127,7 +127,7 @@ for i=1:length(s)
         uv(dia).resp=resp_file;
         uv(dia).inst=inst;
         uv(dia).filter=filter;
-        uv(dia).duv=[dat',nanmean(time)',duv_];
+        uv(dia).duv=[dat',nanmean(time)',duv_]';
         if inst==33 uv(dia).spikes=[];  % no hay correccion para el #033
         else   
             [uvc,inds,cols]=spikes(uv(dia).l(:,1),uv(dia).uv,2900); % quitamos los picos;

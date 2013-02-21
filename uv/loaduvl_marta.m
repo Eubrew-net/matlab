@@ -45,8 +45,8 @@ for i=1: length(s)
        year=r(2);
        date_f=datejul(year,dia);
        date_fich=date_f(:,1);
-        %J=find((date_fich-response_struct.date)<0,1,'last');
-      [date_near_resp,J ] = min(date_fich-response_struct.date>0);%coge la respuesta más cercana
+       % J=find((date_fich-response_struct.date)>0,1,'last');
+      [date_near_resp,J ] = min(abs(date_fich-response_struct.date));%coge la respuesta más cercana
      
       response=[response_struct.wavelength, response_struct.M(:,J)];
       response_file=response_struct.filename(J,:);
