@@ -8,7 +8,7 @@ function visor_s(action)
   
   hlist=findobj('Tag','ListaUV');
   Value=get(hlist,'Value');
-   
+  
    switch(action)
       
    case 'lista_files'

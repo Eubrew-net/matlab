@@ -1,5 +1,6 @@
 function  [A,ETC,SL_B,SL_R,F_corr,cfg]=read_cal_config_new(config,file_setup,sl_s)
 % 
+
 % Updated:
 %   - 27/11/2012 (Juanjo): Now it gives filter correction as output
 % 
