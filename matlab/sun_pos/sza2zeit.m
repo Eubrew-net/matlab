@@ -1,4 +1,4 @@
-function utstu=sza2zeit(nn,sza,pm,la,lo,meth);    
+function utstu=sza2zeit(nn,sza,pm,la,lo,meth)
 %utstu=sza2zeit(nn,sza,pm,la,lo,meth) is the inversion of zeit2sza
 %nn=datenum(yy,mm,dd) in UT, muss ein Skalar sein!
 %uses interpolation

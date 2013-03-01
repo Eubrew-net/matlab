@@ -1,4 +1,4 @@
-function [sza,az,szac,pm]=zeit2sza(nn,la,lo,meth);
+function [sza,az,szac,pm]=zeit2sza(nn,la,lo,meth)
 %[sza,az,szac,pm]=zeit2sza(nn,la,lo,meth) calculates
 %the solar zenith angle sza [°], the azimuth az [°] (0=north,90=east),
 %the refraction corrected solar zenith angle szac [°] and 
