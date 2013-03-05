@@ -46,8 +46,8 @@ else
     eval(['scf',brw_str{b_idx},'=spectral_setup']);
 end
 
-dsum={};    ozone_sum={};  ozone_ds={}; ozone_raw0={};
-ozone_raw={}; ozone_ratios={};
+dsum={}; ozone_sum={}; ozone_ds={}; ozone_raw0={}; ozone_raw={}; ozone_ratios={};
+dzsum={}; ozone_dz_raw0={};
 config={};  sl={};     sl_cr={};     hg={};     bhg={};
 missing=NaN;
 ozone=[];
@@ -159,6 +159,8 @@ for dd=CALC_DAYS
       sl_cr=[sl_cr;sl_.sls_cr]; % recalculated/second calibration
       hg=[hg;hg_.hg];
       bhg=[bhg;hg_.time_badhg];
+      dzsum=[dzsum;o3.dzsum];
+      ozone_dz_raw0=[ozone_dz_raw0;o3.dz_raw0];          
       if ~isempty(o3.ds_raw0)
           ozone_ratios=[ozone_ratios;[o3.ds_raw0,o3.ozone_ds(:,[9:14,16:21])]];
       end
@@ -169,6 +171,8 @@ for dd=CALC_DAYS
    %  sumarios y medidas tal y como estan en el fichero
       ozone.dsum_legend=o3.dsum_legend;
       ozone.raw0_legend=o3.ds_raw0_legend;
+      ozone.dzsum_legend=o3.dzsum_legend;
+      ozone.dz_raw0_legend=o3.dz_raw0_legend;
    %  recalculadas
       ozone.ds_legend=o3.ozone_ds_legend;
       ozone.s_legend=o3.ozone_s_legend;  
@@ -192,3 +196,6 @@ ozone.bhg=bhg;
 ozone.raw0=ozone_raw0;
 ozone.raw=ozone_raw;
 ozone.ratios=ozone_ratios;
+ozone.dzsum=dzsum;
+ozone.ozone_dz_raw0=ozone_dz_raw0;          
+
