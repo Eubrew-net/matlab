@@ -26,34 +26,32 @@ function [o3,config,sl_data,hg_data,loc]=readb_ds_develop(bfile,config_file,spec
 %  TODO: ratios in summaries.
 
 
-dsum=[];ds=[];dss=[];timeds=[];timedss=[];ds_l=[];ds_aod=[];
-ds=[];dss=[];ndss=0;timedsum=[];timeds=[];
-sl=[];sls=[];nsl=0;nsls=0;timesls=[];timesl=[];
-TC=[];config=[];
-config_2=[];
-TC_2=[];
-DT_2=[];
-extrat_2=[];absx_2=[];AT_2=[];
+dsum=[]; timedsum=[]; 
+ds=[]; dss=[]; ndss=0; timedss=[]; timeds=[]; ds_l=[]; ds_aod=[];
+dz=[]; dzs=[]; ndzs=0; timedzs=[]; timedz=[]; timedzsum=[]; 
+sl=[]; sls=[]; nsls=0; timesls=[]; timesl=[];
+
+config=[];
 
 %formats for reading the bfile
-fmtds=[' ds %c %d %f %d %d %d %d %d %d %d %d %d %d rat %f %f %f %f'];
-fmtsc=[' sc %c %d %f %d %d %d %d %d %d %d %d %d %d rat %d %d %d %d'];
+fmtds=' ds %c %d %f %d %d %d %d %d %d %d %d %d %d rat %f %f %f %f';
+fmtsc=' sc %c %d %f %d %d %d %d %d %d %d %d %d %d rat %d %d %d %d';
+fmtdz=' dz %c %d %f %d %d %d %d %d %d %d %d %d %d %d rat %f %f %f %f';
 
-fmt=['ds %*s %d %f %d %d %d %d %d %d %d %d %d %d rat %d %d %d %d']; % format of ds Bfile
-fmtsum=['summary %d:%d:%d %c%c%c %f/ %f %f %f %f %c%c %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f']; % summary format
-fmtsum_output=['summary\r%d:%d:%d\r%c%c%c\r%d/\r%d\r%.5f\r%.3f\r%d\r%c%c\r%d\r%d\r%d\r%d\r%d\r%d\r%d\r%.1f\r%.1f\r%d\r%d\r%d\r%d\r%d\r%d\r%.1f\r%.1f']; % output summary format
-fmtinst=['inst %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f mk%*3c %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f'];
-TCfmt=['inst %f %f %f %f %f '];
-absfmt=['inst %*f %*f %*f %*f %*f %*f %f %f %f '];
-extratfmt=['inst %*f %*f %*f %*f %*f %*f %*f %*f %*f %f %f'];
-dtfmt=['inst %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %f'];
-fmtum=['um %d %d %d %*s %f %f %f pr %f %d %f %d %d %d %d %d %d %d %d %d rat %d %d %d %d'];
-fmtum_output=['summary\r%d:%d:%d\r%c%c%c\r%f/\r%f\r%f\r%f\r%f\r%c%c\r%f\r%f\r%f\r%f\r%f\r%f\r%f\r%f\r%f\r%f\r%f\r%f\r%f\r%f\r%f\r%f\r%f']; % output um format
-fmt_icf=[
-'inst %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f mk%3c',...
-' %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %s %s'];
-fmtsl=[' sl %c %d %f %d %d %d %d %d %d %d %d %d %d rat %f %f %f %f'];
-fmtsl_old=[' sl %c %d %f %d %d %d %d %d %d %d %d %d rat %d %d %d %d'];
+fmt='ds %*s %d %f %d %d %d %d %d %d %d %d %d %d rat %d %d %d %d'; % format of ds Bfile
+fmtsum='summary %d:%d:%d %c%c%c %f/ %f %f %f %f %c%c %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f'; % summary format
+fmtsum_output='summary\r%d:%d:%d\r%c%c%c\r%d/\r%d\r%.5f\r%.3f\r%d\r%c%c\r%d\r%d\r%d\r%d\r%d\r%d\r%d\r%.1f\r%.1f\r%d\r%d\r%d\r%d\r%d\r%d\r%.1f\r%.1f'; % output summary format
+fmtinst='inst %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f mk%*3c %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f';
+TCfmt='inst %f %f %f %f %f ';
+absfmt='inst %*f %*f %*f %*f %*f %*f %f %f %f ';
+extratfmt='inst %*f %*f %*f %*f %*f %*f %*f %*f %*f %f %f';
+dtfmt='inst %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %f';
+fmtum='um %d %d %d %*s %f %f %f pr %f %d %f %d %d %d %d %d %d %d %d %d rat %d %d %d %d';
+fmtum_output='summary\r%d:%d:%d\r%c%c%c\r%f/\r%f\r%f\r%f\r%f\r%c%c\r%f\r%f\r%f\r%f\r%f\r%f\r%f\r%f\r%f\r%f\r%f\r%f\r%f\r%f\r%f\r%f\r%f'; % output um format
+fmt_icf=['inst %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f mk%3c',...
+        ' %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %s %s'];
+fmtsl=' sl %c %d %f %d %d %d %d %d %d %d %d %d %d rat %f %f %f %f';
+fmtsl_old=' sl %c %d %f %d %d %d %d %d %d %d %d %d rat %d %d %d %d';
 
 %Filter definition
 filter=[0,64,128,192,256];
@@ -97,6 +95,7 @@ jum=strmatch('um',l);
 jhg=strmatch('hg',l);
 jhgscan=strmatch('hgscan',l);
 jsl=strmatch('sl',l);
+jdz=strmatch('dz',l);
 
 
 jsc=strmatch('sc',l);
@@ -216,8 +215,7 @@ end
 
 
 
-  ndss=0;
-  nsls=0;
+  ndss=0;  nsls=0;  ndzs=0;
   for i=1:length(jsum)
       dsum=sscanf(l{jsum(i)},fmtsum);
       type=char(dsum(12:13)');
@@ -271,6 +269,27 @@ end
                   end
               end
           end
+      elseif strmatch('dz',type)
+          ndzs=ndzs+1;
+          dz_idx=find(jdz-jsum(i)<0 & jdz-jsum(i)>=-4);
+          jdzsum(ndzs)=jsum(i);
+          if length(dz_idx)==4
+              %timedssum fecha,indice
+              timedzsum=[timedzsum;[fecha+hora,jsum(i)]];
+              dzs=[dzs,dsum];
+              for ii=2:4
+                  ds_=sscanf(l{jdz(dz_idx(ii))},fmtdz);
+                  if size(ds_,1)==18
+                      dz=[dz,ds_];
+                      hora=ds_(3)/60/24;
+                      %time ds
+                      %timeds=fecha matlab,linea del fichero,nï¿½de
+                      %sumario +temperatura
+                      timedz=[timedz;[fecha+hora,jdz(dz_idx(ii)),size(dzs,2)*10+ii]];
+                  end
+              end
+          end
+          %disp(jsum(i));          
       else % sum faltan zs aod
          % l{jsum(i)};
       end
@@ -477,6 +496,76 @@ else
     o3.ds_raw0_legend=[];o3.ozone_ds_legend=[];
     o3.ozone_s_legend=[];
 end
+
+% ---------------------- Start DZ output ------------------------------------
+if ~isempty(dzs)
+    % Time calculation: hora a formato matlab -> sumarios
+    hora=dzs(1,:)*60+dzs(2,:)+dzs(3,:)/60;
+
+    % idx_dz indice de la medida dz
+    idx_dz=fix(timedz(:,3)/10);
+    % asignamos la temperatura al ds tomada del sumario
+    dz_temp=dzs(11,idx_dz)';
+    %filter check
+    if any(dzs(14,idx_dz)-(dz(2,:)/64))
+       % to chek that the filter are 0 64....
+       unique(ds(2,:))
+       unique(dss(14,:))
+       disp('error in filter check');
+       
+       ds(2,:)=64*dss(14,idx_ds);
+    end       
+    
+    % calculo de los angulos zenitales y masa optica sumarios
+    [szadzs,m2dzs,m3dzs]=brewersza(hora',fileinfo(2),fileinfo(3),lat,long);
+    [sza,saz,tst_dz,snoon,sunrise,sunset]=sun_pos(timedzsum(:,1),lat,-long);
+    timedzs=cat(2,timedzsum,[szadzs,m2dzs,m3dzs,sza,saz,tst_dz,snoon,sunrise,sunset]);
+
+    % calculos se sza y masa op medidas individuales
+    [szadz,m2dz,m3dz]=brewersza(dz(3,:)',fileinfo(2),fileinfo(3),lat,long);
+    [sza,saz,tst_dz,snoon,sunrise,sunset]=sun_pos(timedz(:,1),lat,-long);
+    timedz=[timedz,[szadz,m2dz,m3dz,sza,saz,tst_dz,snoon,sunrise,sunset]];
+
+    %HGFILTER
+    % -> falla si no hay ningun hg->
+    tb_dz=[];    tb_dzsum=[];
+    for ii=1:size(time_badhg,1)
+     tb_dzsum=[tb_dzsum,find((hora>time_badhg(ii,1)   & hora<time_badhg(ii,2)))];
+     tb_dz=[tb_dz,find((dz(3,:)>time_badhg(ii,1) & dz(3,:)<time_badhg(ii,2)))];
+    end
+    % flag hg utilizamos el numero de linea (ï¿½?)
+    timedz(:,2)=ones(size(timedz(:,2)));
+    timedzs(:,2)=ones(size(timedzs(:,2)));
+    if ~isempty(tb_dzsum)
+       timedz(tb_dz,2)=0;
+       timedzs(tb_dzsum,2)=0;
+    end
+    dz=dz'; dzs=dzs';
+
+    %%  salidas raw DS      
+      o3.dzsum=[timedzs(:,1:2),timedzs(:,8)/60,timedzs(:,4),...
+        dzs(:,9:11),dzs(:,[14,22,30,21,29]),dzs(:,[15,23,16,24,17,25,18,26,19,27,20,28])];
+      o3.dzsum_legend={'date';'hgflag';'hora ';'??';'ang2';'airm';'temp';'filt';'ozo ';'std_ozo';'so2 ';'std_so2';...
+        'ms4 ';'std_ms4';'ms5 ';'std_ms5';'ms6 ';'std_ms6';'ms7 ';'std_ms7';'ms8 ';'std_ms8';'ms9 ';'std_ms9'};
+
+     %sustituimos s0 s1 de la medida por m2 m3
+     dz(:,4:5)=[m2dz,m3dz*pr/1013];
+     dz(:,3)=tst_dz;
+     MS9=dz(:,15)-0.5*dz(:,16)-1.7*dz(:,17); % o3 double ratio ==MS(9)
+     MS8=dz(:,14)-3.2*dz(:,17);              %:REM SO2 ratio MS(8)       
+          
+     o3.dz_raw0=[timedz(:,1:3),dz_temp,dz,MS8,MS9];
+     o3.dz_raw0_legend={'date';'hgflag';'ndz';'tmp';'fl1';'fl2';'tim';'m2 ';'m3*pressure corr';'cy ';...
+                        'F0 ';'F1 ';'F2 ';'F3 ';'F4 ';'F5 ';'F6 '; 'F7 ';'r1 ';'r2 ';'r3 ';'r4 ';'MS8 ';'MS9 '};    
+
+    %% dz re-calculation: Pendiente. ¿Vale la pena? Por ahora sólo interesan las cuentas brutas (o3.dz_raw0 y )
+
+else
+    disp('Fichero vacio? (no dz measurements)');
+    o3.dzsum=[]; o3.dzsum_legend=[];
+    o3.dz_raw0=[]; o3.dz_raw0_legend=[];
+end
+% ---------------------- End DZ output ------------------------------------
 
 if ~isempty(sls)
 % SLS hora a formato matlab ->sumarios
@@ -891,6 +980,7 @@ end
     
   F(:,2)=F_dark;
   DS=F; 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %function DS=raw2counts(F,Filtro,temp,CY,DT,TC,AF,SAF)
 %SAF=lineas Filtro, columnas slits
