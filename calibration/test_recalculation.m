@@ -84,7 +84,7 @@ if ~isempty(fecha)
        RC_old=(SL_R.old(:,ninst+1)-SL_B.old(:,ninst+1))./(A.old(:,ninst+1)*10);
 
       if plot_sl
-       figure;
+         figure; set(gcf,'Tag','SLref_diffs')
          plot(SL_R.new(:,1),matadd(SL_R.new(:,ninst+1),-SL_B.new(:,ninst+1)),'og');
          hold on; plot(SL_R.old(:,1),matadd(SL_R.old(:,ninst+1),-SL_B.old(:,ninst+1)),'*r');
          set(gca,'YLim',[-20 20]); grid;  datetick('x',2,'Keeplimits','Keepticks');
