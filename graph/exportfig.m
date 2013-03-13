@@ -686,7 +686,7 @@ try
     delete(tfile2);
     
   elseif ~opts.applystyle
-    drawnow;
+    drawnow; set(gcf,'InvertHardCopy','off');
     print(H, filename, args{:});
   end
   warning(oldwarn);
