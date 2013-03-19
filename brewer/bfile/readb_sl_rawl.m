@@ -20,6 +20,9 @@ function [sl_raw,TC]=readb_sl_rawl(path,varargin)
 %
 % Juanjo 22/09/2011: Se añade depurador de ficheros: los ficheros que no cumplan la sintaxis
 %                    Bdddyy.### son descartados
+% 
+% 16/03/2013 Juanjo: Modificado para aceptar diferentes años, siempre con la estructura del
+%                    repositorio !! yyyy/bdata###
 
 
 %%%%%%%   VALIDACIÓN DE ARGUMENTOS DE ENTRADA    %%%%%%%%%%%%
@@ -54,57 +57,87 @@ catch % compatibilidad con version original
 end
 %%%%%%%   FIN DE VALIDACIÓN   %%%%%%%%%%%%%%%
 
-sl_avg=[];
-sl_raw=[];
-s=dir(path);
+%% FILES search
+sl_avg=[]; sl_raw=[];
+Bfiles={}; FilesB={}; paths={}; files={}; pat={};
 
+[pathstring f]=fileparts(path); 
 if ~isempty(date_range)
-    dir_cell=struct2cell(s); files=dir_cell(1,:);
-
-    myfunc_clean=@(x)regexp(x, '^B\D.\d*','ignorecase')';     clean=@(x)~isempty(x); 
-    remove=find(cellfun(clean,cellfun(myfunc_clean,files, 'UniformOutput', false))==1);
-    files(remove)=[];  s(remove)=[];
-
-    myfunc=@(x)sscanf(x,'%*c%3d%2d.%*d')';
-    A=cell2mat(cellfun(myfunc,files, 'UniformOutput', false)');
-%                    Año    Dia
-    dates=datejuli(A(:,2),A(:,1));
-    s(dates<date_range(1))=[]; dates(dates<date_range(1),:)=[];
-    if length(date_range)>1
-       s(dates>date_range(2))=[];
+    if length(date_range)==2
+       DATE=date_range(1):date_range(2); YEAR=unique(year(DATE));
+    else
+       DATE=date_range(1);               YEAR=unique(year(DATE));
     end
+    if length(YEAR)==1
+        Bfiles{1}=dir(path);
+        dir_cell=struct2cell(Bfiles{1}); FilesB{1}=dir_cell(1,:);
+        paths{1}=repmat({pathstring},length(Bfiles{1}),1); 
+    else
+        for i=1:length(YEAR)
+            pathstr=regexprep(pathstring, '\d{4}',num2str(YEAR(i)));
+            if isempty(regexp(pathstr, '\d{4}'))
+               pathstr=strcat('..\',num2str(YEAR(i)),'\',pathstring);
+            end
+            Bfiles{i}=dir(sprintf('%s\\%s',pathstr,f));
+            dir_cell=struct2cell(Bfiles{i}); FilesB{i}=dir_cell(1,:);
+            paths{i}=repmat({pathstr},length(Bfiles{i}),1);  
+        end
+    end
+    for i=1:length(YEAR)
+        files=cat(2,files,FilesB{i});
+        pat=cat(1,pat,paths{i});
+    end
+    FilesB=files; paths=pat;
+else
+    Bfiles=dir(path);    
+    dir_cell=struct2cell(Bfiles); FilesB=dir_cell(1,:);
+    paths=repmat({pathstr},length(Bfiles),1);  
 end
 
-if isempty(s)
-    sl_raw=NaN; TC=NaN;
-    disp('No data');
-    return
+    myfunc_clean=@(x)regexp(x, '^B\d{5}[.]\d*','ignorecase')';     clean=@(x)~isempty(x); 
+    remove=cellfun(clean,cellfun(myfunc_clean,FilesB, 'UniformOutput', false));
+    FilesB(~remove)=[];  
+    myfunc=@(x)sscanf(x,'%*c%3d%2d.%*d')';    
+    A=cell2mat(cellfun(myfunc,FilesB, 'UniformOutput', false)');
+    if isempty (FilesB)
+       disp('No B Files'); 
+       sl_raw=NaN; TC=NaN; return
+    end
+    
+% control de fechas
+if ~isempty(date_range)
+%                  Año    Dia
+   dates=datejuli(A(:,2),A(:,1));    
+   FilesB(dates<date_range(1))=[]; paths(dates<date_range(1))=[]; dates(dates<date_range(1))=[]; 
+   if length(date_range)>1
+      FilesB(dates>date_range(2))=[]; paths(dates>date_range(2))=[]; 
+   end   
+   if isempty(FilesB)
+      disp('No B Files in date range'); 
+      sl_raw=NaN; TC=NaN; return
+   end   
 end
+
+%%
+textprogressbar('processing sl files: ');
 
 [p n ext]=fileparts(path);
-TC=[];
-textprogressbar('processing sl files: ');
-for i=1: length(s)
-    slraw=[];
-    textprogressbar(100*i/length(s));
+for i=1:length(FilesB)
+    slraw=[]; TC=[];
+    textprogressbar(100*i/length(FilesB));
     try
-      [path nam ext]=fileparts(s(i).name);
-      if exist(fullfile(p,[nam,'_dep',ext]))
-         file=fullfile(p,[nam,'_dep',ext]); 
+      [path nam ext]=fileparts(FilesB{i});
+      if exist(fullfile(paths{i},[nam,'_dep',ext]),'file')
+         file=fullfile(paths{i},[nam,'_dep',ext]); 
       else
-         file=fullfile(p,s(i).name);
+         file=fullfile(paths{i},FilesB{i});
       end      
-       [slraw,TC_]=readb_sl_raw(file);
-       sl_raw=[sl_raw;slraw.sl];
-       TC=[TC,[slraw.sls_dep,TC_(3,:)]'];
-    catch
-        %rethrow(lasterror);
-        disp('warning')
-        warning('MATLAB:readbsl:file_error', ' %s.', s(i).name);
-        sx=lasterror;
-        disp(sx.message);   
-        disp('\n');
-        textprogressbar(i/length(s));
+      [slraw,TC_]=readb_sl_raw(file);
+      sl_raw=[sl_raw;slraw.sl];
+      TC=[TC,[slraw.sls_dep,TC_(3,:)]'];
+    catch exception
+      fprintf('%s. File %s\n',exception.message, FilesB{i});  
+      textprogressbar(i/length(FilesB));
     end
 end
 textprogressbar(' sl raw done');
