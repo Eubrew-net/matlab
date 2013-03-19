@@ -1,11 +1,12 @@
 
 function [LRatPFHT ErrorRaCI]=analyzeCI(path,nameb,varargin)
+
 % This function analyze CI files and gives the response for each one respect nameb.
 % We want all ratios appear.
-% The output is a matrix (Ratio %)with the Data/Time and T. 
-
-% [LRatPFHT_185 ErrorRaCI_185 ErrorRCI_185]=analyzeCICI('E:\CODE\aro2010\bdata185\CI2*10.185','CI20110.185');
- 
+% The output is a matrix (Ratio %) with the Data/Time and T. 
+% 
+% [LRatPFHT_185 ErrorRaCI_185 ErrorRCI_185]=analyzeCI('E:\CODE\aro2010\bdata185\CI2*10.185','CI20110.185');
+%  
 %%  TODO: 
 %        ¿Es necesario pasarle el nombre CI?
 %        Comprobar depuración de outliers. Eliminarlos en su caso??
@@ -28,7 +29,8 @@ function [LRatPFHT ErrorRaCI]=analyzeCI(path,nameb,varargin)
 %  26/10/2010 Isabel  Modificados titulos y ejes para que salgan en negrita.
 %                     Se muestran los outliers.
 %                     Se comenta el que muestre los outliers,CIFiles=dir(path);
-
+% 16/03/2013 Juanjo:  Modificado para aceptar diferentes años, siempre con la estructura del
+%                     repositorio !! yyyy/bdata###
 
 %% Validacion de argumentos de entrada
 arg = inputParser;   % Create instance of inputParser class.
@@ -39,39 +41,78 @@ arg.addRequired('path');
 arg.addRequired('nameb'); 
 
 % input param - value,varargin
-arg.addParamValue('date_range', [], @isfloat); % por defecto, no control de fechas
-arg.addParamValue('depuracion',0, @(x)(x==0 || x==1)); % por defecto no depuracion
+arg.addParamValue('date_range',  [], @isfloat);            % por defecto, no control de fechas
+arg.addParamValue('depuracion',   0, @(x)(x==0 || x==1));    % por defecto no depuracion
 arg.addParamValue('outlier_flag', 0, @(x)(x==0 || x==1)); % por defecto no depuracion
 
 % validamos los argumentos definidos:
 try
-arg.parse(path, nameb, varargin{:});
-mmv2struct(arg.Results);
-chk=1;
-catch
-  errval=lasterror;
-  chk=0;
+    arg.parse(path, nameb, varargin{:});
+    mmv2struct(arg.Results);
+    chk=1;
+catch exception
+    fprintf('%s',exception.message);  
+    chk=0;
 end
 
 %% CI FILES
-CIFiles=dir(path);
-FilesCI=[]; FilesCI_m=[];
-for i=1:length(CIFiles)
-    FilesCI  = [FilesCI; cellstr(CIFiles(i,1).name)];    
-    FilesCI_m= [FilesCI_m; brewer_date(str2num(cell2mat(regexp(CIFiles(i).name,'\d{5}','match'))))];
-end
-if isempty (FilesCI)
-    warning ('No Files')
+CZFiles={}; FilesCZ={}; paths={}; files={}; pat={};
+
+[pathstring f]=fileparts(path); 
+if ~isempty(date_range)
+    if length(date_range)==2
+       DATE=date_range(1):date_range(2); YEAR=unique(year(DATE));
+    else
+       DATE=date_range(1);               YEAR=unique(year(DATE));
+    end
+    if length(YEAR)==1
+        CIFiles{1}=dir(path);
+        dir_cell=struct2cell(CIFiles{1}); FilesCI{1}=dir_cell(1,:);
+        paths{1}=repmat({pathstring},length(CIFiles{1}),1); 
+    else
+        for i=1:length(YEAR)
+            pathstr=regexprep(pathstring, '\d{4}',num2str(YEAR(i)));
+            if isempty(regexp(pathstr, '\d{4}'))
+               pathstr=strcat('..\',num2str(YEAR(i)),'\',pathstring);
+            end
+            CIFiles{i}=dir(sprintf('%s\\%s',pathstr,f));
+            dir_cell=struct2cell(CIFiles{i}); FilesCI{i}=dir_cell(1,:);
+            paths{i}=repmat({pathstr},length(CIFiles{i}),1);  
+        end
+    end
+    for i=1:length(YEAR)
+        files=cat(2,files,FilesCI{i});
+        pat=cat(1,pat,paths{i});
+    end
+    FilesCI=files; paths=pat;
+else
+    CIFiles=dir(path);    
+    dir_cell=struct2cell(CIFiles); FilesCI=dir_cell(1,:);
+    paths=repmat({pathstr},length(CIFiles),1);  
 end
 
+    myfunc_clean=@(x)regexp(x, '^ci\d{5}[.]\d*','ignorecase')';     clean=@(x)~isempty(x); 
+    remove=cellfun(clean,cellfun(myfunc_clean,FilesCI, 'UniformOutput', false));
+    FilesCI(~remove)=[];  
+    myfunc=@(x)sscanf(x,'%*2c%3d%2d.%*d')';    
+    A=cell2mat(cellfun(myfunc,FilesCI, 'UniformOutput', false)');
+    if isempty (FilesCI)
+       disp('No CI Files'); 
+       wl={}; fwhm={}; return
+    end
+    
 % control de fechas
 if ~isempty(date_range)
-   indx=FilesCI_m(:,1)<date_range(1); 
-   FilesCI(indx)=[]; FilesCI_m(indx,:)=[];
+%                  Año    Dia
+   dates=datejuli(A(:,2),A(:,1));    
+   FilesCI(dates<date_range(1))=[]; paths(dates<date_range(1))=[]; dates(dates<date_range(1))=[]; 
    if length(date_range)>1
-      indx=FilesCI_m(:,1)>date_range(2);
-      FilesCI(indx)=[]; FilesCI_m(indx,:)=[];
-   end
+      FilesCI(dates>date_range(2))=[]; paths(dates>date_range(2))=[]; 
+   end   
+   if isempty(FilesCI)
+      disp('No CI Files in date range'); 
+      LRatPFHT={}; ErrorRaCI={}; return
+   end   
 end
 
 %% DEFINING VARIABLES 
@@ -82,20 +123,15 @@ FHjtodos=[];
 Ttodosai=[];
 ErrorRaCI=[];
 ErrorRCI=[];
-pathstr=fileparts(path);
 
 %% RaCI FUNCTION
 %...CLongRatiosPFiles...........................................................
-file_chk={};
-[a b c]=unique(FilesCI_m(:,end)); FilesCI_m=FilesCI_m(b,:);
-for i=1:size(FilesCI_m,1)
-    [a b ext]=fileparts(nameb);
-    file=sprintf('Ci%03d%02d',FilesCI_m(i,5),FilesCI_m(i,2)-2000);
-    if exist(fullfile(pathstr,[file,'_dep',ext]))
-       file_d=fullfile(pathstr,[file,'_dep',ext]); 
-       file_chk{i}=file_d;
+for i=1:length(FilesCI)
+    [a b ext]=fileparts(FilesCI{i});
+    if exist(fullfile(paths{i},[b,'_dep',ext]),'file')
+       file_d=fullfile(paths{i},[b,'_dep',ext]); 
     else
-       file_d=fullfile(pathstr,[file,ext]); 
+       file_d=fullfile(paths{i},[b,ext]); 
     end
     
     try
@@ -195,24 +231,19 @@ figure;
 set(gcf,'Tag','CI_Report');
 subplot(2,1,1);
 Cp=size(data_plot,2);
-gris_line(Cp+1);
-P=ploty(data_plot);
+gris_line(Cp+1); ploty(data_plot);
 set(gca,'XTicklabel',[],'GridLineStyle','-.','Linewidth',1);
-ylabel('SL Intensity','FontWeight','bold');
-title('');
+ylabel('SL Intensity','FontWeight','bold'); title('');
 text(3100,nanmean(max(data_plot(:,2:end)))/2,...
     sprintf('%d scans from %s to %s',length(FHj), datestr(FHj(1),1), datestr(FHj(end),1)),...
     'BackgroundColor','w','HorizontalAlignment','center'); grid;
-sup=suptitle(sprintf('%s%s','CI files, Brw#',nameb(end-2:end)));
-set(sup,'FontWeight','bold');
+sup=suptitle(sprintf('%s%s','CI files, Brw#',nameb(end-2:end))); set(sup,'FontWeight','bold');
 
-%figure
 subplot(2,1,2);
 Cp=size(CLongRatiosPFiles,2);
 gris_line(Cp+5); P=ploty(CLongRatiosPFiles(:,[1,2:end]));
 set(gca,'GridLineStyle','-.','Linewidth',1);
-xlabel('Wavelength (A)','FontWeight','bold');
-ylabel('Ratio %','FontWeight','bold');
+xlabel('Wavelength (A)','FontWeight','bold'); ylabel('Ratio %','FontWeight','bold');
 title('');
 pos=get(gca,'YLim'); [pathstr, name, ext] = fileparts(nameb);
 text(3100,pos(2),sprintf('Reference CI file: %s',[name,ext]),...
@@ -230,17 +261,18 @@ Cp=size(CLongRatiosPFiles,2);
 [m,s,n,n_]=grpstats(CLongRatiosPFiles(:,2:end),fix(CLongRatiosPFiles(:,1)/100)*100,0.5);
 
 figure;  set(gcf,'Tag','CI_ratios');
-errorbar(repmat(diaj2(FHj),1,size(m,1)),m',s','o')
-legend(n_,'location','best')
+errorbar(repmat(FHj',1,size(m,1)),m',s','o'); legend(n_,'location','best');
+set(gca,'GridLineStyle','-.','Linewidth',1); grid;
+if ~exist('YEAR','var'), YEAR=unique(year(FHj)); end
+if length(YEAR)>1
+   datetick('x',6,'Keeplimits','Keepticks');
+else
+   set(gca,'XtickLabel',diaj(get(gca,'XTick')));    
+end
+xlabel('Day ','FontWeight','bold'); ylabel('Ratio %','FontWeight','bold');
+[pathstr, name, ext] = fileparts(nameb);
+title(sprintf('Mean and standard dev (10 nm averaged)\nRef: %s',[name,ext]));
 
-set(gca,'GridLineStyle','-.','Linewidth',1);
-xlabel('Day ','FontWeight','bold');
-ylabel('Ratio %','FontWeight','bold');
-title('mean and standard dev 10 nm averaged');
-pos=get(gca,'YLim'); [pathstr, name, ext] = fileparts(nameb);
-text(3100,pos(2),sprintf('Reference CI file: %s',[name,ext]),...
-    'BackgroundColor','w','HorizontalAlignment','center');
-grid;
 %hold on;
 %plot(CLongRatiosPFiles(:,1),nanmean(CLongRatiosPFiles(:,3:end)'),'r-','LineWidth',1.5);
 
@@ -376,10 +408,6 @@ grid;
 %     hold off
 % end
 
-
-
-fid=fclose('all');
-
   if chk
       % Se muestran los argumentos que toman los valores por defecto
       disp('--------- Validation OK --------------') 
@@ -388,15 +416,18 @@ fid=fclose('all');
          for k=1:numel(arg.UsingDefaults)
              field = char(arg.UsingDefaults(k));
              value = arg.Results.(field);
-             if isempty(value),   value = '[]';   
-             elseif isfloat(value), value = num2str(value); end
-             disp(sprintf('   ''%s''    defaults to %s', field, value))
+             if isempty(value),   
+                value = '[]';   
+             elseif isfloat(value), 
+                value = num2str(value); 
+             end
+             fprintf('   ''%s''    defaults to %s\n', field, value);
          end
       else
-         disp('               None                   ')
+         disp('               None                   ');
       end
-      disp('--------------------------------------') 
+      disp('--------------------------------------'); 
   else
-      disp('NO INPUT VALIDATION!!')
-      disp(sprintf('%s',errval.message))
+      disp('NO INPUT VALIDATION!!');
+      fprintf('%s',errval.message);
   end
