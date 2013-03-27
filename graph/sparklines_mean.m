@@ -101,7 +101,7 @@ spark_spacing=  (1.5*fontsize(1)/72);                % distance between successi
 text_height =  (2*fontsize(1)/72);                  % height of all text boxes, distance between text boxes
 sep = (0.5*fontsize(1)/72);
 
-fig_height = (size(m,1))*(spark_height + spark_spacing)/1.5+text_height+sep;
+fig_height = (size(m,1))*(spark_height + spark_spacing)+text_height+sep;
 
 spark_width  = (spark_width/72);                   % width of sparkline
 value_width = 0.5*length([sprintf(numformat,pi)]) * (fontsize(end)/72);                   % width of sparkline labels
@@ -188,15 +188,18 @@ for(i = 1:size(m,1))                                % for all the rows in the in
     % create an axis for this sparkline
     axes('position',[x_spark,  y_thiselement+.75*spark_height,  spark_width,  spark_height])
     
+    %remove NaN values
+    
+    
     % find the extreem values (to highlight)
     [miny, minxi] = min(m(i,:));            
     [maxy, maxxi] = max(m(i,:));   
     % average and std
     mean_=nanmean(m(i,:));
     mean_2=nanmean(m(i,t<0.7));
+    
     j1=find(~isnan(m(i,:)),1,'first');
     jend=find(~isnan(m(i,:)),1,'last');
-    
     
     %Draw the rnage box in the background if requested
     if(exist('range','var'))
@@ -225,12 +228,12 @@ for(i = 1:size(m,1))                                % for all the rows in the in
            
     % add values for the left and right end
     if(showstart)
-%     if isnan(m(i,end))
-%         k=find(~isnan(m(i,:)),1,'last');
-%         if ~isempty(k)
-%           m(i,end)=m(i,k);
-%         end
-%     end
+    if isnan(m(i,end))
+        k=find(~isnan(m(i,:)),1,'last');
+        if ~isempty(k)
+          m(i,end)=m(i,k);
+        end
+    end
     annotation('textbox', [x_left, y_thiselement, value_width, text_height], ...
                'string', sprintf(numformat,m(i,j1)), ...
                'HorizontalAlignment', 'right', ...
@@ -242,7 +245,7 @@ for(i = 1:size(m,1))                                % for all the rows in the in
                'LineStyle', 'none', ...
                'Color', 'r', 'FontSize', fontsize(end));
            
-    % add values for median 
+    % add values for the minumum and maximum 
     if(maxmin)
     annotation('textbox', [x_min, y_thiselement, value_width, text_height], ...
                'string', sprintf(numformat,mean_), ...
