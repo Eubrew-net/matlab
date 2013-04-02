@@ -154,7 +154,7 @@ ref=summary{n_ref}(jday,:);
          
          ms9c=o3_c(:,21);   % filter corr. 
          ms9=o3_c(:,21);    % no filter corr.(Cuidado!! Hasta que no se adopte filter_corr siempre)
-         o3ref=o3_c(:,13);  % usually not SL corrected: o3_c(:,7)
+         o3ref=o3_c(:,7);   % usually not SL corrected: o3_c(:,7), SL corrected o3_c(:,13)
          m_inst=o3_c(:,16); % ozone airmass from inst.
          m_ref =o3_c(:,4);  % ozone airmass from ref.
            
