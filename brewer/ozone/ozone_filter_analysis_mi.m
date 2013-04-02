@@ -74,21 +74,24 @@ tableform({'F#0 <-> F#1','F#1 <-> F#2','F#2 <-> F#3','F#3 <-> F#4'},...
 
 results_rel=cell2mat(chg_rel); results_abs=cell2mat(chg_abs); 
 if isempty(varargin)
-   fplot=1;
+   fplot=1; qplot=1;
+elseif size(varargin)==1
+   fplot=varargin{1};   qplot=0;
 else
-   fplot=varargin{1};
+   fplot=varargin{1};   qplot=varargin{2};   
 end
 
-
-if fplot
    % queso con porcentajes relativos al total
-   figure; set(gcf,'Tag','FILTER_DISTRIBUTION');
-   label_1=mmcellstr(sprintf('F#%d= |',freq_filter(:,1)./64));
-   label_=mmcellstr(sprintf('%.1f%% |',freq_filter(:,3)));
-   explode = repmat(1,1,size(freq_filter,1))'; pie3(freq_filter(:,2),explode,strcat(label_1,label_));
-   set(findobj(gcf,'Type','text'),'Backgroundcolor','w');
-   title(sprintf('%s%s','Filters:  ',Cal.brw_name{Cal.n_inst}),'FontSize',12,'FontWeight','Bold');
-    
+   if qplot
+      figure; set(gcf,'Tag','FILTER_DISTRIBUTION');
+      label_1=mmcellstr(sprintf('F#%d= |',freq_filter(:,1)./64));
+      label_=mmcellstr(sprintf('%.1f%% |',freq_filter(:,3)));
+      explode = repmat(1,1,size(freq_filter,1))'; pie3(freq_filter(:,2),explode,strcat(label_1,label_));
+      set(findobj(gcf,'Type','text'),'Backgroundcolor','w');
+      title(sprintf('%s%s','Filters:  ',Cal.brw_name{Cal.n_inst}),'FontSize',12,'FontWeight','Bold');
+   end
+   
+if fplot
    f=figure;  set(f,'Tag','Ozone_diff_filter_rel');
    rectangle('Position',[.5,-0.5,8,1],'FaceColor',[.95 .95 .95]); hold on; 
    boxplot(results_rel(:,1:3:end),'notch','on',...% ploteamos campo 6
