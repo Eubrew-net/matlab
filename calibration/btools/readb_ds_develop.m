@@ -345,35 +345,28 @@ if ~isempty(dss)
 %     end
 %
 
-
-
     ds=ds';dss=dss';
 
-    %%  salidas raw DS
-      
+    %%  salidas raw DS    
       o3.dsum=[timedss(:,1:2),timedss(:,8)/60,timedss(:,4),...
         dss(:,9:11),dss(:,[14,22,30,21,29]),dss(:,[15,23,16,24,17,25,18,26,19,27,20,28])];
-      o3.dsum_legend={'date';'hgflag';'lat ';'angz';'ang2';'airm';'temp';'filt';'ozo ';'sozo';'so2 ';'sso2';...
-        'ms4 ';'sms4';'ms5 ';'sms5';'ms6 ';'sms6';'ms7 ';'sms7';'ms8 ';'sms8';'ms9 ';'sms9'};
-      %xlswrite(dsum,'',dss_legend)
+      o3.dsum_legend={'date';'hgflag';'tst ';'aimass';'sza';'airm';'temp';...
+                      'filt';'ozo ';'sozo';'so2 ';'sso2';...
+                      'ms4 ';'sms4';'ms5 ';'sms5';'ms6 ';'sms6';'ms7 ';'sms7';...
+                      'ms8 ';'sms8';'ms9 ';'sms9'}; % xlswrite(dsum,'',dss_legend);
 
-     %sustituimos s0 s1 de la medida por m2 m3
-     ds(:,4:5)=[m2ds,m3ds*pr/1013];
-     ds(:,3)=tst_ds;
+     %sustituimos [slit_ini, slit_end] de la medida por m2 m3
+     ds(:,4:5)=[timeds(:,5),timeds(:,6)*pr/1013];% m2ds, m3ds
+     %sustituimos tiempo de la medida por true-solar-time
+     ds(:,3)=timeds(:,9);% tst_ds
+     
      MS9=ds(:,15)-0.5*ds(:,16)-1.7*ds(:,17); % o3 double ratio ==MS(9)
-     MS8=ds(:,14)-3.2*ds(:,17); %:REM SO2 ratio MS(8)
-    
-     
-
-     
+     MS8=ds(:,14)-3.2*ds(:,17);              % SO2 double ratio ==MS(8)            
      
      o3.ds_raw0=[timeds(:,1:3),ds_temp,ds,MS8,MS9];
-     o3.ds_raw0_legend={'date';'flg';'nds';'tmp';'fl1';'fl2';'tim';'m2 ';'m3*pressure corr';'cy ';'F0 ';'F1 ';'F2 ';'F3 ';...
-        'F4 ';'F5 ';'F6 ';'r1 ';'r2 ';'r3 ';'r4 ';'r5 ';'r6 '};
-    
-    %%   fin de salidas raw
- 
-
+     o3.ds_raw0_legend={'date';'hgflg';'nds';'tmp';'fl1';'fl2';'tim';'m2 ';...
+                        'm3*pressure corr';'cy ';'F0 ';'F1 ';'F2 ';'F3 ';...
+                        'F4 ';'F5 ';'F6 ';'ms4 ';'ms5 ';'ms6 ';'ms7 ';'MS8 ';'MS9 '};    
 
     %% ds re-calculation
     %%% Prueba de vectorizar 
@@ -389,84 +382,74 @@ if ~isempty(dss)
     %     end
     %     
 
-    Fr=ds(:,7:13); % asilamos las cuetas
-    %dead  time correction and filter atenuation. 
+
+    % Convert to count-rates / Dead Time - Temperature - Filter - correction
     %IF Q14%=0 THEN TE%=-33.27+VAL(TE$)*18.64:IF Q10%=0 THEN TE%=-30+VAL(TE$)*16+.5
-     if nargin <3 || isempty(spectral_config) 
-      F=ds_counts(Fr,ds(:,2),ds_temp,ds(:,6),DT(1,:),TC(1,:),AT(1,:));
+
+     Fr=ds(:,7:13); % asimilamos las cuentas brutas (en todos los canales) del fichero B
+     if nargin <3 || isempty(spectral_config)% first config 
+        F=ds_counts(Fr,ds(:,2),ds_temp,ds(:,6),DT(1,:),TC(1,:),AT(1,:));
      else
-      F=ds_counts(Fr,ds(:,2),ds_temp,ds(:,6),DT(1,:),TC(1,:),AT(1,:),spectral_config);
+        F=ds_counts(Fr,ds(:,2),ds_temp,ds(:,6),DT(1,:),TC(1,:),AT(1,:),spectral_config);
      end
+     
      DS_=F;  % DS_ counts raleyght uncorrected
      DS=rayleigth_cor(DS_,pr,m3ds);
-    % R=[ 0 0 0  4620    4410    4220    4040 ];
-    % w=[0.00  0.00   0.00   -1.00    0.50    2.20   -1.70];
-    % Vectorizado
-    % RC=matmul(m3ds,R)*pr/1013*w'
-    % R coef raleight
-    % w weithgth
 
-    % los ratios de fichero
-    %  ratios_orig=[ds(:,14:17),MS8,MS9];
-    
-    [ozone,so2,ratios]=ozone_cal(DS,m2ds,config(:,1));
-    [ozo_rc,ozo_rc_std]=grpstats(ozone,idx_ds,{'mean','std'});
-
+     [ozone,so2,ratios]=ozone_cal(DS,m2ds,config(:,1));
+     [ozo_rc,ozo_rc_std]=grpstats(ozone,idx_ds,{'mean','std'});
 
     if size(config,2)>1 % segunda configuracion
-        Fr=ds(:,7:13); % asilamos las cuetas
-      
-        if nargin <3 || isempty(spectral_config) 
-               F2=ds_counts(Fr,ds(:,2),ds_temp,ds(:,6),DT(2,:),TC(2,:),AT(2,:)');
-        else
-               F2=ds_counts(Fr,ds(:,2),ds_temp,ds(:,6),DT(2,:),TC(2,:),AT(2,:),spectral_config);
-        end
+       Fr=ds(:,7:13); % asimilamos las cuentas brutas (en todos los canales) del fichero B      
+       if nargin <3 || isempty(spectral_config) 
+          F2=ds_counts(Fr,ds(:,2),ds_temp,ds(:,6),DT(2,:),TC(2,:),AT(2,:)');
+       else
+          F2=ds_counts(Fr,ds(:,2),ds_temp,ds(:,6),DT(2,:),TC(2,:),AT(2,:),spectral_config);
+       end
         
-        DS_2=F2;  % DS_ counts raleyght uncorrected
-        DS2=rayleigth_cor(DS_2,pr,m3ds);
-        [ozone2,so22,ratios2]=ozone_cal(DS2,m2ds,config(:,2));
+       DS_2=F2;  % DS_ counts raleyght uncorrected
+       DS2=rayleigth_cor(DS_2,pr,m3ds);
+       [ozone2,so22,ratios2]=ozone_cal(DS2,m2ds,config(:,2));
+       [ozo_c,ozo_std]=grpstats(ozone2,idx_ds,{'mean','std'});
 
+       % All individual measurements, recalculated
+       o3.ozone_ds=[timeds(:,1:5),ds_temp,ds(:,2),ozone,ratios,ozone2,ratios2];
+       o3.ozone_ds_legend={'date'  'hg_flag' 'nds'   'sza'   'airm'  'temp'  'flt'...
+                           'o3_o'  'ms4'     'ms5'   'ms6'   'ms7'   'ms8'   'ms9'...% ratios (Rayleight corrected !!)
+                           'o3_n'  'ms4'     'ms5'   'ms6'   'ms7'   'ms8'   'ms9'}; % ratios (Rayleight corrected !!)
+       
+       % Summaries, recalculated  
+       o3.ozone_s=[timedss(:,1:4),dss(:,[11,14]),ozo_rc,ozo_rc_std,ozo_c,ozo_std];
+       o3.ozone_s_legend={'date '     'hg_flag '    'sza '       'airm '   'temp ' 'flt ' ...
+                          'o3_first ' 'std_first '	'o3_second ' 'std_second '};
 
-        %ozone_ds=[timeds(:,[1,3,4,5]),ozone,ratios,ozone2,ratios2];
-        o3.ozone_ds=[timeds(:,1:5),ds_temp,ds(:,2),ozone,ratios,ozone2,ratios2];
-        o3.ozone_ds_legend={  'date'    'hg_flag'    'n'    'sza'    'airm'  'temp' 'flt'...
-                              'o3'    'r1'    'r2'    'r3'    'r4'    'r5'    'r6'   ... % ratios (Rayleight corrected !!)
-                              'o3'    'r1'    'r2'    'r3'    'r4'    'r5'    'r6'};
-        [ozo_c,ozo_std]=grpstats(ozone2,idx_ds,{'mean','std'});
-        o3.ozone_s=[timedss(:,1:4),dss(:,[11,14]),ozo_rc,ozo_rc_std,ozo_c,ozo_std];
-        o3.ozone_s_legend={'fecha' 'hgflag' 'sza' 'airm' 'tmp' 'flt' 'ozo'	'std'	'ozo_c'	'std_c'};
-
-        %time ratios_fichero %cuentas/secod recalculadas
-        o3.ozone_raw=[timeds(:,1:9),ds(:,2),ds_temp,ds(:,7:13),F,F2];
-        o3.ozone_raw_legend={'date'	'hg'    'idx'   'sza'	'm2'	'm3'	'sza'	'saz'	'tst'	'temp'  'flt'...
-                             'OS0'  'OS1'	'OS2'	'OS3'	'OS4'	'OS5'	'OS6'	...  % cuentas brutas
-                             'iS0'  'iS1'	'iS2'	'iS3'	'iS4'	'iS5'	'iS6'	...  % cuentas recalculadas 1
-                             'fs0'	'fs1'	'fs2'	'fs3'	'fs4'	'fs5'	'fs6'	...  % cuentas recalculadas 2
-                             };
-
-
+       % Raw counts & count-rates recalculated (DT, Temp &  Filt. corrected). Rayleight uncorrected !!
+       o3.ozone_raw=[timeds(:,1:9),ds(:,2),ds_temp,ds(:,7:13),F,F2];
+       o3.ozone_raw_legend={'date'	'hg'    'idx'   'sza'	'm2'	'm3'	'sza'	'saz'	'tst'  'flt'  'temp'...
+                            'OS0'  'OS1'	'OS2'	'OS3'	'OS4'	'OS5'	'OS6'	...  % cuentas brutas
+                            'iS0'  'iS1'	'iS2'	'iS3'	'iS4'	'iS5'	'iS6'	...  % count-rates recalculadas 1 (Rayleight uncorrected !!)
+                            'fs0'	'fs1'	'fs2'	'fs3'	'fs4'	'fs5'	'fs6'	...  % count-rates recalculadas 2 (Rayleight uncorrected !!)
+                            };
     else
-        o3.ozone_ds=[timeds(:,1:5),ozone,ratios,NaN*ozone,NaN*ratios];
-        %ozone_s=[timedss(:,[1,3,4]),dss(:,[22,30]),dss(:,1)*NaN,dss(:,1)*NaN];
-        o3.ozone_ds_legend={  'date'    'hg_flag'    'n'  'lat'   'sza'    'airm'  'temp' 'flt'...
-                              'o3'    'r1'    'r2'    'r3'    'r4'    'r5'    'r6'   ...
-                              'o3'    'r1'    'r2'    'r3'    'r4'    'r5'    'r6'};
+       % All individual measurements, recalculated
+       o3.ozone_ds=[timeds(:,1:5),ds_temp,ds(:,2),ozone,ratios,NaN*ozone,NaN*ratios];
+       o3.ozone_ds_legend={'date'  'hg_flag' 'nds'   'sza'   'airm'  'temp'  'flt'...
+                           'o3_o'  'ms4'     'ms5'   'ms6'   'ms7'   'ms8'   'ms9'...% ratios (Rayleight corrected !!)
+                           'o3_n'  'ms4'     'ms5'   'ms6'   'ms7'   'ms8'   'ms9'}; % ratios (Rayleight corrected !!)
 
-        o3.ozone_s=[timedss(:,1:4),dss(:,[11,14,22,30]),ozo_rc,ozo_rc_std];
-        o3.ozone_s_legend={'fecha' 'hgflag' 'sza' 'airm' 'tmp' 'flt' 'ozo'	'std'	'ozo_c'	'std_c'};
-        
-        
-        o3.ozone_raw=[timeds(:,1:9),ds(:,2),ds_temp,ds(:,7:13),F,F];
-        o3.ozone_raw_legend={'date'	'hg'    'idx'   'sza'	'm2'	'm3'	'sza'	'saz'	'tst'	'temp'  'flt'...
-                             'OS0'  'OS1'	'OS2'	'OS3'	'OS4'	'OS5'	'OS6'	...
-                             'iS0'  'iS1'	'iS2'	'iS3'	'iS4'	'iS5'	'iS6'	...
-                             'fs0'	'fs1'	'fs2'	'fs3'	'fs4'	'fs5'	'fs6'	...
-                             };
-
-        
+       % Summaries, recalculated  
+       o3.ozone_s=[timedss(:,1:4),dss(:,[11,14,22,30]),ozo_rc,ozo_rc_std];
+       o3.ozone_s_legend={'fecha '    'hgflag ' 'sza '       'airm ' 'tmp ' 'flt ' ...
+                          'o3_bfile ' 'std '    'ozo_first ' 'std_first '};
+                
+       % Raw counts & count-rates recalculated (DT, Temp &  Filt. corrected). Rayleight uncorrected !!
+       o3.ozone_raw=[timeds(:,1:9),ds(:,2),ds_temp,ds(:,7:13),F,F];
+       o3.ozone_raw_legend={'date'	'hg'    'idx'   'sza'	'm2'	'm3'	'sza'	'saz'	'tst'  'flt'  'temp'...
+                            'OS0'  'OS1'	'OS2'	'OS3'	'OS4'	'OS5'	'OS6'	...  % cuentas brutas
+                            'iS0'  'iS1'	'iS2'	'iS3'	'iS4'	'iS5'	'iS6'	...  % count-rates recalculadas 1 (Rayleight uncorrected !!)
+                            'fs0'	'fs1'	'fs2'	'fs3'	'fs4'	'fs5'	'fs6'	...  % count-rates recalculadas 2 (Rayleight uncorrected !!)
+                            };
     end
-
-
 
 else
     warning('Fichero vacio ? no ozone measurements');
@@ -730,8 +713,10 @@ if ~isempty(jco)
         end
     else
         o3.co=[];
-    end
+end
 
+
+%%%%%% functions %%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 function [flag,time]=hg_filter(dsvar,hg_time)
 % dsvar-> temperature first column
@@ -744,12 +729,8 @@ function [flag,time]=hg_filter(dsvar,hg_time)
         flag=[tb_dsum,find((dsvar(:,1)>time_badhg(ii,1)   & dsvar(:,1)<time_badhg(ii,2)))];
      end
     
-
-
-
-
-
 function [ozone,so2,ratios]=ozone_cal(DS,m2,config)
+
 % 8700 REM -8799 calculate ratios
 % 8705 IF MDD$="n2" THEN 8730
 % FOR I=4 TO 6:MS(I)=F(5)-F(I-2):NEXT:
@@ -770,8 +751,7 @@ function [ozone,so2,ratios]=ozone_cal(DS,m2,config)
     so2=(ms8-B2)./(A2*A3*m2)-ozone/A2; %revisar
     ratios=[ms4,ms5,ms6,ms7,ms8,ms9];
     
-    
-    
+        
 function ratios=calc_ratios(F)
         
 % Weight definition for the seven slits
@@ -813,38 +793,28 @@ function F=ratio2counts(sls)
     %F8c=log(MS(:,8))*1E4/log(10);
     %figure;plot(100*(F(:,7)-F8c)./F(:,7));
 
-
-
-% 
 function DS=ds_counts(F,Filtro,temp,CY,DT,TC,AF,SAF)
-  
-%AF en columna
-AF=AF(:);
 
-
-
-% REM calc corr F's
 % 8305 FOR I=WL TO WU:IF I=1 THEN 8335
 % 8310   VA=F(I):GOSUB 8350
-
+%
 % 8350 REM correct VA for dark/dead time
 % 8355 VA=(VA-F(1))*2/CY/IT:IF VA>1E+07 THEN VA=1E+07
 % 8360 IF VA<2 THEN VA=2
 % 8365 F1=VA:FOR J=0 TO 8:VA=F1*EXP(VA*T1):NEXT
 % 8370 RETURN
-
-%correccion por dark  
-  F_dark=F(:,2);
-  F(:,2)=NaN*F_dark;
-  % otra constante
+  
+  % Convert to count-rates
+  F_dark=F(:,2);  F(:,2)=NaN*F_dark;
+  % IT=interval-scaling factor
   IT=0.1147;
   for j=1:7
-    F(:,j) = 2*(F(:,j)-F_dark)./CY/IT;
+    F(:,j) = 2*(F(:,j)-F_dark)./CY/IT; 
   end
   F(F<=0)=2;
   F(F>1E07)=1E07;
 
-  % dead time correction
+  % Dead Time correction
   F0=F;
   for j=1:9
      for i=1:7  
@@ -853,7 +823,6 @@ AF=AF(:);
   end
   F=round(log10(F)*10^4);  %aritmetica entera
   
-% REM calc corr F's
 % 8305 FOR I=WL TO WU:IF I=1 THEN 8335
 % 8310   VA=F(I):GOSUB 8350
 % 8315   F(I)=LOG(VA)/CO*P4%:J=I:IF J=0 THEN J=7
@@ -861,40 +830,39 @@ AF=AF(:);
 % 8325   F(I)=F(I)+X*TE%+AF(AF%)
 % 8335 NEXT:RETURN
 
+  % AF en columna
+  AF=AF(:);
   Filtro=(Filtro/64)+1;
-%
-if nargin==7 % standard configuration
-  for j=1:7
 
-      if j~=1  
-          ii=j;
-      else
-          ii=8;
-      end
-      % slit 0 no tiene correccion (no se usa para ozono) 
-      F(:,j)=F(:,j)+(TC(ii)*temp)+AF(Filtro);
-  end
-else % spectral configuration
+  if nargin==7 % standard configuration
+    for j=1:7
+        if j~=1  
+           ii=j;
+        else
+           ii=8;
+        end
+        % slit 0 no tiene correccion (no se usa para ozono) 
+        F(:,j)=F(:,j)+(TC(ii)*temp)+AF(Filtro);
+    end
+  else % spectral configuration
     SAF=[SAF(:,1),NaN*SAF(:,1),SAF(:,2:end),SAF(:,1)];
-
-   for j=1:7
-
-      if j~=1  
-          ii=j;
-      else
-          ii=8;
-      end
-      % slit 0 no tiene correccion (no se usa para ozono) 
-      F(:,j)=F(:,j)+(TC(ii)*temp)+SAF(Filtro,j);
-  end
-end   
-    
+    for j=1:7
+        if j~=1  
+           ii=j;
+        else
+           ii=8;
+        end
+        % slit 0 no tiene correccion (no se usa para ozono) 
+        F(:,j)=F(:,j)+(TC(ii)*temp)+SAF(Filtro,j);
+    end
+  end       
   F(:,2)=F_dark;
   DS=F; 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function DS=raw2counts(F,Filtro,temp,CY,DT,TC,AF,SAF)
+
 %function DS=raw2counts(F,Filtro,temp,CY,DT,TC,AF,SAF)
 %SAF=lineas Filtro, columnas slits
-function DS=raw2counts(F,Filtro,temp,CY,DT,TC,AF,SAF)
   
 %AF en columna
 AF=AF(:);
@@ -946,28 +914,35 @@ end
 F(:,2)=F_dark;
 DS=F; 
 
-  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  %function RC=rayleigth_cor(F,P,M3,BE)
-  %Rayleight correction
-  % Si se proporcionan coeficientes se calculan si no se usa el standard
-  %
-  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  function RC=rayleigth_cor(F,P,M3,BE)
-   % F(I)=F(I)+BE(I)*M3*PZ%/1013:REM rayleigh
+function RC=rayleigth_cor(F,P,M3,BE)
 
-      
-      if nargin==3 % si no usa la estandard
-        % FROM INIT.RTN 
-        %12060 FOR I=2 TO 6:READ BE(I):NEXT:REM  read Rayleigh coeffs
-        %12070 DATA 4870,4620,4410,4220,4040
+% function RC=rayleigth_cor(F,P,M3,BE)
+% Rayleight correction
+% Si se proporcionan coeficientes se calculan si no se usa el standard
+%
+% FROM INIT.RTN 
+% 12060 FOR I=2 TO 6:READ BE(I):NEXT:REM  read Rayleigh coeffs
+% 12070 DATA 4870,4620,4410,4220,4040
+%
+% F(I)=F(I)+BE(I)*M3*PZ%/1013:REM rayleigh
+% 
+% TODO: Vectorizado
+% w=[0.00  0.00   0.00   -1.00    0.50    2.20   -1.70];
+% 
+% RC=matmul(m3ds,R)*pr/1013*w'
+% R coef raleight
+% w weithgth
 
-      BE=[0,0,4870,4620,4410,4220,4040];
-      end
-    % BE=[5327    0 5096    4835    4610    4408    4217];
-    for j=1:7
-        F(:,j)=F(:,j)+BE(j)*M3*P/1013;         
-    end    
+  if nargin==3 % si no usa la estandard
+     BE=[0,0,4870,4620,4410,4220,4040];
+  end
+  % BE=[5327    0 5096    4835    4610    4408    4217];
+ 
+  for j=1:7
+      F(:,j)=F(:,j)+BE(j)*M3*P/1013;         
+  end    
   RC=F;
+    
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   % function ozone_cal_raw=(DS,m2,P,M3,BE)
   % ozone calculation from counts/seconds
