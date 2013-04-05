@@ -91,7 +91,7 @@ if ~isempty(date_range)
 else
     Bfiles=dir(path);    
     dir_cell=struct2cell(Bfiles); FilesB=dir_cell(1,:);
-    paths=repmat({pathstr},length(Bfiles),1);  
+    paths=repmat({pathstring},length(Bfiles),1);  
 end
 
     myfunc_clean=@(x)regexp(x, '^B\d{5}[.]\d*','ignorecase')';     clean=@(x)~isempty(x); 
