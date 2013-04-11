@@ -133,10 +133,10 @@ try
         exportfig(h,strtok(figura,'.'),Options);
      end
      saveas(h,figura,'fig');
-     saveas(h,figura,'png');
+%      saveas(h,figura,'png');
 end
 cd(cwd);
-catch
-disp('Error en printfiles_report')
-cd(cwd);
+catch exception
+      fprintf('Error en printfiles_report: %s\n',exception.message); 
+      cd(cwd);
 end
