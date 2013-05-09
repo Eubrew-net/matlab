@@ -58,7 +58,7 @@ end
 %%%%%%%   FIN DE VALIDACIÓN   %%%%%%%%%%%%%%%
 
 %% FILES search
-sl_avg=[]; sl_raw=[];
+sl_avg=[]; sl_raw=[]; TC=[];
 Bfiles={}; FilesB={}; paths={}; files={}; pat={};
 
 [pathstring f]=fileparts(path); 
@@ -123,7 +123,7 @@ textprogressbar('processing sl files: ');
 
 [p n ext]=fileparts(path);
 for i=1:length(FilesB)
-    slraw=[]; TC=[];
+    slraw=[]; TC_=[];
     textprogressbar(100*i/length(FilesB));
     try
       [path nam ext]=fileparts(FilesB{i});

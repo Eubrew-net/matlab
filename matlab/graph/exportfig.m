@@ -542,13 +542,13 @@ try
 	set(allMarker,'LineWidth',opts.linewidth);
       end
      case 'scaled'
-      if (opts.linewidth == -1)
-	scale = sizescale;
-      else
-	scale = opts.linewidth;
-      end
-      newlines = LocalScale(oldlines, scale, opts.linemin, opts.linemax);
-      set(allMarker,{'LineWidth'},newlines);
+%       if (opts.linewidth == -1)
+% 	scale = sizescale;
+%       else
+% 	scale = opts.linewidth;
+%       end
+%       newlines = LocalScale(oldlines, scale, opts.linemin, opts.linemax);
+%       set(allMarker,{'LineWidth'},newlines);
     end
   end
 

@@ -58,8 +58,8 @@ for peak=[2967,3020,3341]
                 
 %       DIFERENCIA ENTRE AMBOS MÉTODOS       
            LR1=wb_real(idx);% Longitud real
-           DMP1= xc1-LR1;% Error Real-Metodo pendientes
-           DMCM1= xc1cm-LR1;% Error Real-Metodo centro masas
+           DMP1= LR1 - xc1;% Error (Metodo pendientes - Nominal)
+           DMCM1= LR1 - xc1cm;% Error (Metodo centro masas - Nominal)
         
 %       Fecha=sscanf(filename,'%*2c%5d%*c%*3d');
            MPMCMDM1= [FH{j} LR1 xc1 DMP1 xc1cm DMCM1 a ];
