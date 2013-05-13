@@ -46,7 +46,7 @@ arg.addRequired('name_a', @ischar);
 arg.addRequired('name_b', @ischar);
 
 arg.StructExpand = false;
-arg.addParamValue('OSC_lim', [300 1600], @isfloat); % Por defecto [300 1600]
+arg.addParamValue('OSC_lim', [250 1700], @isfloat); % Por defecto [300 1600]
 arg.addParamValue('plot_flag', 1, @(x)(x==1 || x==0)); % Por defecto 1 (ploteo de individuales)
 
    try
