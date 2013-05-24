@@ -406,7 +406,8 @@ end
 ylabel('Ozone slant Path'); xlabel(' Calc Step number');
 orient('portrait');  
 
-step_cal=[step_cal,step0,step1];    sc_avg=a;
+% date, csn cal, CI-, CI+, csn cfg
+step_cal=[mean(unique(sc_raw(:,1))),step_cal,step0,step1,CSN_orig];    sc_avg=a;
 
 if chk
     % Se muestran los argumentos que toman los valores por defecto
