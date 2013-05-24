@@ -57,7 +57,7 @@ for ii=orden
     med_r6c=summary{ii}(:,8);    % (8 = filter corrected)
     med_o3=summary_old{ii}(:,6); 
     med_o3c=summary{ii}(:,6); 
-    med_flt=summary{ii}(:,5)/64; 
+    med_flt=summary{ii}(:,5); 
     med_temp=summary{ii}(:,4);    
 %           -------------------------------------     
     ref_sza=scan_join(ref_sza,cat(2,time,ZA));     
