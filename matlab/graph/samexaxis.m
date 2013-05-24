@@ -31,7 +31,7 @@ function samexaxis(varargin)
 
 
 Args=struct('YAxisLocation','left','XAxisLocation','bottom','Box','on','XLim',[],'XTick',[],'XTickLabel',[],'XMinorTick',[],'YLabelDistance',1.4,'ABC',false,'Join',false,'YTickAntiClash',false); 
-Args=parseArgs(varargin,Args,{'abc' 'join' 'ytickanticlash'});
+Args=parseargs(varargin,Args,{'abc' 'join' 'ytickanticlash'});
 
 
 
