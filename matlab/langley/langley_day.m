@@ -12,7 +12,7 @@ function [sum, resp,stats,O3R,lgl_cor] = langley_day(lgl,nb,cfg,FC,fplot,Cal,Dep
 %         setup=squeeze(auxc(:,j,:));
 if nargin<=3
     FC=[];
-    flot=0;
+    fplot=0;
     Cal.brw_str{nb}='xxx';
     Dep=1;
 elseif nargin==4
@@ -29,18 +29,24 @@ end
         fecha=unique(fix(lgl(:,1)));
         % for recalculation
         %[o_3,so_2,rat]=ozone_cal_raw(lgl(:,12:18),lgl(:,5),770,lgl(:,6),setup(:,1));
-%
+% 
+    if  ndims(cfg)==2;
+        cfg_idx=find(cfg(:,1)==fecha);
+        setup=cfg(cfg_idx,:);
+    elseif ndims(cfg)==3     
         cfg_idx=find(cfg(end,:,1)==fecha);
         setup=squeeze(cfg(:,cfg_idx,:));
+    
         % depuracion de observaciones
         [m,s,n,g]=grpstats(lgl(:,[2,19,33]),fix(lgl(:,3)/10));
         j=find(s(:,2)<2 & m(:,2)>100 & m(:,2)<600 & m(:,1)>0 & n(:,1)==5);
         idx=cellfun(@str2num,g(j));
         t=ismember(fix(lgl(:,3)/10),idx);
         lgl=lgl(t,:);
-        %airmas 5
-        lgl=lgl(lgl(:,5)<5,:);
         
+    end
+    %airmas 5
+        lgl=lgl(lgl(:,5)<5,:);
         
         %%
         % plot
@@ -109,7 +115,7 @@ end
          sum.o3r_mean=(nanmean(sum.o3_r(:,1:end)));
          sum.o3r_std=(nanstd(sum.o3_r(:,1:end)));
          sum.o3r_range=(abs(max(sum.o3_r(:,1:end))-min(sum.o3_r(:,1:end))));
-         tableform(sum.label_row,[sum.o3r_mean;sum.o3r_std;sum.o3r_range],{'mean','std','range'});
+        % tableform(sum.label_row,[sum.o3r_mean;sum.o3r_std;sum.o3r_range],{'mean','std','range'});
         % tableform(sum.label_row,{'mean','std','range'},[sum.o3r_mean;sum.o3r_std;sum.o3r_range]);         
          
          sum.label_row2={'am1','pm1','am2','pm2'};
