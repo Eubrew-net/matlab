@@ -44,11 +44,12 @@ mmv2struct(arg.Results);
 
 %% Obtenemos los datos simultáneos: Medidas individuales
 TSYNC=5; orden=Cal.n_ref;
+idx_=find(cellfun (@(x) ~isempty(x),summary)==1);
 
 ref_sza=[]; ref_m2=[];   ref_m3=[];      ref_tst=[]; 
 ref_flt=[]; ref_temp=[]; ref_o3_old=[]; ref_o3_new=[];
 ref_ms9_old=[]; ref_ms9_new=[];
-for ii=orden
+for ii=idx_
     time=fix(summary{ii}(:,1)*24*60/TSYNC)/24/60*TSYNC;
 
     [ZA,m2,m3]=brewersza((summary{ii}(:,1)-fix(summary{ii}(:,1)))*24*60,diaj(time),year(time)-2000,lalo(1),lalo(2));
@@ -81,8 +82,8 @@ langsumm_sync_data_legend={
     'O3 new'  'NaN'  'NaN'  'NaN'  'NaN'  'NaN'  'MS9 new'  ... % 33-39 
                           };
 
-dds=unique(fix(ref_ms9_old(:,1))); langsumm_sync_data=cell(length(orden),1);    
-for jj=orden
+dds=unique(fix(ref_ms9_old(:,1))); langsumm_sync_data=cell(length(idx_),1);    
+for jj=idx_
     y=group_time(fix(ref_ms9_old(:,1)),dds);
     for dd=1:length(dds)
         idx=y==dd;
