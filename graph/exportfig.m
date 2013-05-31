@@ -75,7 +75,8 @@ function varargout = exportfig(varargin)
 %          in 'scaled' mode multiplies with the font size of each
 %          text object to obtain the exported font size
 %          in 'fixed' mode specifies the font size of all text
-%          objects in points
+%          objects in points, except for those with HandleVisibility
+%          property set to off
 %     'DefaultFixedFontSize' a positive scalar
 %          in 'fixed' mode specified the default font size in
 %          points
@@ -365,9 +366,9 @@ end
 % make sure figure is up-to-date
 drawnow;
 
-allLines  = findall(H, 'type', 'line');
-allText   = findall(H, 'type', 'text');
-allAxes   = findall(H, 'type', 'axes');
+allLines  = findobj(H, 'type', 'line');
+allText   = findobj(H, 'type', 'text');% not those set to HandleVisibility=off
+allAxes   = findobj(H, 'type', 'axes');
 allImages = findall(H, 'type', 'image');
 allLights = findall(H, 'type', 'light');
 allPatch  = findall(H, 'type', 'patch');
