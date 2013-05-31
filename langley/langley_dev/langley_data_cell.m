@@ -26,9 +26,9 @@ lgl_leg.ozone_indv = {
 % cfg=cellfun(@(x) cat(1,x(1,:),x(2:6,:),x(8,:),x(11,:),x(13,:),x(17:22,:)), ...
 %                                             config,'UniformOutput',false);
 cfg_old=cell2mat(cellfun(@(x) cat(1,x(1,1),x(2:6,1),x(8,1),x(11,1),x(13,1),x(17:22,1)),config','UniformOutput',false)); 
-[~,b]=unique(cfg_old(1,:)); cfg.old=cfg_old(:,b);
+[a,b]=unique(cfg_old(1,:)); cfg.old=cfg_old(:,b);
 cfg_new=cell2mat(cellfun(@(x) cat(1,x(1,2),x(2:6,2),x(8,2),x(11,2),x(13,2),x(17:22,2)),config','UniformOutput',false)); 
-[~,b]=unique(cfg_new(1,:)); cfg.new=cfg_new(:,b);                                     
+[a,b]=unique(cfg_new(1,:)); cfg.new=cfg_new(:,b);                                     
 lgl_leg.cfg={
     'Usage date','o3 Temp coef 1','o3 Temp coef 2','o3 Temp coef 3','o3 Temp coef 4','o3 Temp coef 5',...
     'O3 on O3 Ratio','ETC on O3 Ratio','Dead time (sec)',...
