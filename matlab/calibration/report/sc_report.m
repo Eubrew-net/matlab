@@ -140,7 +140,7 @@ end
 
 %sale si no hay datos
 if all(isnan(sc_avg(:,1))) %isempty(sc_avg) 
-    step_cal=[NaN,NaN,NaN];
+    step_cal=[NaN,NaN,NaN,NaN,NaN];
     return
 end
 
@@ -167,11 +167,9 @@ if ~ (isempty(a) || isempty(b) )
         end
         a(jnan,:)=[];
 
-   % Ozono fuera de rango
-        j=find(b(:,18)>550 | b(:,18)<100);
-        b(j,:)=[];
-        j=find(a(:,11)>550 | a(:,16)<10);
-        a(j,:)=[];
+   % Ozono fuera de rango        
+        b(b(:,18)>550 | b(:,18)<100,:)=[];
+        a(a(:,11)>550 | a(:,16)<10,:)=[];
         
    % normr residual remove
    j=find(abs(a(:,17)>=residual_limit));
@@ -197,6 +195,7 @@ if ~ (isempty(a) || isempty(b) )
         
    % bad hg remove
     if isempty(a) 
+       step_cal=[NaN,NaN,NaN,NaN,NaN];
        return; 
     end
     hg_limit=1.25;
@@ -326,7 +325,8 @@ if one_flag
               sc_=scraw_(medida==scavg_(ii,3),:);
               sca=scavg_(ii,:);
               %subplot(3,2,mod(i,6)+1);
-              [P,s,v]=polyplot2(sc_(:,3),sc_(:,18));
+              [P,s,v]=polyplot2(sc_(:,3),sc_(:,20));
+%               hold on; [P,s,v]=polyplot2(sc_(:,3),sc_(:,20));
               % polyplot2(sc_(:,3),sc_(:,18).*sc_(:,8));
 % esto se refiere al calculo hecho              
               title(sprintf('Brewer#%s, ddd=%d (%s)\n airm=%.2f  filter=%d ozone=%.1f  step=%.1f \\Delta hg step=%.1f ',...
@@ -336,7 +336,7 @@ if one_flag
 %              ,['y=',poly2str(round(sca(18:20)*100)/100,'x'),'',sprintf(' normr=%.1f',sca(1,17))]},'FontSize',9);
               xlabel('step');  ylabel('ozone');
               set(gca,'LineWidth',1);
-%                  ['y=',poly2str(round(sca(18:20)*100)/100,'x'),'',sprintf(' normr=%.1f',sca(1,17))]},'FontSize',9);
+%                  ['y=',poly2str(round(sca(18:20)*100)/100,'x'),'',sprintf(' normr=%.1f',sca(1,17))]},'FontSize',9);  
           end
      end
    end
@@ -373,7 +373,7 @@ f_end=figure; set(f_end,'Tag','Final_SC_Calculation');
 h0=plot(X,a(:,8).*a(:,11),'s'); set(gca,'LineWidth',1);
 hold on;
 hconf=confplot(x,y,delta); set(hconf(1),'Marker','none')
-ylim([300 1300]); xlim(xlims);
+ylim([300 1700]); xlim(xlims);
 hold on;
 h1=plot(X,a(:,8).*a(:,11),'o');
 try

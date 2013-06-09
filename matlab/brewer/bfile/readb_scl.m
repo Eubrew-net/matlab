@@ -118,12 +118,9 @@ for i=1:length(s)
 %             end
 %         end
 
-    catch
-        %rethrow(lasterror);
-        warning('MATLAB:readbsl:file_error', ' %s.',file);
-        %sx=lasterror;
-        %disp(sx.message);
-        
+    catch exception
+        fprintf('%s (Bfile %s) File/Line: %s/%d\n',exception.message,file,exception.stack(1).name,...
+                                                             exception.stack(1).line);
     end
 end
 
