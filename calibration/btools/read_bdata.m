@@ -150,11 +150,11 @@ for dd=CALC_DAYS
         
     try
       dsum=[dsum;o3.dsum];
-      ozone_sum=[ozone_sum;o3.ozone_s];
-      config=[config;config_];
-      ozone_ds=[ozone_ds;o3.ozone_ds];
       ozone_raw0=[ozone_raw0;o3.ds_raw0];
+      ozone_sum=[ozone_sum;o3.ozone_s];
+      ozone_ds=[ozone_ds;o3.ozone_ds];
       ozone_raw=[ozone_raw;o3.ozone_raw];
+      config=[config;config_];
       sl=[sl;sl_.sls_c];        % first calibration (or bfile)
       sl_cr=[sl_cr;sl_.sls_cr]; % recalculated/second calibration
       hg=[hg;hg_.hg];
@@ -181,14 +181,14 @@ for dd=CALC_DAYS
 end
 
 ozone.dsum=dsum;
+ozone.raw0=ozone_raw0;
 ozone.ozone_sum=ozone_sum;
-ozone.config=config;
 ozone.ozone_ds=ozone_ds;
+ozone.raw=ozone_raw;
+ozone.config=config;
 ozone.hg=hg;
 ozone.sl=sl;
 ozone.sl_cr=sl_cr;
 ozone.hg=hg;
 ozone.bhg=bhg;
-ozone.raw0=ozone_raw0;
-ozone.raw=ozone_raw;
 ozone.ratios=ozone_ratios;

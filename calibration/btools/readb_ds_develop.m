@@ -26,7 +26,7 @@ function [o3,config,sl_data,hg_data,loc]=readb_ds_develop(bfile,config_file,spec
 %  TODO: ratios in summaries.
 
 
-dsum=[];ds=[];dss=[];timeds=[];timedss=[];ds_l=[];ds_aod=[];
+dsum=[];ds=[];dss=[];timeds=[];timedss=[]; ds_aod=[];
 ds=[];dss=[];ndss=0;timedsum=[];timeds=[];
 sl=[];sls=[];nsl=0;nsls=0;timesls=[];timesl=[];
 TC=[];config=[];
@@ -453,9 +453,8 @@ if ~isempty(dss)
 
 else
     warning('Fichero vacio ? no ozone measurements');
-    o3.dsum=[];o3.ds=[]; o3.ozone_s=[];
-    o3.ozone_ds=[];o3.ds_raw0=[]; o3.dss=[];o3.timeds=[];
-    o3.timedss=[];o3.ds_l=[];o3.ozone_raw=[];
+    o3.dsum=[]; o3.ozone_s=[]; o3.ozone_ds=[]; o3.ds_raw0=[]; o3.dss=[];
+    o3.timeds=[]; o3.timedss=[]; o3.ozone_raw=[];
     o3.ozone_ds_legend=[];o3.dsum_legend=[];
     o3.ds_raw0_legend=[];o3.ozone_ds_legend=[];
     o3.ozone_s_legend=[];
