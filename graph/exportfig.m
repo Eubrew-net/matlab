@@ -202,6 +202,7 @@ auto.bounds = 'tight';
 explicitbounds = 0;
 auto.lockaxes = 1;
 auto.separatetext = 0;
+auto.axes = 0;
 opts = auto;
 
 % Process param-value pairs
@@ -358,6 +359,8 @@ for k = 1:2:length(paramPairs)
     opts.lockaxes = LocalToNum(value,auto.lockaxes);
    case 'separatetext'
     opts.separatetext = LocalToNum(value,auto.separatetext);
+   case 'axes'
+    opts.axes = LocalToNum(value,auto.axes);
    otherwise
     error(['Unrecognized option ' param '.']);
   end
@@ -431,7 +434,10 @@ try
   set(H, 'PaperPositionMode', 'auto');
   newPos = [figPos(1) figPos(2)+figPos(4)*(1-hscale) ...
 	    wscale*figPos(3) hscale*figPos(4)];
-  set(H, 'Position', newPos);
+  set(H, 'Position', newPos); 
+  if opts.axes
+     set(allAxes(2),'Position',get(allAxes(1),'Position'));
+  end
   set(H, 'Units', oldFigureUnits);
   
   % process line-style map
