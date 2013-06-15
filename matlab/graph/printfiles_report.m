@@ -49,7 +49,7 @@ Options.SeparateText=0 ;       %one of 0 or 1 specifies that the text objects ar
                                %file as EPS with the base filename having '_t' appended.end
 
 okargs = {'Format','Color','Width','Height','LineWidth','DefaultFixedFontSize',...
-          'LockAxes','FontSize','FontMode','aux_pattern','LineMode','Reference'};
+          'LockAxes','FontSize','FontMode','aux_pattern','LineMode','Reference','axes'};
 
 for j=1:2:(length(varargin)-1)
     pname = varargin{j};
@@ -85,6 +85,8 @@ for j=1:2:(length(varargin)-1)
                 Options.LineMode=pval;
             case 12  % Reference
                 Options.Reference=pval;             
+            case 13  % Axes
+                Options.axes=pval;             
         end
     end
 end
