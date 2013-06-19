@@ -122,5 +122,7 @@ else
    ylabel('Zenith');
    set(ha(2),'YLim',[-10 10]);  grid;  hline([-5 5],'-k');
    datetick('x',2,'KeepTicks','KeepLimits'); 
+   
+   linkaxes(findobj(gcf,'Type','Axes'),'x');
 end
 azimut=aux1; zenit=aux2;
