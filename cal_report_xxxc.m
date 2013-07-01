@@ -3,7 +3,7 @@
 
 %% Brewer Evaluation
 clear all;
-file_setup='arosa2012_setup';
+file_setup='arenos2013_setup';
 
 eval(file_setup);     % configuracion por defecto
 Cal.n_inst=find(Cal.brw==xxx);
@@ -26,7 +26,7 @@ Cal.Date=Date;
 
 %% READ Brewer Summaries
 
- for i=[Cal.n_ref(2),Cal.n_inst]
+ for i=[Cal.n_ref,Cal.n_inst]
     dsum{i}={};       ozone_raw{i}={};   hg{i}={};
     ozone_sum{i}={};  ozone_raw0{i}={};  bhg{i}={};
     config{i}={};     sl{i}={};          log{i}={};
@@ -98,7 +98,7 @@ matrix2latex_config([config_orig(2:end),config_def(2:end)],...
 %
 %% SL Report
 close all;
-for ii=[Cal.n_ref(2),Cal.n_inst]
+for ii=[Cal.n_ref,Cal.n_inst]
     sl_mov_o{ii}={}; sl_median_o{ii}={}; sl_out_o{ii}={}; R6_o{ii}={};
     sl_mov_n{ii}={}; sl_median_n{ii}={}; sl_out_n{ii}={}; R6_n{ii}={};
     try
@@ -157,7 +157,7 @@ hg_report(Cal.n_inst,hg,Cal,'outlier_flag',1,'date_range',[]);
 
 %% READ Configuration
 close all
-[A,ETC,SL_B,SL_R,cfg]=read_cal_config_new(config,Cal,{sl_median_o,sl_median_n});
+[A,ETC,SL_B,SL_R,F_corr,cfg]=read_cal_config_new(config,Cal,{sl_median_o,sl_median_n});
 
 try
  tabla_sl=printmatrix([Cal.brw(:)';ETC.old;ETC.new;A.old;A.new;Cal.SL_OLD_REF';Cal.SL_NEW_REF';fix(SL_B)']',4);
@@ -175,11 +175,9 @@ end
 %makeHtmlTable(round(10000*[Cal.brw;ETC.old;ETC.new;A.old;A.new;SL_OLD_REF';SL_NEW_REF';fix(SL_B)']')/10000);
 
 %% Data recalculation for summaries  and individual observations
-
-for i=[Cal.n_inst Cal.n_ref(2)]
+for i=[Cal.n_inst Cal.n_ref]
     cal{i}={}; summary{i}={}; summary_old{i}={};
     if i==Cal.n_inst
-
     [cal{i},summary{i},summary_old{i}]=test_recalculation(Cal,i,ozone_ds,A,SL_R,SL_B,'flag_sl',1);
     else
     [cal{i},summary{i},summary_old{i}]=test_recalculation(Cal,i,ozone_ds,A,SL_R,SL_B,'flag_sl',1);
@@ -206,17 +204,19 @@ close all
 
 %% filter correction 185
 % Si queremos eliminar algun filtro CORREGIR a NaN
-ETC_C=[0,0,0,7,15,0];
-[summary_old_corr summary_corr]=filter_corr(summary_orig,summary_orig_old,Cal.n_ref(2),A,ETC_C);
-summary_old{Cal.n_ref(2)}=summary_old_corr; summary{Cal.n_ref(2)}=summary_corr;
-
+for ii=[Cal.n_ref Cal.n_inst]
+   [summary_old_corr summary_corr]=filter_corr(summary_orig,summary_orig_old,ii,A,F_corr{ii});
+   summary_old{ii}=summary_old_corr; summary{ii}=summary_corr;
+end
 figure; plot(summary{Cal.n_inst}(:,1),summary{Cal.n_inst}(:,6),'r.',...
-             summary{Cal.n_ref(2)}(:,1),summary{Cal.n_ref(2)}(:,6),'k+');
-legend(gca,'inst','ref','Location','SouthEast'); grid;
+             summary{Cal.n_ref(1)}(:,1),summary{Cal.n_ref(1)}(:,6),'k.',...
+             summary{Cal.n_ref(2)}(:,1),summary{Cal.n_ref(2)}(:,6),'m.');
+legend(gca,'inst','IZO#183','IZO#185','Location','NorthEast'); grid;
 datetick('x',26,'KeepLimits','KeepTicks');
 
 %% Ozone Calibration
 % Reference Brewer #185
+close all
 n_ref=Cal.n_ref(2); % Cuidado con cual referencia estamos asignando
 n_inst=Cal.n_inst;
 brw=Cal.brw; brw_str=Cal.brw_str;
@@ -243,7 +243,8 @@ if ~isempty(blinddays)
        5,brw_str{n_inst},brw_str{n_ref},'plot_flag',0);% original config , sl corrected
 
 % Sugerido con los blind_days
-[ETC_SUG,o3c_SUG,m_etc_SUG]=ETC_calibration_C(Cal,summary_old,A.old(Cal.n_inst),...
+A1=A.old(ismember(Date.CALC_DAYS,blinddays),Cal.n_inst+1); A1_old=unique(A1(~isnan(A1)))
+[ETC_SUG,o3c_SUG,m_etc_SUG]=ETC_calibration_C(Cal,summary_old,A1_old,...
                    Cal.n_inst,n_ref,5,.8,0.01,blinddays);
 tableform({'ETCorig','ETCnew 1p','ETCnew 2p','O3Abs (ICF)','O3Abs 2p','O3Abs dsp'},...
           [round([ETC.old(n_inst),ETC_SUG(1).NEW,ETC_SUG(1).TP(1), 10000*A.old(n_inst),ETC_SUG(1).TP(2),10000*A.new(Cal.n_inst)])
@@ -253,7 +254,7 @@ tableform({'ETCorig','ETCnew 1p','ETCnew 2p','O3Abs (ICF)','O3Abs 2p','O3Abs dsp
 
 
 % suggested
-o3r= (inst1_b(:,8)-ETC_SUG(1).NEW)./(A.old(Cal.n_inst)*inst1_b(:,3)*10);
+o3r= (inst1_b(:,8)-ETC_SUG(1).NEW)./(nanmean(A.old(ismember(Date.CALC_DAYS,blinddays),Cal.n_inst+1))*inst1_b(:,3)*10);
 inst1_b(:,10)=o3r;
     [x,r,rp,ra,dat,ox,osc_smooth_sug]=ratio_min_ozone(...
        inst1_b(:,[1,10,3,2,8,9,4,5]),ref2_b(:,[1,6,3,2,8,9,4,5]),...
@@ -335,8 +336,9 @@ if isempty(blinddays)
    osc_smooth{Cal.n_inst}.ini_sl=osc_smooth_inisl;
 end
 %%
-[ETC_NEW,o3c_NEW,m_etc_NEW]=ETC_calibration_C(Cal,summary,A.new(Cal.n_inst),...
-                   Cal.n_inst,n_ref,5,0.8,0.01,finaldays);
+A1=A.new(ismember(Date.CALC_DAYS,blinddays),Cal.n_inst+1); A1_new=unique(A1(~isnan(A1)))
+[ETC_NEW,o3c_NEW,m_etc_NEW]=ETC_calibration_C(Cal,summary,A1_new,Cal.n_inst,n_ref,...
+                                                                5,0.8,0.03,finaldays);
 tableform({'ETCorig','ETCnew 1p','ETCnew 2p','O3Abs (ICF)','O3Abs 2p','O3Abs dsp'},...
           [round([ETC.old(n_inst),ETC_NEW(1).NEW,ETC_NEW(1).TP(1), 10000*A.old(n_inst),ETC_NEW(1).TP(2),10000*A.new(Cal.n_inst)])
 %         solo el rango seleccionado
@@ -348,23 +350,24 @@ latexcmd(fullfile(['>',Cal.file_latex],['cal_etc_',brw_str{n_inst}]),'\ETCfin',n
 etc{Cal.n_inst}.new=ETC_NEW;
 save(Cal.file_save,'-APPEND','etc');
 %%
-% o3r= (inst2(:,8)-ETC_NEW(1).NEW)./(A.new(Cal.n_inst)*inst2(:,3)*10);
-% inst2(:,10)=o3r;
-%     [x,r,rp,ra,dat,ox,osc_smooth_fin]=ratio_min_ozone(...
-%        inst2(:,[1,10,3,2,8,9,4,5]),ref2(:,[1,6,3,2,8,9,4,5]),...
-%        5,brw_str{2},brw_str{n_ref},'plot_flag',0);
-    [x,r,rp,ra,dat,ox,osc_smooth_fin]=ratio_min_ozone(...
-       inst2(:,[1,6,3,2,8,9,4,5]),ref2(:,[1,6,3,2,8,9,4,5]),...
-       5,brw_str{Cal.n_inst},brw_str{n_ref},'plot_flag',0);
-%%
-o3r= (inst2(:,8)-ETC_NEW(1).TP(1))./(ETC_NEW(1).TP(2)/10000*inst2(:,3)*10);
+o3r= (inst2(:,8)-ETC_NEW(1).NEW)./(nanmean(A.new(ismember(Date.CALC_DAYS,blinddays),Cal.n_inst+1))*inst2(:,3)*10);
 inst2(:,10)=o3r;
-    [x,r,rp,ra,dat,ox,osc_smooth_2P]=ratio_min_ozone(...
+    [x,r,rp,ra,dat,ox,osc_smooth_fin]=ratio_min_ozone(...
        inst2(:,[1,10,3,2,8,9,4,5]),ref2(:,[1,6,3,2,8,9,4,5]),...
        5,brw_str{2},brw_str{n_ref},'plot_flag',0);
+%     [x,r,rp,ra,dat,ox,osc_smooth_fin]=ratio_min_ozone(...
+%        inst2(:,[1,6,3,2,8,9,4,5]),ref2(:,[1,6,3,2,8,9,4,5]),...
+%        5,brw_str{Cal.n_inst},brw_str{n_ref},'plot_flag',0);
+
+%%
+% o3r= (inst2(:,8)-ETC_NEW(1).TP(1))./(ETC_NEW(1).TP(2)/10000*inst2(:,3)*10);
+% inst2(:,10)=o3r;
+%     [x,r,rp,ra,dat,ox,osc_smooth_2P]=ratio_min_ozone(...
+%        inst2(:,[1,10,3,2,8,9,4,5]),ref2(:,[1,6,3,2,8,9,4,5]),...
+%        5,brw_str{2},brw_str{n_ref},'plot_flag',0);
 
 osc_smooth{Cal.n_inst}.fin=osc_smooth_fin;
-osc_smooth{Cal.n_inst}.twoP=osc_smooth_2P;
+% osc_smooth{Cal.n_inst}.twoP=osc_smooth_2P;
 save(Cal.file_save,'-APPEND','osc_smooth');
 
 %%
@@ -470,9 +473,9 @@ ozone_day_sum=round([diaj(m(:,1)),m(:,2),s(:,2),n(:,2),m(:,3),s(:,3),100*(m(:,3)
 %% Plot daily summary
 close all
 figure; set(gcf,'Tag','_GlobalPlot_');
-plot(summary{Cal.n_ref(2)}(:,1),summary{Cal.n_ref(2)}(:,6),'g*','MarkerSize',5);
+plot(summary{Cal.n_ref(1)}(:,1),summary{Cal.n_ref(1)}(:,6),'g*','MarkerSize',5);
 hold on; plot(summary{Cal.n_inst}(:,1),summary{Cal.n_inst}(:,6),'b.','MarkerSize',12);
-legend(gca,Cal.brw_name{Cal.n_ref(2)},Cal.brw_name{Cal.n_inst},'Location','Best',...
+legend(gca,Cal.brw_name{Cal.n_ref(1)},Cal.brw_name{Cal.n_inst},'Location','Best',...
                                                                'Orientation','Horizontal');
 ylabel('Total Ozone (DU)'); xlabel('Date'); grid;
 title(Cal.campaign);
