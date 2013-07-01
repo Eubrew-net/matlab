@@ -134,7 +134,7 @@ else
 end
 
 if isempty(sc_avg) 
-    step_cal=[NaN,NaN,NaN];    
+    step_cal=[NaN,NaN,NaN,NaN,NaN];
     return
 end
 
