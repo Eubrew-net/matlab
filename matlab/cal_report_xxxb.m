@@ -3,7 +3,7 @@
 
 %% Brewer Evaluation
 clear all;
-file_setup='arosa2012_setup';
+file_setup='arenos2013_setup';
 
 eval(file_setup);     % configuracion por defecto
 Cal.n_inst=find(Cal.brw==xxx);
@@ -21,10 +21,9 @@ catch
 end
 
 %% configuration files
+close all
 [config_def,TCdef,DTdef,ETCdef,A1def,ATdef]=read_icf(Cal.brw_config_files{Cal.n_inst,2});
 [config_orig,TCorig,DTorig,ETCorig,A1orig,ATorig]=read_icf(Cal.brw_config_files{Cal.n_inst,1});
-
-close all;
 
 Station.OSC=680;
 Station.name='';
@@ -35,11 +34,12 @@ Station.meanozo=350;
 cal_step={}; sc_avg={}; sc_raw={}; Args={};
 
 %% Sun_scan: Before Campaign
+close all
 [cal_step{1},sc_avg{1},sc_raw{1},Args{1}]=sc_report(Cal.brw_str{Cal.n_inst},Cal.brw_config_files{Cal.n_inst,1},...
-                     'date_range',datenum(Cal.Date.cal_year,1,[180 190]),...
+                     'date_range',datenum(Cal.Date.cal_year,1,[1 159]),...
                      'CSN_orig',config_orig(14),'OSC',Station.OSC,...
-                     'control_flag',1,'residual_limit',15,...
-                     'hg_time',5,'one_flag',0);
+                     'control_flag',1,'residual_limit',35,...
+                     'hg_time',15,'one_flag',0);
 
 %% Sun_scan: Campaign
 [cal_step{2},sc_avg{2},sc_raw{2},Args{2}]=sc_report(Cal.brw_str{Cal.n_inst},Cal.brw_config_files{Cal.n_inst,2},...

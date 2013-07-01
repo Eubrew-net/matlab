@@ -2,9 +2,9 @@
 % publish(fullfile(pwd,'cal_report_xxxa2.m'),options_pub);
 
 %% Brewer Setup
-clear all; 
+clear all;
 
-file_setup='arosa2012_setup'; 
+file_setup='arenos2013_setup';
 
 eval(file_setup);     % configuracion por defecto
 Cal.n_inst=find(Cal.brw==xxx);
@@ -14,8 +14,8 @@ Cal.dir_figs=fullfile('latex',filesep(),Cal.brw_str{Cal.n_inst},...
 mkdir(Cal.dir_figs);
 
 try
- save(Cal.file_save,'-Append','Cal'); %sobreescribimos la configuracion guardada.   
- load(Cal.file_save);      
+ save(Cal.file_save,'-Append','Cal'); %sobreescribimos la configuracion guardada.
+ load(Cal.file_save);
 catch
     disp('clean');
     save(Cal.file_save);
@@ -24,8 +24,8 @@ end
 %% configuration files
 close all;
 
-[config_def,TCdef,DTdef,ETCdef,A1def,ATdef]=read_icf(Cal.brw_config_files{Cal.n_inst,2}); 
-[config_orig,TCorig,DTorig,ETCorig,A1orig,ATorig]=read_icf(Cal.brw_config_files{Cal.n_inst,1}); 
+[config_def,TCdef,DTdef,ETCdef,A1def,ATdef]=read_icf(Cal.brw_config_files{Cal.n_inst,2});
+[config_orig,TCorig,DTorig,ETCorig,A1orig,ATorig]=read_icf(Cal.brw_config_files{Cal.n_inst,1});
 
 config_temp.n_inst=Cal.n_inst;
 config_temp.brw_name=Cal.brw_name{Cal.n_inst};
@@ -38,7 +38,7 @@ NTC={}; tabla_regress={}; ajuste={}; Args={};
 
 [NTC{1},ajuste{1},Args{1},Fr]=temp_coeff_raw(config_temp,sl_rw,'outlier_flag',0,...
                                      'date_range',datenum(Cal.Date.cal_year,1,[Cal.calibration_days{Cal.n_inst,1}(1) Cal.calibration_days{Cal.n_inst,1}(end)]));
-                              
+
 disp(sprintf(' ORIG MS9: %5.0f +/-%2.0f  %3.1f +/- %3.2f  ',ajuste{1}.orig(7,[1 3 2 4])));
 disp(sprintf('  NEW MS9: %5.0f +/-%2.0f  %3.1f +/- %3.2f  ',ajuste{1}.new(7,[1 3 2 4])));
 
@@ -52,9 +52,9 @@ disp(sprintf('  NEW MS9: %5.0f +/-%2.0f  %3.1f +/- %3.2f  ',ajuste{1}.new(7,[1 3
 %% Check previous results
 if exist('sl_raw','var')
     if iscell(sl_raw) && size(sl_raw,2)>=Cal.n_inst
-        if isempty(sl_raw{Cal.n_inst})            
+        if isempty(sl_raw{Cal.n_inst})
            [sl_raw{Cal.n_inst},TC{Cal.n_inst}]=readb_sl_rawl(['.\bdata',Cal.brw_str{Cal.n_inst},...
-                                                              '\B*.'   ,Cal.brw_str{Cal.n_inst}],'f_plot',1);       
+                                                              '\B*.'   ,Cal.brw_str{Cal.n_inst}],'f_plot',1);
            save(Cal.file_save,'-APPEND','sl_raw','TC');
         end
     else
@@ -64,17 +64,17 @@ if exist('sl_raw','var')
     end
 else
     [sl_raw{Cal.n_inst},TC{Cal.n_inst}]=readb_sl_rawl(['.\bdata',Cal.brw_str{Cal.n_inst},...
-                                                       '\B*.'   ,Cal.brw_str{Cal.n_inst}],'f_plot',1);  
+                                                       '\B*.'   ,Cal.brw_str{Cal.n_inst}],'f_plot',1);
     save(Cal.file_save,'-APPEND','sl_raw','TC');
 end
 
 %% SL summary from bfiles temperature
 figure; set(gcf,'Tag','DailySL');
-hl1=ploterr(TC{Cal.n_inst}(1,:),TC{Cal.n_inst}(2,:),[],TC{Cal.n_inst}(3,:),'*k'); 
-set(hl1,'LineWidth',2); 
+hl1=ploterr(TC{Cal.n_inst}(1,:),TC{Cal.n_inst}(2,:),[],TC{Cal.n_inst}(3,:),'*k');
+set(hl1,'LineWidth',2);
 ylabel('SL double ratio MS9');
 title(sprintf('Daily means for sl ozone ratio & temperature. Brewer %s\r\n (from bfile sl summaries)',Cal.brw_name{Cal.n_inst}));
-set(gca,'XTickLabels',datestr(get(gca,'XTick'),2));  grid; 
+set(gca,'XTickLabels',datestr(get(gca,'XTick'),2));  grid;
 ax(1)=gca; set(ax(1),'Position',[0.1  0.12  0.75  0.72]);% [left bottom width height]
 rotateticklabel(gca,30);
 ax(2)=axes('Position',get(ax(1),'Position'),...
@@ -82,15 +82,15 @@ ax(2)=axes('Position',get(ax(1),'Position'),...
    'YAxisLocation','right',...
    'Color','none','FontSize',10,...
    'XColor','k','YColor','b'); set(ax,'box','off');
-hold on; hl2=ploterr(TC{Cal.n_inst}(1,:),TC{Cal.n_inst}(7,:),[],TC{Cal.n_inst}(8,:),'*b');  
-set(hl2,'LineWidth',2);  set(gca,'XTicklabels',[],'YLim',[0 45]); 
+hold on; hl2=ploterr(TC{Cal.n_inst}(1,:),TC{Cal.n_inst}(7,:),[],TC{Cal.n_inst}(8,:),'*b');
+set(hl2,'LineWidth',2);  set(gca,'XTicklabels',[],'YLim',[0 45]);
 ylb=ylabel('Temperature','Rotation',-90); pos=get(ylb,'Position'); pos(1)=pos(1)+3;
-set(ylb,'Position',pos); 
+set(ylb,'Position',pos);
 
 [NTC{2},ajuste{2},Args{2},Fraw,Fnew]=temp_coeff_raw(config_temp,sl_raw{Cal.n_inst},'outlier_flag',1,...
                                   'date_range',datenum(Cal.Date.cal_year,1,[1,Cal.calibration_days{Cal.n_inst,1}(1)]));
 % figure(max(findobj('Tag','TEMP_OLD_VS_NEW'))); set(gca,'YLim',[1750 1920]);
-                                                
+
 disp(sprintf(' ORIG MS9: %5.0f +/-%2.0f  %3.1f +/- %3.2f  ',ajuste{2}.orig(7,[1 3 2 4])));
 disp(sprintf('  NEW MS9: %5.0f +/-%2.0f  %3.1f +/- %3.2f  ',ajuste{2}.new(7,[1 3 2 4])));
 
@@ -102,13 +102,13 @@ disp(sprintf('  NEW MS9: %5.0f +/-%2.0f  %3.1f +/- %3.2f  ',ajuste{2}.new(7,[1 3
  makeHtmlTable(NTC{2});
 
 %%  Check changes
-[NTCx,ajustex,Argsx,Fraw,Forig]=temp_coeff_raw(config_temp,sl_raw{Cal.n_inst},'outlier_flag',1,'N_TC',TCorig(1:5)',...
-                                 'date_range',datenum(Cal.Date.cal_year,1,[1,Cal.calibration_days{Cal.n_inst,1}(1)]));
+[NTCx,ajustex,Argsx,Fraw,Forig]=temp_coeff_raw(config_temp,sl_raw{Cal.n_inst},'outlier_flag',1,'plots',0,...
+                                'N_TC',TCorig(1:5)','date_range',datenum(Cal.Date.cal_year,1,[1,Cal.calibration_days{Cal.n_inst,1}(1)]));
 
 Forigx=Forig; Fn=Fnew;
 figure; set(gcf,'Tag','TEMP_COMP_DATE')
-[mn,sn]=grpstats(Forigx(:,[1,end]),{year(Forigx(:,1)),fix(Forigx(:,1))});
-[mt,st]=grpstats(Fn(:,[1,end]),{year(Fn(:,1)),fix(Fn(:,1))});
+[mn,sn]=grpstats(Forigx(:,[1,end]),{year(Forigx(:,1)),fix(Forigx(:,1))},{'mean','sem'});
+[mt,st]=grpstats(Fn(:,[1,end]),{year(Fn(:,1)),fix(Fn(:,1))},{'mean','sem'});
 errorbar(mn(:,1),mn(:,2),sn(:,2),'Color','k','Marker','s');
 hold on
 errorbar(mt(:,1),mt(:,2),st(:,2),'Color','g','Marker','s');
@@ -117,9 +117,9 @@ legend('Old temperature coeff','New temperature coeff');
 title(['R6 Temperature dependence Brewer#', Cal.brw_str{Cal.n_inst}]);
 
 figure; set(gcf,'Tag','TEMP_COMP_TEMP')
-[mn,sn]=grpstats(Forigx(:,[2,end]),Forigx(:,2),{'mean','std'});
-[mt,st]=grpstats(Fn(:,[2,end]),Fn(:,2),{'mean','std'});
-errorbar(mn(:,1),mn(:,2),sn(:,2),'Color','k','Marker','s'); 
+[mn,sn]=grpstats(Forigx(:,[2,end]),Forigx(:,2),{'mean','sem'});
+[mt,st]=grpstats(Fn(:,[2,end]),Fn(:,2),{'mean','sem'});
+errorbar(mn(:,1),mn(:,2),sn(:,2),'Color','k','Marker','s');
 hold on
 errorbar(mt(:,1),mt(:,2),st(:,2),'Color','g','Marker','s'); grid;
 legend('Old temperature coeff','New temperature coeff');
@@ -127,10 +127,10 @@ title(['R6 Temperature dependence Brewer#', Cal.brw_str{Cal.n_inst}]);
 ylabel('Standard Lamp R6 ratio'); xlabel('Temperature');
 
 %%
-% ix=sort(findobj('tag','TEMP_COEF_DESC')); 
+% ix=sort(findobj('tag','TEMP_COEF_DESC'));
 % printfiles_report(ix',Cal.dir_figs,'aux_pattern',ix,'Width',15,'Height',7,'LockAxes',0,'no_export');
 
-% ix=sort(findobj('tag','TEMP_day_new')); 
+% ix=sort(findobj('tag','TEMP_day_new'));
 % printfiles_report(ix',Cal.dir_figs,'aux_pattern',ix,'Width',14,'Height',9,'LockAxes',0,'no_export');
 
 ix=sort(findobj('tag','TEMP_OLD_VS_NEW'));
@@ -138,7 +138,7 @@ printfiles_report(ix',Cal.dir_figs,'aux_pattern',ix,'Width',12.5,'Height',6.5);
 
 ix=sort(findobj('tag','TEMP_COMP_DATE'));
 printfiles_report(ix',Cal.dir_figs,'aux_pattern',ix,'Width',12.5,'Height',6.5);
- 
+
 ix=sort(findobj('tag','TEMP_COMP_TEMP'));
 printfiles_report(ix',Cal.dir_figs,'aux_pattern',ix,'Width',12.5,'Height',6.5);
 
@@ -152,7 +152,7 @@ close all
 tmp=Fr(:,2);
 latexcmd(fullfile(Cal.file_latex,['cal_tempcoeff_',Cal.brw_str{Cal.n_inst}]),...
                                   '\tempmin',min(tmp),'\tempmax',max(tmp));
-clear tmp;                
+clear tmp;
 temperature{Cal.n_inst}.sl_raw=sl_raw{Cal.n_inst};
 temperature{Cal.n_inst}.NTC=NTC;
 temperature{Cal.n_inst}.ajuste=ajuste;
@@ -163,7 +163,7 @@ end
 save(Cal.file_save,'-APPEND','temperature');
 
 % Tables
-tc_table={}; 
+tc_table={};
  for t=1:length(NTC)
     tc_table{t}=[round(config_orig(2:6)'*10^4)/10^4                             %'Current'
                        NTC{1}                                                   %'Calculated'
@@ -177,17 +177,17 @@ tc_table={};
                     'alignment', 'c','resize',0.8,'format','%7.4f','size','footnotesize');
  end
 
-tabla_regress={}; 
+tabla_regress={};
  for tt=1:length(ajuste)
-              
-     param=ajuste{tt}; 
+
+     param=ajuste{tt};
      if isstruct(param)
          param=param.new;
      end
      absc=mmcellstr(sprintf('%g +/- %g |',round(param([1:5 7],[1,3]))'));
      slpe=mmcellstr(sprintf('%3.1f +/- %3.2f |',param([1:5 7],[2,4])'));
      tabla_regress{tt}=cat(2,absc,slpe);
-     
+
      if tt==1, tt=[]; indx=1;  else tt=tt-1; indx=indx+1;  end
         matrix2latex_ctable(tabla_regress{indx},...
                 fullfile(Cal.file_latex,['table_regress',num2str(tt),'_',Cal.brw_str{Cal.n_inst},'.tex']),...

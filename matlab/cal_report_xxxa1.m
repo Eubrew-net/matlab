@@ -3,7 +3,7 @@
 
 %% Brewer Evaluation
 clear all;
-file_setup='arosa2012_setup';
+file_setup='arenos2013_setup';
 
 eval(file_setup);     % configuracion por defecto
 Cal.n_inst=find(Cal.brw==xxx);
@@ -65,24 +65,6 @@ makeHtmlTable([config_orig,config_def],[],cellstr(leg),[Cal.brw_config_files(Cal
 catch exception
       fprintf('%s, brewer: %s\n',exception.message,Cal.brw_name{Cal.n_inst});
       DTorig=NaN; DTdef=NaN;
-end
-
-%% Num hg's & Num hp's
-hgs=read_custom(sprintf('./bdata%s',Cal.brw_str{Cal.n_inst}),sprintf('B*.%s',Cal.brw_str{Cal.n_inst}),...
-                           'hg','printfile',0,'date_range',datenum(Cal.Date.cal_year,1,[Cal.Date.day0 Cal.Date.dayend]));
-hps=read_custom(sprintf('./bdata%s',Cal.brw_str{Cal.n_inst}),sprintf('B*.%s',Cal.brw_str{Cal.n_inst}),...
-                           'hpscan','printfile',0,'date_range',datenum(Cal.Date.cal_year,1,[Cal.Date.day0 Cal.Date.dayend]));
-
-[mean_hg N_hg] = grpstats(fix(hgs),fix(hgs),{'nanmean','numel'}); 
-[mean_hp N_hp] = grpstats(fix(hps),fix(hps),{'nanmean','numel'});
-
-data=sortrows(cat(1,[mean_hp N_hp repmat(1,length(N_hp),1)],[mean_hg N_hg repmat(2,length(N_hg),1)]));
-clr='kr'; symb='ox'; grps=unique(data(:,3)); leg={'Hg','Hp'};
-if ~isempty(data)
-    figure; gscatter(data(:,1),data(:,2),data(:,3),clr(grps),symb(grps))
-    datetick('x',6,'keepLimits','KeepTicks'); legend(leg{grps}); grid; 
-else
-    disp('No Hg''s');
 end
 
 %% Historical review AVG info
