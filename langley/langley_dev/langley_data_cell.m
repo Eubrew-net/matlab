@@ -1,20 +1,47 @@
-function [ozone_lgl,ozone_lgl_sum,cfg,lgl_leg] = langley_data_cell(ozone_raw,ozone_ds,config)
-
+function [ozone_lgl,cfg,lgl_leg,ozone_lgl_sum] = langley_data_cell(ozone_raw,ozone_ds,config,varargin)
+% 
 % Data for langley analysis. 
 % 
 % iNPUT:  
 % - readb_ds_develop / readb_data output: ozone_raw, ozone_ds, config
 % 
 % OUPUT: 
-% - ozone_lgl (langley individual data)
+% - ozone_lgl (langley individual data) -> depured with normal summary filters
 % - ozone_lgl_sum (langley summaries data). Summaries recalculated from individual measurements
-%                  Additional fields are added for later filtering (40, 41 & 42 fields)
 % - cfg (cal. constants for each ozone_lgl measurement) old & new
 % - lgl_leg
 
-%% Common
-ozone_lgl=cellfun(@(x,y) [x(:,1:11),x(:,19:25),y(:,8:14),x(:,26:32),y(:,15:21)], ...
+%% Validacion de argumentos de entrada
+arg = inputParser;   % Create instance of inputParser class.
+arg.FunctionName = 'langley_filter_cell';
+
+% input obligatorio
+arg.addRequired('ozone_raw',@iscell);
+arg.addRequired('ozone_ds',@iscell);
+arg.addRequired('config',@iscell);
+
+% input param - value
+arg.addParamValue('O3_summ', 2.5, @isfloat); % default 2.5 O3 std / summary
+
+% validamos los argumentos definidos:
+arg.parse(ozone_raw,ozone_ds,config, varargin{:});
+
+%% Individual Data
+ozone_lgl_=cellfun(@(x,y) [x(:,1:11),x(:,19:25),y(:,8:14),x(:,26:32),y(:,15:21)], ...
                                      ozone_raw, ozone_ds,'UniformOutput',false);
+% We apply normal summaries filters
+j_unique=cellfun(@(x) size(x,1)==1,ozone_lgl_); ozone_lgl_=ozone_lgl_(~j_unique);
+[m_sum,s_sum,n_sum,gname]=cellfun(@(x) grpstats(x,fix(x(:,3)/10),{'mean','std','numel','gname'}),...
+                                                                ozone_lgl_,'UniformOutput',false);
+
+j=cellfun(@(x,y,z) find(x(:,19)<= arg.Results.O3_summ & y(:,19)> 100 & y(:,19)<600 & y(:,2)>0 & z(:,1)==5),...
+                     s_sum,m_sum,n_sum,'UniformOutput',false); 
+g_valid=cellfun(@(x) str2double(x),...
+          cellfun(@(y,z) y(z),gname,j,'UniformOutput',false),'UniformOutput',false);
+idx_valid=cellfun(@(x,y) ismember(fix(x(:,3)/10),y),ozone_lgl_,g_valid,'UniformOutput',false);
+
+ozone_lgl=cellfun(@(x,y) x(y,:),ozone_lgl_,idx_valid,'UniformOutput',false);
+ozone_lgl=ozone_lgl(cell2mat(cellfun(@(x) ~isempty(x),ozone_lgl,'UniformOutput',false)));
 lgl_leg.ozone_indv = {
     'date'	'hg_id'  'nds'  'sza'  'm2'  'm3'  'sza'  'saz'  'tst'  'filt'  'temp' ...% 1-11              
     'f0'  'f1'  'f2'  'f3'  'f4'  'f5'  'f6'   ...  % 12-18 count-rates recalculated 1 (Rayleight uncorrected !!)                   
@@ -35,19 +62,16 @@ lgl_leg.cfg={
     'ND filter 0','ND filter 1','ND filter 2','ND filter 3','ND filter 4','ND filter 5'
             }; 
 
-j_unique=cellfun(@(x) size(x,1)==1,ozone_lgl); ozone_lgl=ozone_lgl(~j_unique);
-
-[m_sum,s_sum,n_sum]=cellfun(@(x) grpstats(x,fix(x(:,3)/10),{'mean','std','numel'}),...
-                           ozone_lgl,'UniformOutput',false);
-% We add to recalc. summ. necessary fields to depure: (40,41) = o3_std & 42 = N)                       
-ozone_lgl_sum=cellfun(@(x,y,z) cat(2,x,y(:,[19 33]),z(:,1)),m_sum,s_sum,n_sum,'UniformOutput', false);    
-lgl_leg.ozone_sum={
-    'date'	'hg_id'  'nds'  'sza'  'm2'  'm3'  'sza'  'saz'  'tst'  'filt'  'temp'...% 1-11              
-    'f0'  'f1'  'f2'  'f3'  'f4'  'f5'  'f6'  ...  % 12-18 count-rates recalculated 1 (Rayleight uncorrected !!)                   
-    'o3_1'  'r1'  'r2'  'r3'  'r4'  'r5'  'r6'...  % 19-25 ratios recalculated 1 (Rayleight corrected !!)                 
-    'F0'  'F1'  'F2'  'F3'  'F4'  'F5'  'F6'  ...  % 26-32 count-rates recalculated 2 (Rayleight uncorrected !!)                   
-    'O3_2'  'R1'  'R2'  'R3'  'R4'  'R5'  'R6'...  % 33-39 ratios recalculated 2 (Rayleight corrected !!)                                                                     
-    'O3_1 std'  'O3_2 std'  'N summaries'  
-                  };
+% ... And this are summaries recalculated from indv. measurements
+if nargout==4
+   ozone_lgl_sum = cellfun(@(x,y) x(y,:),m_sum,j,'UniformOutput',false);
+   lgl_leg.ozone_sum={
+        'date'	'hg_id'  'nds'  'sza'  'm2'  'm3'  'sza'  'saz'  'tst'  'filt'  'temp'...% 1-11              
+        'f0'  'f1'  'f2'  'f3'  'f4'  'f5'  'f6'  ...  % 12-18 count-rates recalculated 1 (Rayleight uncorrected !!)                   
+        'o3_1'  'r1'  'r2'  'r3'  'r4'  'r5'  'r6'...  % 19-25 ratios recalculated 1 (Rayleight corrected !!)                 
+        'F0'  'F1'  'F2'  'F3'  'F4'  'F5'  'F6'  ...  % 26-32 count-rates recalculated 2 (Rayleight uncorrected !!)                   
+        'O3_2'  'R1'  'R2'  'R3'  'R4'  'R5'  'R6'...  % 33-39 ratios recalculated 2 (Rayleight corrected !!)                                                                       
+                     };
+end
 
 
