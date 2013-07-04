@@ -63,6 +63,30 @@ arg.parse(data, varargin{:});
 % one-data days removed
 j_unique=cellfun(@(x) size(x,1)==1,data); data=data(~j_unique);
 
+%% Data filtering
+
+% summaries from test_recalculation already partially depured
+if ~arg.Results.summ 
+   [m_sum,s_sum,n_sum,gname]=cellfun(@(x) grpstats(x,fix(x(:,3)/10),{'mean','std','numel','gname'}),...
+                                          data,'UniformOutput',false);
+                                      
+   j=cellfun(@(x,y,z) find(x(:,19)<=2.5  & y(:,19)> 100 & y(:,19)<600 & y(:,2)>0 & z(:,1)==5),...
+                      s_sum,m_sum,n_sum,'UniformOutput',false); 
+   g_valid=cellfun(@(x) str2double(x),...
+           cellfun(@(y,z) y(z),gname,j,'UniformOutput',false),'UniformOutput',false);
+   idx_valid=cellfun(@(x,y) ismember(fix(x(:,3)/10),y),data,g_valid,'UniformOutput',false);
+
+   data=cellfun(@(x,y) x(y,:),data,idx_valid,'UniformOutput',false);
+   data=data(cell2mat(cellfun(@(x) ~isempty(x),data, 'UniformOutput',false)));
+elseif unique(cellfun(@(x) size(x,2),data))==42
+   j=cellfun(@(x) find(x(:,41)<=2.5  & x(:,33)> 100 & x(:,33)<600 & x(:,2)==1 & x(:,42)==5),...
+                  data,'UniformOutput',false); 
+  
+   data=cellfun(@(x,y) x(y,:),data,j,'UniformOutput',false);    
+   data=data(cell2mat(cellfun(@(x) ~isempty(x),data, 'UniformOutput',false)));
+end
+   % oz=data;   
+
 %% Filter corr (todo NaN & 1st config)
 if ~isempty(arg.Results.F_corr)
     f_corr=arg.Results.F_corr;
