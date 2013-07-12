@@ -21,11 +21,10 @@ catch
 end
 
 %% Brewer setup
-Date.CALC_DAYS=Cal.calibration_days{Cal.n_inst,1};
-Cal.Date=Date;
+Cal.Date.CALC_DAYS=Cal.calibration_days{Cal.n_inst,1};
+Cal.n_ref=15;
 
 %% READ Brewer Summaries
-
  for i=[Cal.n_ref,Cal.n_inst]
     dsum{i}={};       ozone_raw{i}={};   hg{i}={};
     ozone_sum{i}={};  ozone_raw0{i}={};  bhg{i}={};
@@ -55,7 +54,7 @@ matrix2latex(log{Cal.n_inst},fullfile(Cal.file_latex,['tabla_fileprocess_',Cal.b
 %% configuration files
 change=write_excel_config(config,Cal,Cal.n_inst);
 
-[config_ref,TCref,DTref,ETCref,A1ref,ATref,leg]  =read_icf(Cal.brw_config_files{Cal.n_ref(2),2});
+[config_ref,TCref,DTref,ETCref,A1ref,ATref,leg]  =read_icf(Cal.brw_config_files{Cal.n_ref(1),2});
 [config_def,TCdef,DTdef,ETCdef,A1def,ATdef]      =read_icf(Cal.brw_config_files{Cal.n_inst,2});
 [config_orig,TCorig,DTorig,ETCorig,A1orig,ATorig]=read_icf(Cal.brw_config_files{Cal.n_inst,1});
 
@@ -209,15 +208,15 @@ for ii=[Cal.n_ref Cal.n_inst]
    summary_old{ii}=summary_old_corr; summary{ii}=summary_corr;
 end
 figure; plot(summary{Cal.n_inst}(:,1),summary{Cal.n_inst}(:,6),'r.',...
-             summary{Cal.n_ref(1)}(:,1),summary{Cal.n_ref(1)}(:,6),'k.',...
-             summary{Cal.n_ref(2)}(:,1),summary{Cal.n_ref(2)}(:,6),'m.');
+             summary{Cal.n_ref(1)}(:,1),summary{Cal.n_ref(1)}(:,6),'k.');%,...
+%             summary{Cal.n_ref(2)}(:,1),summary{Cal.n_ref(2)}(:,6),'m.');
 legend(gca,'inst','IZO#183','IZO#185','Location','NorthEast'); grid;
 datetick('x',26,'KeepLimits','KeepTicks');
 
 %% Ozone Calibration
 % Reference Brewer #185
 close all
-n_ref=Cal.n_ref(2); % Cuidado con cual referencia estamos asignando
+n_ref=Cal.n_ref; % Cuidado con cual referencia estamos asignando
 n_inst=Cal.n_inst;
 brw=Cal.brw; brw_str=Cal.brw_str;
 
@@ -230,7 +229,7 @@ ref2=summary{n_ref}(jday_ref,:);
 % etiquetamos con _b, porque eso sera lo que usamos para plotear los individuales, con la configuración sugerida
 blinddays=Cal.calibration_days{Cal.n_inst,2};
 
-if ~isempty(blinddays)
+if ~isequal(blinddays,Cal.calibration_days{Cal.n_inst,3})
 
    jday=findm(diaj(summary_old{Cal.n_inst}(:,1)),blinddays,0.5);
    inst1_b=summary_old{Cal.n_inst}(jday,:);
@@ -243,7 +242,7 @@ if ~isempty(blinddays)
        5,brw_str{n_inst},brw_str{n_ref},'plot_flag',0);% original config , sl corrected
 
 % Sugerido con los blind_days
-A1=A.old(ismember(Date.CALC_DAYS,blinddays),Cal.n_inst+1); A1_old=unique(A1(~isnan(A1)))
+A1=A.old(ismember(Cal.Date.CALC_DAYS,blinddays),Cal.n_inst+1); A1_old=unique(A1(~isnan(A1)))
 [ETC_SUG,o3c_SUG,m_etc_SUG]=ETC_calibration_C(Cal,summary_old,A1_old,...
                    Cal.n_inst,n_ref,5,.8,0.01,blinddays);
 tableform({'ETCorig','ETCnew 1p','ETCnew 2p','O3Abs (ICF)','O3Abs 2p','O3Abs dsp'},...
@@ -254,7 +253,7 @@ tableform({'ETCorig','ETCnew 1p','ETCnew 2p','O3Abs (ICF)','O3Abs 2p','O3Abs dsp
 
 
 % suggested
-o3r= (inst1_b(:,8)-ETC_SUG(1).NEW)./(nanmean(A.old(ismember(Date.CALC_DAYS,blinddays),Cal.n_inst+1))*inst1_b(:,3)*10);
+o3r= (inst1_b(:,8)-ETC_SUG(1).NEW)./(A1_old*inst1_b(:,3)*10);
 inst1_b(:,10)=o3r;
     [x,r,rp,ra,dat,ox,osc_smooth_sug]=ratio_min_ozone(...
        inst1_b(:,[1,10,3,2,8,9,4,5]),ref2_b(:,[1,6,3,2,8,9,4,5]),...
@@ -328,15 +327,16 @@ inst2=summary{Cal.n_inst}(jday,:);
        inst1(:,[1,6,3,2,8,9,4,5]),ref2(:,[1,6,3,2,8,9,4,5]),...
        5,brw_str{n_inst},brw_str{n_ref},'plot_flag',1);% original config
 
-if isempty(blinddays)
+if isequal(blinddays,Cal.calibration_days{Cal.n_inst,3})
    osc_smooth{Cal.n_inst}.ini=osc_smooth_ini;
    [x,r,rp,ra,dat,ox,osc_smooth_inisl]=ratio_min_ozone(...
    inst1(:,[1,12,3,2,8,9,4,5]),ref2(:,[1,6,3,2,8,9,4,5]),...
    5,brw_str{n_inst},brw_str{n_ref},'plot_flag',0);
    osc_smooth{Cal.n_inst}.ini_sl=osc_smooth_inisl;
 end
+
 %%
-A1=A.new(ismember(Date.CALC_DAYS,blinddays),Cal.n_inst+1); A1_new=unique(A1(~isnan(A1)))
+A1=A.new(ismember(Cal.Date.CALC_DAYS,finaldays),Cal.n_inst+1); A1_new=unique(A1(~isnan(A1)))
 [ETC_NEW,o3c_NEW,m_etc_NEW]=ETC_calibration_C(Cal,summary,A1_new,Cal.n_inst,n_ref,...
                                                                 5,0.8,0.03,finaldays);
 tableform({'ETCorig','ETCnew 1p','ETCnew 2p','O3Abs (ICF)','O3Abs 2p','O3Abs dsp'},...
@@ -350,11 +350,11 @@ latexcmd(fullfile(['>',Cal.file_latex],['cal_etc_',brw_str{n_inst}]),'\ETCfin',n
 etc{Cal.n_inst}.new=ETC_NEW;
 save(Cal.file_save,'-APPEND','etc');
 %%
-o3r= (inst2(:,8)-ETC_NEW(1).NEW)./(nanmean(A.new(ismember(Date.CALC_DAYS,blinddays),Cal.n_inst+1))*inst2(:,3)*10);
+o3r= (inst2(:,8)-ETC_NEW(1).NEW)./(A1_new*inst2(:,3)*10);
 inst2(:,10)=o3r;
     [x,r,rp,ra,dat,ox,osc_smooth_fin]=ratio_min_ozone(...
        inst2(:,[1,10,3,2,8,9,4,5]),ref2(:,[1,6,3,2,8,9,4,5]),...
-       5,brw_str{2},brw_str{n_ref},'plot_flag',0);
+       5,brw_str{n_inst},brw_str{n_ref},'plot_flag',0);
 %     [x,r,rp,ra,dat,ox,osc_smooth_fin]=ratio_min_ozone(...
 %        inst2(:,[1,6,3,2,8,9,4,5]),ref2(:,[1,6,3,2,8,9,4,5]),...
 %        5,brw_str{Cal.n_inst},brw_str{n_ref},'plot_flag',0);
@@ -364,7 +364,7 @@ inst2(:,10)=o3r;
 % inst2(:,10)=o3r;
 %     [x,r,rp,ra,dat,ox,osc_smooth_2P]=ratio_min_ozone(...
 %        inst2(:,[1,10,3,2,8,9,4,5]),ref2(:,[1,6,3,2,8,9,4,5]),...
-%        5,brw_str{2},brw_str{n_ref},'plot_flag',0);
+%        5,brw_str{n_inst},brw_str{n_ref},'plot_flag',0);
 
 osc_smooth{Cal.n_inst}.fin=osc_smooth_fin;
 % osc_smooth{Cal.n_inst}.twoP=osc_smooth_2P;
@@ -473,16 +473,18 @@ ozone_day_sum=round([diaj(m(:,1)),m(:,2),s(:,2),n(:,2),m(:,3),s(:,3),100*(m(:,3)
 %% Plot daily summary
 close all
 figure; set(gcf,'Tag','_GlobalPlot_');
-plot(summary{Cal.n_ref(1)}(:,1),summary{Cal.n_ref(1)}(:,6),'g*','MarkerSize',5);
+plot(summary{n_ref}(:,1),summary{n_ref}(:,6),'g*','MarkerSize',5);
 hold on; plot(summary{Cal.n_inst}(:,1),summary{Cal.n_inst}(:,6),'b.','MarkerSize',12);
-legend(gca,Cal.brw_name{Cal.n_ref(1)},Cal.brw_name{Cal.n_inst},'Location','Best',...
+legend(gca,Cal.brw_name{n_ref},Cal.brw_name{Cal.n_inst},'Location','Best',...
                                                                'Orientation','Horizontal');
 ylabel('Total Ozone (DU)'); xlabel('Date'); grid;
 title(Cal.campaign);
 datetick('x',6,'keepLimits','KeepTicks');
 
 % blind days: suggested config.
-if ~isempty(blinddays)
+if ~isequal(blinddays,Cal.calibration_days{Cal.n_inst,3})
+   inst1_b      =summary_old{Cal.n_inst}(findm(diaj(summary_old{Cal.n_inst}(:,1)),blinddays,0.5),:);
+   inst1_b(:,10)=(inst1_b(:,8)-ETC_SUG(1).NEW)./(A1_old*inst1_b(:,3)*10);     
    for dd=1:length(blinddays)
       j=find(diajul(floor(inst1_b(:,1)))==blinddays(dd));
       j_=find(diajul(floor(ref2_b(:,1)))==blinddays(dd));
@@ -492,7 +494,7 @@ if ~isempty(blinddays)
          hold on; plot(inst1_b(j,1),inst1_b(j,10),'b-d','MarkerSize',7,'MarkerFaceColor','b');
          plot(inst1_b(j,1),inst1_b(j,6),'r:.','MarkerSize',9);
          title(sprintf('Suggested configuration \n  Blind day %d%d',blinddays(dd), Cal.Date.cal_year-2000))
-         legend(gca,Cal.brw_name{Cal.n_ref(2)},Cal.brw_name{Cal.n_inst},[Cal.brw_name{Cal.n_inst} ' old config.'],'Location','SouthEast',...
+         legend(gca,Cal.brw_name{n_ref},Cal.brw_name{Cal.n_inst},[Cal.brw_name{Cal.n_inst} ' old config.'],'Location','SouthEast',...
                                                                'Orientation','Horizontal');
          ylabel('Total Ozone (DU)'); grid;
          datetick('x',15,'keepLimits','KeepTicks');
@@ -501,6 +503,8 @@ if ~isempty(blinddays)
 end
 
 % final days: final config.
+jday=findm(diaj(summary{Cal.n_inst}(:,1)),finaldays,0.5);% quiero mostrar la primera config. con sl
+inst2=summary{Cal.n_inst}(jday,:);
 for dd=1:length(finaldays)
 j=find(diajul(floor(inst2(:,1)))==finaldays(dd));
 j_=find(diajul(floor(ref2(:,1)))==finaldays(dd));
@@ -508,9 +512,9 @@ if (isempty(j) || length(j)<4), continue; end
 f=figure; set(f,'Tag',sprintf('%s%s','DayPlot_',num2str(finaldays(dd))));
 plot(ref2(j_,1),ref2(j_,6),'g-s','MarkerSize',6,'MarkerFaceColor','g');
 hold on; plot(inst2(j,1),inst2(j,10),'b--d','MarkerSize',7,'MarkerFaceColor','b');
-         plot(inst1(j,1),inst1(j,6),'r:.','MarkerSize',9);
+         plot(inst2(j,1),inst2(j,6),'r:.','MarkerSize',9);
 title(sprintf('Final configuration \nFinal day %d%02d',finaldays(dd), Cal.Date.cal_year-2000))
-legend(gca,Cal.brw_name{Cal.n_ref(2)},Cal.brw_name{Cal.n_inst},[Cal.brw_name{Cal.n_inst} ' old config.'],...
+legend(gca,Cal.brw_name{n_ref},Cal.brw_name{Cal.n_inst},[Cal.brw_name{Cal.n_inst} ' old config.'],...
                                                       'Location','SouthEast','Orientation','Horizontal');
 ylabel('Total Ozone (DU)'); grid;
 datetick('x',15,'keepLimits','KeepTicks');
