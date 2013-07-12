@@ -37,7 +37,7 @@ NTC={}; tabla_regress={}; ajuste={}; Args={};
 [sl_rw,tc]=readb_sl_rawl(['.\bfiles','\B*.',Cal.brw_str{Cal.n_inst}]);% cambio nombres para poder seguir
 
 [NTC{1},ajuste{1},Args{1},Fr]=temp_coeff_raw(config_temp,sl_rw,'outlier_flag',0,...
-                                     'date_range',datenum(Cal.Date.cal_year,1,[Cal.calibration_days{Cal.n_inst,1}(1) Cal.calibration_days{Cal.n_inst,1}(end)]));
+                                     'date_range',datenum(Cal.Date.cal_year,1,Cal.calibration_days{Cal.n_inst,1}([1 end])));
 
 disp(sprintf(' ORIG MS9: %5.0f +/-%2.0f  %3.1f +/- %3.2f  ',ajuste{1}.orig(7,[1 3 2 4])));
 disp(sprintf('  NEW MS9: %5.0f +/-%2.0f  %3.1f +/- %3.2f  ',ajuste{1}.new(7,[1 3 2 4])));
