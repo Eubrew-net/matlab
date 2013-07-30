@@ -49,11 +49,16 @@ close all
                      'hg_time',5,'one_flag',1);
 
 %%
-ix=sort(findobj('tag','SC_INDIVIDUAL'));
+ix=sort(findobj('tag','SC_INDIVIDUAL')); figure(ix); set(get(gca,'title'),'FontSize',8);
 printfiles_report(ix',Cal.dir_figs,'aux_pattern',ix,'FontSize',.9,'Width',8.5,'Height',7);
 
 ix=sort(findobj('tag','Final_SC_Calculation'));
-if length(ix)>1, Width=8; Height=6; else  Width=13; Height=8; end
+if length(ix)>1
+    Width=8; Height=6;
+    for i=1:length(ix), figure(ix(i)); set(get(gca,'title'),'FontSize',8); end
+else
+    Width=13; Height=8;
+end
 printfiles_report(ix',Cal.dir_figs,'aux_pattern',ix,'Width',Width,'Height',Height);
 
 close all

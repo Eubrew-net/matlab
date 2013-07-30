@@ -164,7 +164,7 @@ if plot_flag
     try
         figure; set(gcf,'Tag','CZ_Report');
         subplot(3,1,1:2)
-        plot(wl{wich}(:,1),wl{wich}(:,4),'ro',wl{wich}(:,1),wl{wich}(:,6),'gs');
+        plot(wl{wich}(:,1),wl{wich}(:,4),'ro',wl{wich}(:,1),wl{wich}(:,6),'gs'); ax(1)=gca;
         set(gca,'YLim',[-0.5 0.5],'XTicklabel',[],'GridLineStyle','-.','Linewidth',1);
         ylabel('Diff.  (A)','FontWeight','bold');    
         sup=suptitle(sprintf('%s scan on %7.2f line. Brw#%s',FilesCZ{end}(1:2),...
@@ -173,10 +173,13 @@ if plot_flag
         set(l,'FontSize',9);    hline([-0.13 0.13],'-k'); 
     
         subplot(3,1,3)
-        plot(wl{wich}(:,1),fwhm{wich}(:,1),'om');
+        plot(wl{wich}(:,1),fwhm{wich}(:,1),'om'); ax(2)=gca;
         set(gca,'YLim',[5 7],'GridLineStyle','-.','Linewidth',1);
         ylabel('FWHM (A)','FontWeight','bold');  grid;
-        datetick('x',25,'keeplimits','keepticks');  hline(6.5,'-k');
+        datetick('x',25,'keeplimits','keepticks');  hline(6.5,'-k');       
+        
+        linkprop(ax,'XLim');
+        
     catch exception
         fprintf('Error in plot: %s\n',exception.message);
     end
