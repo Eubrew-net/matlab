@@ -97,7 +97,8 @@ for j=1:length(s)
        cfg=read_icf([brw_config_files{n_inst,config_n}],datefile); CSN=[cfg(14) cfg(8) cfg(44)];
        end           
        if ~isempty(csn)
-           cfg(14)=csn(1); cfg(8)=csn(2); cfg(44)=csn(3);
+           cfg(14)=csn;% cfg(8)=csn(2); cfg(44)=csn(3);
+           CSN(1)=csn;
        end
        coment=brw_str{n_inst};
        if isempty(strfind(a,'DSP'))
