@@ -21,7 +21,7 @@ end
 
 %% Cargar datos
 run(setup);
-load('..\DSP\dsp_summary.mat');
+load(fullfile('..','DSP','dsp_summary.mat'));
 
 %%
 dsp_info=cell(4,4); 
