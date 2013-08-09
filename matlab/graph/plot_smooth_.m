@@ -45,8 +45,8 @@ function h=plot_smooth_(osc_smooth_a,osc_smooth_b,varargin)
  
  else
 
-    [ma,sa,na]=osc_group(osc_ranges,[osc_smooth_a(jka,2:end) osc_smooth_a(jka,1)]);
-    [mb,sb,nb]=osc_group(osc_ranges,[osc_smooth_b(jkb,2:end) osc_smooth_b(jkb,1)]);
+    [grpa,ma,sa,na]=osc_group(osc_ranges,[osc_smooth_a(jka,2:end) osc_smooth_a(jka,1)]);
+    [grpb,mb,sb,nb]=osc_group(osc_ranges,[osc_smooth_b(jkb,2:end) osc_smooth_b(jkb,1)]);
     h(1)=errorbar(ma(:,end-1),ma(:,1)',ma(:,2)','--sb','MarkerFaceColor','b');
     hold on
     h(2)=errorbar(mb(:,end-1),mb(:,1)',mb(:,2)',':sr','MarkerFaceColor','r');
@@ -58,7 +58,7 @@ function h=plot_smooth_(osc_smooth_a,osc_smooth_b,varargin)
               osc_smooth=varargin{vargs};
               osc_smooth=osc_smooth(~isnan(osc_smooth(:,1)),:); 
               jk=osc_smooth(:,1)>osc_lim(1) & osc_smooth(:,1)<osc_lim(2);
-              [m,s,n]=osc_group(osc_ranges,[osc_smooth(jk,2:end) osc_smooth(jk,1)]);
+              [grp,m,s,n]=osc_group(osc_ranges,[osc_smooth(jk,2:end) osc_smooth(jk,1)]);
               h(2+vargs)=errorbar(m(:,end-1),m(:,1)',m(:,2)',marks{vargs},'MarkerFaceColor',marks{vargs}(end));
            end
        end
