@@ -16,9 +16,7 @@ function [ql_avg,ql_data]=load_ql_PLC(file,pathirr,ref,dateref)
 % 
 
 if nargin==0
-   [file,path]=uigetfile('ql*');
-   od=pwd;
-   cd(path)
+   [file,path]=uigetfile('ql*');  cd(path)
 end
 
 if nargin==2 
@@ -32,14 +30,12 @@ end
 leg=[];
 
 % leemos el archivo en memoria
-f=fopen(file);s=fread(f);fclose(f);
-s=char(s)';lin=mmstrtok(s,char(13));
-nlin=size(lin); %numero de lineas
-fecha=0;
+f=fopen(file); s=fread(f,'*char'); fclose(f);
+lin=mmstrtok(s,char(13)); nlin=size(lin); %numero de lineas
 
 % cargamos  el archivo
 l0=sscanf(lin{1},'%f');
-ql=[NaN*zeros(nlin(1),length(l0)+2)];
+ql=(NaN*zeros(nlin(1),length(l0)+2));
 
 for i=1:nlin(1)
     if length(lin{i})>100
@@ -53,7 +49,7 @@ for i=1:nlin(1)
         end
     end
 end
-ql(find(isnan(ql(:,1))),:)=[];% ya tenemos leído el archivo ql
+ql(isnan(ql(:,1)),:)=[];% ya tenemos leído el archivo ql
 
 %fecha en formato matlab
 fecha=brewer_date(ql(:,2)); fecha(:,1)=fecha(:,1) + ql(:,end-2)/24 + ql(:,end-1)/24/60;
@@ -72,18 +68,20 @@ lamda =ql(:,7:2:end-3);
 meas=ql(:,8:2:end-3);           % solo cuentas   
 
 [path_,file_,ext]=fileparts(file);
-file=[file_,ext]
-qfile=strrep(file,'_','');      % nombre
-lamp=sscanf(qfile,'%*2c%d.%*d');% extraemos el nombre de la lámpara 
-inst=sscanf(qfile,'%*2c%*d.%d');% extraemos el nombre del intrumento
+file=[file_,ext]; file=upper(file);
+qfile=strrep(file,'_',''); qfile=strrep(qfile,'QL',''); % nombre
+
+lamp=strrep(qfile,ext,'');     % extraemos el nombre de la lámpara 
+inst=sscanf(ext,'.%d');        % extraemos el nombre del intrumento
 
 % cargamos el fichero de la lámpara
 ir=[];
 try
- ir=loadirr(lamp,pathirr);
-catch
- warning('\r LOAD QL irr file not found in matlab path\r ');
-end 
+ ir=loadirr_PLC(lamp,pathirr);
+catch exception
+ fprintf('Error en %s, line %d:\n%s (%s)',exception.stack(1).file,exception.stack(1).line,...
+                                          exception.message,exception.stack(2).file);
+end
     
 % SALIDA INDIDUAL
 % salida del fichero medidas individuales
@@ -96,7 +94,7 @@ ql_data.dark=ql(:,5);
 % FICHERO EXCEL
 %leg=mmcellstr(sprintf('%05d  %02d:%02d\n',ql(:,[2, end-2:end-1])'));
 
- qlamp=[fecha(:,1),lamp*ones(size(ql(:,1))),inst*ones(size(ql(:,1))),fecha(:,2:end),medida];
+ qlamp=[fecha(:,1),str2num(lamp)*ones(size(ql(:,1))),inst*ones(size(ql(:,1))),fecha(:,2:end),medida];
 
 if ~isempty(qlamp)
     % RESUMEN DIARIO
@@ -163,7 +161,7 @@ if ~isempty(qlamp)
      legend(datestr(ql_avg.date),-1)
 
 % PLOTEO DE RATIO
-if length(nd_>1) && ~isempty(ref)
+if length(nd_)>1 && ~isempty(ref)
             figure
             orient landscape
             plot(nd_,med_d./refer);
@@ -174,7 +172,7 @@ if length(nd_>1) && ~isempty(ref)
             legend(num2str(lamda(1,:)'),-1);
             grid;
             rotateticklabel(gca,30);
-    end
+end
 else    
     ql_avg.ql=qlamp;
     ql_avg.qls=qlamp;
