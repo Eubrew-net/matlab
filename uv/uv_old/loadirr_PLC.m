@@ -13,17 +13,17 @@ function irx=loadirr_PLC(lamp,pathirr)
 if isnumeric(lamp)
  name=sprintf('LAMP%03d.irr',lamp);
 else
- name=lamp;
+ name=['LAMP',lamp,'.irr'];
 end
  [fid,m]=fopen(fullfile(pathirr,name));
  if fid>0 
-    fgets(fid);
-    fgets(fid);
+    fgets(fid)
+    fgets(fid)
     irx=fscanf(fid,'%f',[2,Inf])';
     fclose(fid);
     lamda=2865:5:3635;
      if size(irx(:,1),1)~=length(lamda)
-       disp('Interpolamos a 5 A');
+       disp('Interpolamos a 5 A')
        y=interp1(irx(:,1),irx(:,2),lamda,'pchip');
        figure;plot(irx(:,1),irx(:,2),'r',lamda,y,'*-k');
        title(name);
