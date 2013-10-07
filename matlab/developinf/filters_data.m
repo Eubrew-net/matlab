@@ -47,18 +47,21 @@ figure; set(gcf,'tag','FI_TIME_atts');
 ha=tight_subplot(2,1,.07,[.1 0.1],[.1 .1]);    
 % slit#3
 axes(ha(1)); sampl1=cell2mat(cellfun(@(x) x(:,5),att,'UniformOutput',0));
-ploty([att{1}(:,1),100*matdiv(matadd(sampl1(:,2:end),-mean(sampl1(:,2:end))),mean(sampl1(:,2:end)))],'-'); 
-set(gca,'XTicklabel',[],'YTickLabelMode','auto','box','on');
-yl=ylabel('ND att. relative diff. with respect to mean'); grid;
-yl_pos=get(yl,'Position'); set(yl,'Position',[yl_pos(1) yl_pos(2)-.65 yl_pos(1)]);
+ploty([att{1}(:,1),100*matdiv(matadd(sampl1(:,2:end),-nanmean(sampl1(:,2:end))),nanmean(sampl1(:,2:end)))],'-'); 
+set(gca,'XTicklabel',[],'YTickLabelMode','auto','box','on'); grid;
 title(sprintf('%s\r\nND attenuations vs. time (sample slits #3, top, and #5, bottom)',Cal.brw_name{Cal.n_inst}));
 legendflex(label_filter(2:end),'ref', ha(1),'anchor', {'sw','sw'},'buffer',[6 0],...
                          'nrow',1,'fontsize',8,'box','off','xscale',.5);                   
 % slit#5
 axes(ha(2)); sampl1=cell2mat(cellfun(@(x) x(:,7),att,'UniformOutput',0));
-ploty([att{1}(:,1),100*matdiv(matadd(sampl1(:,2:end),-mean(sampl1(:,2:end))),mean(sampl1(:,2:end)))],'-'); 
+ploty([att{1}(:,1),100*matdiv(matadd(sampl1(:,2:end),-nanmean(sampl1(:,2:end))),nanmean(sampl1(:,2:end)))],'-'); 
 set(gca,'YTickLabelMode','auto','box','on'); grid;
 datetick('x','mmmyy','keeplimits','keepticks');
+
+yl=ylabel('ND att. relative diff. with respect to mean');
+yl_pos=get(yl,'Position'); 
+i1=get(ha(1),'Position'); i2=get(ha(2),'Position');
+set(yl,'Position',[yl_pos(1) i1(2)+i1(2)/3 yl_pos(3)]); % yl_pos(2)-.65
 
 %% F corr. vs Time
 [a b c]=grpstats([fech,temp(:,1),o3f],{year(fech),month(fech)},{'mean','sem','numel'});
