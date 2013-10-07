@@ -201,7 +201,7 @@ salida=[path outfname_cuadratic];
 % using read_icf= cfg(14)+cfg(44)
 %cfg=read_icf('icf07808.193');
 %ozonepos=cfg(14)+cfg(44);
-CALC_STEP=cfg(14);
+CALC_STEP=cfg(14); %fnameN='O3f30012.185';
 [res,detail,salida]=ozonecoeff3([path fnamealldsp],[ozonepos,cfg(44)],[path fnameN],[path outfname_cuadratic]);
 
 jcal=find((res(:,1)==CALC_STEP),1);
