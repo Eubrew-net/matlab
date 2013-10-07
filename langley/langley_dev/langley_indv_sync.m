@@ -59,7 +59,7 @@ end
 
 [idx_2 b]=ismember(time_ref,cellfun(@(x) fix(x(1,1)),ozone_lgl{3})); 
 id=find(b==0);  b(b==0)=[];
-lgl_{3}=repmat({[]},length(time_ref),1); lgl_{3}(idx_2,:)=ozone_lgl{3}(b)
+lgl_{3}=repmat({[]},length(time_ref),1); lgl_{3}(idx_2,:)=ozone_lgl{3}(b);
 for id_=1:length(id)   
     lgl_{3}(id(id_))={cat(2,time_ref(id(id_)),NaN*ones(1,38))};    
 end

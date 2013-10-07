@@ -74,7 +74,7 @@ if ~isempty(summary{inst})
            if length(A_new)>1
               cor(j)=corETC(j)./(10*A_new(j).*summary{inst}(j,3));
            else
-              cor(j)=ETC_C(filtro)./(10*A_new.*summary{inst}(j,3))';
+              cor(j)=ETC_Cnew(filtro)./(10*A_new.*summary{inst}(j,3))';
            end
         
            summary{inst}(j,6)=summary{inst}(j,6)-cor(j);   % cal2
@@ -99,7 +99,7 @@ if ~isempty(summary{inst})
            if length(A_old)>1
               cor_old(jo)=corETC_old(jo)./(10*A_old(jo).*summary_old{inst}(jo,3));
            else
-              cor_old(jo)=ETC_C(filtro)./(10*A_old.*summary_old{inst}(jo,3))';
+              cor_old(jo)=ETC_Cold(filtro)./(10*A_old.*summary_old{inst}(jo,3))';
            end
         
            summary_old{inst}(jo,6)=summary_old{inst}(jo,6)-cor_old(jo);   % cal1
