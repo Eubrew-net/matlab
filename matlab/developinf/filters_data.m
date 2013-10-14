@@ -61,7 +61,7 @@ datetick('x','mmmyy','keeplimits','keepticks');
 yl=ylabel('ND att. relative diff. with respect to mean');
 yl_pos=get(yl,'Position'); 
 i1=get(ha(1),'Position'); i2=get(ha(2),'Position');
-set(yl,'Position',[yl_pos(1) i1(2)+i1(2)/3 yl_pos(3)]); % yl_pos(2)-.65
+set(yl,'Position',[yl_pos(1) yl_pos(2)*-4 yl_pos(3)]); % yl_pos(2)-.65
 
 %% F corr. vs Time
 [a b c]=grpstats([fech,temp(:,1),o3f],{year(fech),month(fech)},{'mean','sem','numel'});
@@ -80,7 +80,9 @@ datetick('x','mmmyy','keeplimits','keepticks'); grid;
 
 %% Tabla
 fprintf('\r\nETC corr Monthly means: %s\r\n', Cal.brw_name{Cal.n_inst});
-tabla_data=cellfun(@(x,y) strcat(num2str(x),' +/- ',num2str(y)),num2cell(round(a(:,3:end))),num2cell(round(b(:,3:end))),'UniformOutput',0); 
-displaytable(tabla_data,{'ETC corr(FW#21)','ETC corr(FW#22)','ETC corr(FW#23)','ETC corr(FW#24)','ETC corr(FW#25)'},...
+tabla_data=cat(2,cellfun(@(x,y) strcat(num2str(x),' +/- ',num2str(y)),...
+                 num2cell(round(a(:,3:end))),num2cell(round(b(:,3:end))),'UniformOutput',0),...
+                 cellstr(num2str(c(:,1))));
+displaytable(tabla_data,{'ETC corr(FW#21)','ETC corr(FW#22)','ETC corr(FW#23)','ETC corr(FW#24)','ETC corr(FW#25)','N'},...
              15,'.0f',cellstr(datestr(a(:,1),1)));
-
+                 
