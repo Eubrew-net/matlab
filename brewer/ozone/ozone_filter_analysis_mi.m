@@ -22,8 +22,10 @@ end
 
 aux=sortrows(summary,1); freq_filter=tabulate(aux(:,5));
 
-cf=diff(aux(:,5));cf=[0;cf];  
+ cf=diff(aux(:,5));cf=[1;cf];  
  cf_idx=find(cf);% buscamos el cambio de filtro (no nulos) 
+ aux=aux(cf_idx,:); cf=cf(cf_idx);
+ cf_idx=find(abs(cf)==64);% sólo filtros consecutivos
 %                 indx     primer F#     segundo F#
  chg_filter=[cf_idx,aux(cf_idx-1,5),aux(cf_idx,5),(aux(cf_idx,1)-aux(cf_idx-1,1))*24*60];
 % Nos quedamos con medidas que no difieran en más de 1/2 hora entre si
