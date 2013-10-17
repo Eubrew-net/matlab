@@ -144,7 +144,7 @@ if  nargin~=3 && ~strcmp(name_a,name_b)
     f=figure;
     set(f,'Tag','RATIOo_1');
     subplot(2,2,1);
-    ploty(data(:,[1,3,3+data_l-1]),'.');grid;title('medidas');
+    ploty(data(:,[1,3,3+data_l-1]),'o');grid;title('medidas');
     hold on;
     plot(a(:,1),a(:,2),'-',b(:,1),b(:,2),':');
     datetick;
@@ -174,7 +174,7 @@ if  nargin~=3 && ~strcmp(name_a,name_b)
     ploty(ab(:,1:2));grid;title(['dif ',name_a,' - ',name_b]);
     datetick;
     subplot(2,3,6);
-    plot(data(:,2)*60*24,data(:,3)-data(:,3+data_l-1),'.');grid;
+    plot(data(:,2)*60*24,data(:,3)-data(:,3+data_l-1),'o');grid;
     title('difference vs time difference (min) ');
     xlabel('min');
     
@@ -191,7 +191,7 @@ if  nargin~=3 && ~strcmp(name_a,name_b)
      title(sprintf('(%s - %s) / %s.  Grouped by day',name_a,name_b,name_b))
      box on;
     catch % falla cuando hay un solo dia revisar
-     plot(osc,rp(:,2),'.');
+     plot(osc,rp(:,2),'o');
      set(gca,'Xlim',OSC_lim);
      xlabel('Ozone slant path');
      ylabel(' % Relative differences');
@@ -202,8 +202,10 @@ if  nargin~=3 && ~strcmp(name_a,name_b)
 %     errorbar(aux_x,m,2*s,'s-');
     grid;
    
+    %%
     
-    f=figure;   set(f,'Tag','RATIO_SZA'); 
+    f=figure; 
+    set(f,'Tag','RATIO_SZA'); 
     j=data(:,1)-fix(data(:,1))>=0.5;
     %hold on;
     %plot(sza(j),rp(j,2),'o');
@@ -245,7 +247,7 @@ if  nargin~=3 && ~strcmp(name_a,name_b)
     f=figure;    set(f,'Tag','RATIO_FILTER_INST');
     if size(b,2)==8;   
     try
-     gscatter(osc,rp(:,2),data(:,9),'','',5); 
+     gscatter(osc,rp(:,2),data(:,9),'','o',5); 
      l=legend(gca,filter_name{unique(data(:,9))/64+1},'Orientation','Horizontal','Location','NorthEast');
      set(l,'FontSize',12);
      set(gca,'Xlim',OSC_lim,'YLim',[-3 3]); hline(0,'-k');
@@ -273,7 +275,7 @@ if  nargin~=3 && ~strcmp(name_a,name_b)
 
     %figure by temp 
     f=figure;    set(f,'Tag','RATIO_TEMP_INST');    
-       P=gscatter(osc,rp(:,2),data(:,8),'','',5);  %,data(:,end-data_l+1)],'','+o');
+       P=gscatter(osc,rp(:,2),data(:,8),'','o',5);  %,data(:,end-data_l+1)],'','+o');
        set(gca,'Ylim',[-3 3]); grid
        set(findobj(gca,'Type','Line'),'MarkerSize',5);
        set(findobj(gcf,'Tag','legend'),'Location','EastOutside')
@@ -284,7 +286,7 @@ if  nargin~=3 && ~strcmp(name_a,name_b)
         
     f=figure;   set(f,'Tag','RATIO_FILTER_REF');    
     try
-     gscatter(osc,rp(:,2),data(:,end),'','',5); 
+     gscatter(osc,rp(:,2),data(:,end),'','o',5); 
      l=legend(gca,filter_name{unique(data(:,9))/64+1},'Orientation','Horizontal','Location','NorthEast');
      set(l,'FontSize',12);
      set(gca,'Xlim',OSC_lim,'YLim',[-3 3]); hline(0,'-k');
