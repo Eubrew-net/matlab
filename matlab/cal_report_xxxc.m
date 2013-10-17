@@ -511,8 +511,8 @@ j_=find(diajul(floor(ref2(:,1)))==finaldays(dd));
 if (isempty(j) || length(j)<4), continue; end
 f=figure; set(f,'Tag',sprintf('%s%s','DayPlot_',num2str(finaldays(dd))));
 plot(ref2(j_,1),ref2(j_,6),'g-s','MarkerSize',6,'MarkerFaceColor','g');
-hold on; plot(inst2(j,1),inst2(j,10),'b--d','MarkerSize',7,'MarkerFaceColor','b');
-         plot(inst2(j,1),inst2(j,6),'r:.','MarkerSize',9);
+hold on; plot(inst2(j,1),inst2(j,6),'b--d','MarkerSize',7,'MarkerFaceColor','b');
+         plot(inst2(j,1),inst2(j,10),'r:.','MarkerSize',9);
 title(sprintf('Final configuration \nFinal day %d%02d',finaldays(dd), Cal.Date.cal_year-2000))
 legend(gca,Cal.brw_name{n_ref},Cal.brw_name{Cal.n_inst},[Cal.brw_name{Cal.n_inst} ' old config.'],...
                                                       'Location','SouthEast','Orientation','Horizontal');
