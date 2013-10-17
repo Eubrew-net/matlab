@@ -34,8 +34,8 @@ config_temp.final_days=Cal.Date.FINAL_DAYS(1);
 NTC={}; tabla_regress={}; ajuste={}; Args={};
 
 %% Temperature dependence.  During campaign
-[sl_rw,tc]=readb_sl_rawl(['.\bfiles','\B*.',Cal.brw_str{Cal.n_inst}]);% cambio nombres para poder seguir
-
+%[sl_rw,tc]=readb_sl_rawl(['.\bfiles','\B*.',Cal.brw_str{Cal.n_inst}]);% cambio nombres para poder seguir
+[sl_rw,tc]=readb_sl_rawl(fullfile('.','bfiles',['B*.',Cal.brw_str{Cal.n_inst}]));% cambio nombres para poder seguir
 [NTC{1},ajuste{1},Args{1},Fr]=temp_coeff_raw(config_temp,sl_rw,'outlier_flag',0,...
                                      'date_range',datenum(Cal.Date.cal_year,1,Cal.calibration_days{Cal.n_inst,1}([1 end])));
 
@@ -53,18 +53,15 @@ disp(sprintf('  NEW MS9: %5.0f +/-%2.0f  %3.1f +/- %3.2f  ',ajuste{1}.new(7,[1 3
 if exist('sl_raw','var')
     if iscell(sl_raw) && size(sl_raw,2)>=Cal.n_inst
         if isempty(sl_raw{Cal.n_inst})
-           [sl_raw{Cal.n_inst},TC{Cal.n_inst}]=readb_sl_rawl(['.\bdata',Cal.brw_str{Cal.n_inst},...
-                                                              '\B*.'   ,Cal.brw_str{Cal.n_inst}],'f_plot',1);
+           [sl_raw{Cal.n_inst},TC{Cal.n_inst}]=readb_sl_rawl(fullfile('.',['bdata',Cal.brw_str{Cal.n_inst}],['B*.',Cal.brw_str{Cal.n_inst}]),'f_plot',1);
            save(Cal.file_save,'-APPEND','sl_raw','TC');
         end
     else
-        [sl_raw{Cal.n_inst},TC{Cal.n_inst}]=readb_sl_rawl(['.\bdata',Cal.brw_str{Cal.n_inst},...
-                                                           '\B*.'   ,Cal.brw_str{Cal.n_inst}],'f_plot',1);
+        [sl_raw{Cal.n_inst},TC{Cal.n_inst}]=readb_sl_rawl(fullfile('.',['bdata',Cal.brw_str{Cal.n_inst}],['B*.',Cal.brw_str{Cal.n_inst}]),'f_plot',1);
         save(Cal.file_save,'-APPEND','sl_raw','TC');
     end
 else
-    [sl_raw{Cal.n_inst},TC{Cal.n_inst}]=readb_sl_rawl(['.\bdata',Cal.brw_str{Cal.n_inst},...
-                                                       '\B*.'   ,Cal.brw_str{Cal.n_inst}],'f_plot',1);
+    [sl_raw{Cal.n_inst},TC{Cal.n_inst}]=readb_sl_rawl(fullfile('.',['bdata',Cal.brw_str{Cal.n_inst}],['B*.',Cal.brw_str{Cal.n_inst}]),'f_plot',1);
     save(Cal.file_save,'-APPEND','sl_raw','TC');
 end
 
