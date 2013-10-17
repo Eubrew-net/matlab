@@ -134,8 +134,8 @@ try
      else
         exportfig(h,strtok(figura,'.'),Options);
      end
-     saveas(h,figura,'fig');
-%      saveas(h,figura,'png');
+     %saveas(h,figura,'fig');
+     saveas(h,figura,'png');
 end
 cd(cwd);
 catch exception
