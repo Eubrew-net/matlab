@@ -1,4 +1,4 @@
-function filters_data(fi_data,Cal,varargin)
+function o3f=filters_data(fi_data,Cal,varargin)
 
 %%
 arg = inputParser;   % Create instance of inputParser class.
@@ -58,10 +58,8 @@ ploty([att{1}(:,1),100*matdiv(matadd(sampl1(:,2:end),-nanmean(sampl1(:,2:end))),
 set(gca,'YTickLabelMode','auto','box','on'); grid;
 datetick('x','mmmyy','keeplimits','keepticks');
 
-yl=ylabel('ND att. relative diff. with respect to mean');
-yl_pos=get(yl,'Position'); 
-i1=get(ha(1),'Position'); i2=get(ha(2),'Position');
-set(yl,'Position',[yl_pos(1) yl_pos(2)*-4 yl_pos(3)]); % yl_pos(2)-.65
+yl=ylabel('ND att. relative diff. (%) with respect to mean');
+set(yl,'Units','Normalized','Position',[-.05,1,0])
 
 %% F corr. vs Time
 [a b c]=grpstats([fech,temp(:,1),o3f],{year(fech),month(fech)},{'mean','sem','numel'});
@@ -85,4 +83,5 @@ tabla_data=cat(2,cellfun(@(x,y) strcat(num2str(x),' +/- ',num2str(y)),...
                  cellstr(num2str(c(:,1))));
 displaytable(tabla_data,{'ETC corr(FW#21)','ETC corr(FW#22)','ETC corr(FW#23)','ETC corr(FW#24)','ETC corr(FW#25)','N'},...
              15,'.0f',cellstr(datestr(a(:,1),1)));
-                 
+%% Output
+o3f=[fech,temp(:,1),o3f];
