@@ -103,8 +103,8 @@ if ~isempty(uv1.time) && ~ isempty(uv2.time)
             axis(ax);
             set(h(2),'Ylim',[-20,20],'YTick',[20,10,5,2.5,0,-2.5,-5,-10,-20]*-1,...
                      'XLim',[3000 Inf],'XTick',[]);
-            set(h(1),'Ylim',[1E-6,10],'YtickMode','Auto','YtickLabelMode','Auto',...
-                     'XLim',[3000 Inf]);         
+%             set(h(1),'Ylim',[1E-6,10],'YtickMode','Auto','YtickLabelMode','Auto',...
+%                      'XLim',[3000 Inf]);         
             grid;
         end
     end
@@ -117,7 +117,7 @@ if ~isempty(uv1.time) && ~ isempty(uv2.time)
         subplot(3,3,[1 2 4 5])
         %h=plot(l(:,(2:2:end)),ratio(:,(2:2:end)));
         %evitamos los picos
-        ratio(find(abs(ratio)>20))=NaN;
+        ratio(find(abs(ratio)>100))=NaN;
         h=plot(l,ratio);
         h=legend(datestr(time(:,1)/60/24,15),'Location','West');        
 %         h=legend(cat(2,datestr(time(:,1)/60/24,15),repmat(' (',size(time,1),1),...
