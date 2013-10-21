@@ -116,8 +116,10 @@ try
         co=l(jco);
         jsc_aux=strfind(co,'sc:');
         jsc=find(~cellfun('isempty',jsc_aux)); 
-        co_aux=find(~cellfun('isempty',strfind(co,'sc: Supressed'))); [a b]=intersect(jsc,co_aux);
-        jsc(b)=[];
+        co_aux=find(~cellfun('isempty',strfind(co,'sc: Supressed'))); 
+        [a b]=intersect(jsc,co_aux); jsc(b)=[];
+        c=find(cellfun(@(x) ~isempty(strfind(x,'Running')),co(jsc)));
+        jsc(c)=[];
         
         sc=[];
         sc_raw=[];
@@ -126,7 +128,7 @@ try
             idx=1;
             for jj=1:2:length(jsc)
                 sc_aux=co(jsc(jj));
-                if ~isempty(strfind(cell2str(sc_aux),'HOME key'));
+                if ~isempty(strfind(cell2str(sc_aux),'HOME key'))
                     continue
                 end
                 lsc=mmstrtok(sc_aux,char(13));
