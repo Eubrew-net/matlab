@@ -40,6 +40,7 @@ arg.addRequired('ozone_raw0', @iscell);
 arg.addRequired('config', @iscell);
 
 arg.StructExpand = false;
+arg.addParamValue('jul', 1, @isfloat); % por defecto: Dia Juliano!!
 arg.addParamValue('date_select', [], @isfloat); % por defecto: no control de fechas. Dia Juliano!!
 arg.addParamValue('DTv', [], @isfloat); % por defecto: [DT1, DT2] from config
 arg.addParamValue('plot_flag', 0, @(x)(x==0 || x==1)); % por defecto, no individual plots
@@ -58,13 +59,20 @@ lectures_legend={'date';'flg';'nds';'tmp';'fl1';'fl2';'tim';'m2 ';'m3*pressure c
 O3W=[  0.00    0   0.00   -1.00    0.50    2.20   -1.70];
 IT=0.1147;
 
-raw=ozone_raw0{Cal.n_inst}; myfunc=@(x)diaj(x(1,1));
-fech=cell2mat(cellfun(myfunc,raw, 'UniformOutput', false)');
+%    raw=ozone_raw0{Cal.n_inst}; myfunc=@(x)diaj(x(1,1));
+%    fech=cell2mat(cellfun(myfunc,raw, 'UniformOutput', false)');
+%    if ~isempty(date_select)
+%       [c, ia] = intersect(fech,date_select);    
+%       raw=raw(ia);
+%    end
+raw=ozone_raw0{Cal.n_inst};   
 if ~isempty(date_select)
-    [c, ia] = intersect(fech,date_select);    
-    raw=raw(ia);
+   fech=cellfun(@(x) fix(x(1,1)),raw);
+   raw=raw(fech>date_select(1)); fech=fech(fech>date_select(1));
+   if length(date_select)==2
+      raw=raw(fech<date_select(2));   
+   end    
 end
-
 cfg=config{Cal.n_inst}{end}(:,1:2);% Usamos configuración final, 2
 TC1=cfg(2:7,1); DT1=cfg(13,1); extrat1=cfg(11,1); absx1=cfg(8,1); AT1=cfg(17:22,1);
 TC2=cfg(2:7,2); DT2=cfg(13,2); extrat2=cfg(11,2); absx2=cfg(8,2); AT2=cfg(17:22,2);
