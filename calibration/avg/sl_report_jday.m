@@ -190,7 +190,7 @@ sl_median(:,2)=[]; sl_median=sortrows(sl_median,1);
     legend([p1(1),p2,p3],'R6 daily median ','R6 smooth 7','R6 summaries','Location','Best');
     title(['Standard Lamp R6   ',brw_name{idx_inst}]);
     if ~diaj_flag
-        if ~isempty(events_raw)
+        if ~isempty(cell2mat(events_raw(:,1)))
            dates=cell2mat(events_raw(:,2)); indx=dates>=sl_median(1,1) & dates<=sl_median(end,1); 
            if any(indx)
               h=vline_v(dates(indx),'-k',events_raw(indx,3)); set(h,'LineWidth',2);
