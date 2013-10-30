@@ -64,6 +64,7 @@ arg.addParamValue('residual_limit', 25, @(x)(x>1 || x<100)); % por defecto 25
 arg.addParamValue('one_flag', 1, @(x)(x==1 || x==0)); % por defecto: ploteo de SC's escogidos
 arg.addParamValue('hg_time', [], @isfloat); % por defecto: no depuración
 arg.addParamValue('cor_hg', [], @isfloat); % hg step correction is added to the calc_step
+arg.addParamValue('hg_limit', 1.25, @isfloat); % hg step correction is added to the calc_step
 try
   arg.parse(brw_str, brw_config, varargin{:});
   mmv2struct(arg.Results); Args=arg.Results;
@@ -198,7 +199,7 @@ if ~ (isempty(a) || isempty(b) )
        step_cal=[NaN,NaN,NaN,NaN,NaN];
        return; 
     end
-    hg_limit=1.25;
+%     hg_limit=1.25;
     j=find(abs(a(:,21))>hg_limit | isnan(a(:,21)));
     for ii=1:length(j)
         J=find(fix(b(:,1))==fix(a(j(ii),1)) & fix(b(:,2)/100)==a(j(ii),3) );
