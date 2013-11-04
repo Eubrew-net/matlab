@@ -47,7 +47,7 @@ end
     s=fread(f);
     fclose(f);
     s=char(s)';
-    [PATHSTR,NAME,EXT,VERSN] = fileparts(bfile);
+    [PATHSTR,NAME,EXT] = fileparts(bfile);
     fileinfo=sscanf([NAME,EXT],'%c%03d%02d.%03d');
     datefich=datejul(fileinfo(3),fileinfo(2));
 %     datestr(datefich(1));
