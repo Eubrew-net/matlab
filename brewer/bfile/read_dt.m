@@ -20,12 +20,15 @@ end
 
  
  if isempty(regexp(path, '\B(\d|\W)'))
-    path=cat(2,path,'\B*');
+    %path=cat(2,path,'\B*');
+    path=fullfile(path,'B*');
  end
  
-p=fileparts(path);        s=dir(path); 
-if ~isempty(date_range)
-    dir_cell=struct2cell(s); files=dir_cell(1,:);
+p=fileparts(path);
+s=dir(path); 
+if ~isempty(date_range) && ~isempty(s)
+    dir_cell=struct2cell(s);
+    files=dir_cell(1,:);
     myfunc_clean=@(x)regexp(x, '^B\D.\d*','ignorecase')';     clean=@(x)~isempty(x); 
     remove=find(cellfun(clean,cellfun(myfunc_clean,files, 'UniformOutput', false))==1);
     files(remove)=[];  s(remove)=[];
