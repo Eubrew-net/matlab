@@ -68,8 +68,11 @@ try
   if isempty(jhgscan)% Con la version antigua nunca se escribe la diferencia de pasos??
 % Se asume como maximo 9 campos (version nueva)
      hg=NaN*ones(length(jhg),9);
-     hg(:,1:end-1)=cell2mat(textscan(char(l(jhg))','hg %f:%f:%f %f %f %f %f %f',...
-                                'delimiter',char(13),'multipleDelimsAsOne',1));  hg=hg';
+%      hg(:,1:end-1)=cell2mat(textscan(char(l(jhg))','hg %f:%f:%f %f %f %f %f %f',...
+%                                 'delimiter',char(13),'multipleDelimsAsOne',1));  hg=hg';    
+     hg(:,1:end-1)=cell2mat(cellfun(@(x) cell2mat(textscan(x,'hg %f:%f:%f %f %f %f %f %f',...
+                                'delimiter',char(13),'multipleDelimsAsOne',1)),cellstr(char(l(jhg))),...
+                                'UniformOutput' ,0));  hg=hg';
   else
 % This only accounts for changing to new sofware after the old one
      hg=NaN*ones(length(setdiff(jhg,jhgscan)),9);
