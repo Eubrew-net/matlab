@@ -136,7 +136,7 @@ for i=1:length(FilesCI)
     
     try
         [r{i},ab{i},rp{i},data{i},DataNumRFH_a{i},DataNumRFH_b{i},...
-         CLongRatio{i},CLongRatioP{i},TNumTotal_a{i},Error]=RaCI(file_d,nameb);
+         CLongRatio{i},CLongRatioP{i},TNumTotal_a{i},Error]=RaCI(file_d,nameb,outlier_flag);
         
         % Obtenemos valores para cada fichero.
         RatiosFiles =  [RatiosFiles  CLongRatio{i}(:,2:end)];
@@ -209,9 +209,9 @@ for ii=1:length(data)
 end
 
 % Depuración
-if outlier_flag==1
+if outlier_flag==1   
    [m,s]=mean_lamp(CLongRatiosPFiles);
-   [a,b,c,out_idx]=outliers_bp(mean(s(:,2:end)));
+   [a,b,c,out_idx]=outliers_bp(nanmean(s(:,2:end)));
    CLongRatiosPFiles(:,out_idx+1)=NaN;   
    data_plot(:,out_idx+1)=NaN;
    outlier_ci=[];
@@ -221,12 +221,8 @@ if outlier_flag==1
    end
 %    title([outlier_ci]);
 end
-% try
-%     display (outlier_ci)
-% catch
-%     warning ('no outliers')
-% end
-%% ...GRÁFICOS 2D...................................................
+
+%% GRÁFICOS 2D
 figure;
 set(gcf,'Tag','CI_Report');
 subplot(2,1,1);

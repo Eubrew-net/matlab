@@ -1,5 +1,5 @@
 
-function [r,ab,rp,data,DataNumRFH_a,DataNumRFH_b,CLongRatio,CLongRatioP,TNumTotal_a,Error]=RaCI(namea,ref)
+function [r,ab,rp,data,DataNumRFH_a,DataNumRFH_b,CLongRatio,CLongRatioP,TNumTotal_a,Error]=RaCI(namea,ref,outl)
 
 % Calcula el ratio entre respuestas de ficheros CI.
 % Poner los nombres de los CI entre comillas.
@@ -27,7 +27,7 @@ catch
     disp('Reference file does not exist');
     return
 end
-Error= Ea;
+Error.log= Ea;
 
 if 1~=length(DataNumRFH_b)
     warning('Refence file length ~= 1. Se escoge el primero')
@@ -52,6 +52,15 @@ for j=1:length(DataNumRFH_a)
     ab{j} = [c{j},(DataNumRFH_a{j}(index_a{j},end)-DataNumRFH_b{1}(index_b,end))]; % diferencia absoluta
     rp{j} = [c{j},100*(DataNumRFH_a{j}(index_a{j},end)-DataNumRFH_b{1}(index_b,end))./DataNumRFH_b{1}(index_b,end)]; % ratio porc.   
     
+   % we remove outliers from individual ratios
+   if nargin==3 && outl
+      [a,b,c_,out_idx]=outliers_bp(rp{j}(:,2),3.5); 
+      if ~isempty(c_)
+          Error.out{j}=rp{j};
+      end
+      rp{j}(out_idx,2)=NaN;   
+   end
+   
     % Si comparamos ref con un archivo que contenga menos longitudes de
     % ...onda, no nos hará r, ab y rp , por lo que no hay datos, asi que
     % ...nos quedamos sin esas filas

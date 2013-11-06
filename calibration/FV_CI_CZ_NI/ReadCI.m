@@ -24,7 +24,7 @@ date=sscanf(nam,'%*2c%3d%2d');
 F=datejuli(2000+date(2),date(1));
 
 % Localizamos las palabras/frases de interés.
-[darks end_dk] = regexpi(s, '\<dark\s*\w*\s*=\s*\d?[.]?\d*\>', 'match','end');% para CI y CZ
+[darks end_dk] = regexpi(s, '\<dark\s*\w*\s*=\s*\d*[.]?\d*\>', 'match','end');% para CI y CZ
  ends          = regexp(s, 'end', 'start');
  pr            = regexp(s, 'pr', 'start');
 
