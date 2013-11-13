@@ -79,8 +79,11 @@ try
      jhg_old=find(jhg<jhgscan(1)); % these are the old ones
      if ~isempty(jhg_old)
         idx_old=length(jhg_old);
-        hg(1:idx_old,1:end-1)=cell2mat(textscan(char(l(jhg(jhg_old)))','hg %f:%f:%f %f %f %f %f %f',...
-                                 'delimiter',char(13),'multipleDelimsAsOne',1));
+%         hg(1:idx_old,1:end-1)=cell2mat(textscan(char(l(jhg(jhg_old)))','hg %f:%f:%f %f %f %f %f %f',...
+%                                  'delimiter',char(13),'multipleDelimsAsOne',1));
+ hg(1:idx_old,1:end-1)=cell2mat(cellfun(@(x) cell2mat(textscan(x,'hg %f:%f:%f %f %f %f %f %f',...
+                                'delimiter',char(13),'multipleDelimsAsOne',1)),cellstr(char(l(jhg(jhg_old)))),...
+                                'UniformOutput' ,0));                              
         jhg=setdiff(jhg(1+idx_old:end),jhgscan); % after hgscan follows hg
      else
         idx_old=[];       
