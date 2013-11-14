@@ -205,7 +205,11 @@ thetaDiff = theta2 - theta1;
 
 %Find the J2000 value
 J2000 = jd - 2451545.0;
-hourvec = datevec(UTC,'yyyy/mm/dd HH:MM:SS');
+if isstr(UTC)
+ hourvec = datevec(UTC,'yyyy/mm/dd HH:MM:SS');
+else
+hourvec = datevec(UTC);
+end
 UTH = hourvec(4) + hourvec(5)/60 + hourvec(6)/3600;
 
 %Calculate local siderial time
