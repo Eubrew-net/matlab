@@ -165,8 +165,20 @@ end
         idx_old=[];       
         jhg=setdiff(jhg,jhgscan); % after hgscan follows hg
      end
-   hg(length(jhg_old)+1:end,:)=cell2mat(textscan(char(l(jhg))','hg %f:%f:%f %f %f %f %f %f %f',...
-                            'delimiter',char(13),'multipleDelimsAsOne',1));  hg=hg';                                            
+     
+   try  
+        %do not work on new versions of matlab ¿?
+        hg(length(jhg_old)+1:end,:)=cell2mat(textscan(char(l(jhg))','hg %f:%f:%f %f %f %f %f %f %f',...
+                            'delimiter',char(13),'multipleDelimsAsOne',1));   
+   catch
+        %hgs2=strrep(l(jhg),[char(13),char(13)],char(10)); 
+        haux=strrep(l(jhg),char(13),' ');
+        haux=sscanf(char(haux)','hg %f:%f:%f %f %f %f %f %f %f\n ',[9,Inf]);
+        %haux=reshape(haux,9,[])';
+        hg(length(jhg_old)+1:end,:)=haux';
+       
+   end
+   hg=hg';
   end
   
 %  aux_date=datevec(datefich(1)); aux_date=repmat(aux_date(1:3),size(hg(1:3,:)',1),2); aux_date(:,4:6)=hg(1:3,:)';
