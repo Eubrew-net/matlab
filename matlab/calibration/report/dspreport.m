@@ -104,7 +104,7 @@ for j=1:length(s)
        if isempty(strfind(a,'DSP'))
           cd('DSP');
        else 
-          cd('..\DSP');
+          cd(fullfile('..','DSP'));
        end
        
        uvr_file=dir(['..',filesep(),brw_str{n_inst},filesep(),'UVR*.',brw_str{n_inst}]);
@@ -136,7 +136,7 @@ for j=1:length(s)
        if isempty(strfind(a,'DSP'))
           cd ..;
        else 
-          cd(['..\',num2str(calyear)]);
+          cd(fullfile('..',num2str(calyear)));
        end
    else
     disp('err');
