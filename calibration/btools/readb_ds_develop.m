@@ -1,4 +1,3 @@
-
 function [o3,config,sl_data,hg_data,loc]=readb_ds_develop(bfile,config_file,spectral_config)
 % Config
 % 1 si no le damos configuracion-> la lee del fichero B
@@ -147,11 +146,19 @@ end
 % Se asume como maximo 9 campos (version nueva)
      hg=NaN*ones(length(jhg),9);
      if ~isempty(jhg)
-     hg(:,1:end-1)=cell2mat(textscan(char(l(jhg))','hg %f:%f:%f %f %f %f %f %f',...
-                            'delimiter',char(13),'multipleDelimsAsOne',1));  hg=hg';
+         try
+             hg(:,1:end-1)=cell2mat(textscan(char(l(jhg))','hg %f:%f:%f %f %f %f %f %f',...
+                 'delimiter',char(13),'multipleDelimsAsOne',1));
+         catch
+             haux=strrep(l(jhg),char(13),' ');
+             haux=sscanf(char(haux)','hg %f:%f:%f %f %f %f %f %f\n ',[8,Inf])
+             hg(:,1:end-1)=haux';
+         end
+         
+         hg=hg';
      else
-     hg=NaN*ones(2,9)';
-     end    
+         hg=NaN*ones(2,9)';
+     end
   else
 % This only accounts for changing to new sofware after the old one
      hg=NaN*ones(length(setdiff(jhg,jhgscan)),9);
