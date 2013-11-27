@@ -90,7 +90,7 @@ try
         idx_old=[];       
         jhg=setdiff(jhg,jhgscan); % after hgscan follows hg
      end
-   hg(length(jhg_old)+1:end,:)=cell2mat(textscans(strrep(char(l(jhg),char(13),' '))','hg %f:%f:%f %f %f %f %f %f %f',...
+   hg(length(jhg_old)+1:end,:)=cell2mat(textscan(char(strrep(l(jhg),char(13),' '))','hg %f:%f:%f %f %f %f %f %f %f',...
                                  'delimiter',char(13),'multipleDelimsAsOne',1));  hg=hg';                                            
   end
 
