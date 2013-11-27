@@ -48,7 +48,8 @@ try
     jhgscan=strmatch('hgscan',l);
     jloc=strmatch('version',l);
     % Read the head
-    c=textscan(l{jloc(1)},fmt_head,'delimiter',char(13));
+    %c=textscanf(l{jloc(1)},fmt_head,'delimiter',char(13));
+    c=textscan(strrep(l{jloc(1)},char(13),' '),fmt_head);
     loc=c{5};
     c(5)=[];
     c=cell2num(c);
@@ -70,7 +71,7 @@ try
      hg=NaN*ones(length(jhg),9);
 %      hg(:,1:end-1)=cell2mat(textscan(char(l(jhg))','hg %f:%f:%f %f %f %f %f %f',...
 %                                 'delimiter',char(13),'multipleDelimsAsOne',1));  hg=hg';    
-     hg(:,1:end-1)=cell2mat(cellfun(@(x) cell2mat(textscan(x,'hg %f:%f:%f %f %f %f %f %f',...
+     hg(:,1:end-1)=cell2mat(cellfun(@(x) cell2mat(textscan(strrep(x,char(13),' '),'hg %f:%f:%f %f %f %f %f %f',...
                                 'delimiter',char(13),'multipleDelimsAsOne',1)),cellstr(char(l(jhg))),...
                                 'UniformOutput' ,0));  hg=hg';
   else
@@ -81,7 +82,7 @@ try
         idx_old=length(jhg_old);
 %         hg(1:idx_old,1:end-1)=cell2mat(textscan(char(l(jhg(jhg_old)))','hg %f:%f:%f %f %f %f %f %f',...
 %                                  'delimiter',char(13),'multipleDelimsAsOne',1));
- hg(1:idx_old,1:end-1)=cell2mat(cellfun(@(x) cell2mat(textscan(x,'hg %f:%f:%f %f %f %f %f %f',...
+ hg(1:idx_old,1:end-1)=cell2mat(cellfun(@(x) cell2mat(textscan(strrep(x,char(13),' '),'hg %f:%f:%f %f %f %f %f %f',...
                                 'delimiter',char(13),'multipleDelimsAsOne',1)),cellstr(char(l(jhg(jhg_old)))),...
                                 'UniformOutput' ,0));                              
         jhg=setdiff(jhg(1+idx_old:end),jhgscan); % after hgscan follows hg
@@ -89,7 +90,7 @@ try
         idx_old=[];       
         jhg=setdiff(jhg,jhgscan); % after hgscan follows hg
      end
-   hg(length(jhg_old)+1:end,:)=cell2mat(textscan(char(l(jhg))','hg %f:%f:%f %f %f %f %f %f %f',...
+   hg(length(jhg_old)+1:end,:)=cell2mat(textscans(strrep(char(l(jhg),char(13),' '))','hg %f:%f:%f %f %f %f %f %f %f',...
                                  'delimiter',char(13),'multipleDelimsAsOne',1));  hg=hg';                                            
   end
 
