@@ -151,7 +151,7 @@ end
                  'delimiter',char(13),'multipleDelimsAsOne',1));
          catch
              haux=strrep(l(jhg),char(13),' ');
-             haux=sscanf(char(haux)','hg %f:%f:%f %f %f %f %f %f\n ',[8,Inf])
+             haux=sscanf(char(haux)','hg %f:%f:%f %f %f %f %f %f\n ',[8,Inf]);
              hg(:,1:end-1)=haux';
          end
          
