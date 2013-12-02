@@ -122,7 +122,6 @@ FHj=[];
 FHjtodos=[];
 Ttodosai=[];
 ErrorRaCI=[];
-ErrorRCI=[];
 
 %% RaCI FUNCTION
 %...CLongRatiosPFiles...........................................................
@@ -139,10 +138,13 @@ for i=1:length(FilesCI)
          CLongRatio{i},CLongRatioP{i},TNumTotal_a{i},Error]=RaCI(file_d,nameb,outlier_flag);
         
         % Obtenemos valores para cada fichero.
-        RatiosFiles =  [RatiosFiles  CLongRatio{i}(:,2:end)];
-        RatiosPFiles = [RatiosPFiles CLongRatioP{i}(:,2:end)];
-        CLongRatiosFiles=  [CLongRatio{1}(:,1)   RatiosFiles ];
-        CLongRatiosPFiles= [CLongRatioP{1}(:,1)  RatiosPFiles];
+        RatiosFiles       = [RatiosFiles          CLongRatio{i}(:,2:end)];
+        RatiosPFiles      = [RatiosPFiles         CLongRatioP{i}(:,2:end)];
+        CLongRatiosFiles  = [CLongRatio{1}(:,1)   RatiosFiles ];
+        CLongRatiosPFiles = [CLongRatioP{1}(:,1)  RatiosPFiles];
+        if isfield(Error,'out')
+           ErrorRaCI      = [ErrorRaCI            cell2mat(Error.out)];
+        end
         % Unimos los valores de los ratios de cada fichero, esto es la segunda
         %...columna de cada salida de datos, pues la primera es la longitud de
         %...onda.
@@ -192,7 +194,6 @@ for i=1:length(FilesCI)
         LRatPFHT= [LRatPFH; NaNTTai];
         % Unimos todas las columnas ratio/longitud, con la fila Fecha hora.
         % Unimos el resultado con la fila  T también                
-%         ErrorRCI=[ErrorRCI;Error];
     catch
 %         ErrorRaCI=[ErrorRaCI;FilesCI{i}];
         %ex=lasterror;
@@ -200,6 +201,9 @@ for i=1:length(FilesCI)
     end
 end
 
+if ~isempty(ErrorRaCI)
+    ErrorRaCI= ErrorRaCI(:,[1 2:2:end]);
+end
 data_plot=[];
 for ii=1:length(data)
     aux=data{ii};
@@ -211,15 +215,13 @@ end
 % Depuración
 if outlier_flag==1   
    [m,s]=mean_lamp(CLongRatiosPFiles);
-   [a,b,c,out_idx]=outliers_bp(nanmean(s(:,2:end)));
-   CLongRatiosPFiles(:,out_idx+1)=NaN;   
-   data_plot(:,out_idx+1)=NaN;
-   outlier_ci=[];
+   [a,b,c,out_idx]=outliers_bp(nanmean(s(:,2:end),1),5.5);
    if ~isempty(out_idx)    
-       disp('warning : remove some outlier');
-       outlier_ci=datestr(LRatPFHT(end-1,out_idx+1));
+      disp('warning: remove some outlier');
+%       outlier_ci=datestr(LRatPFHT(end-1,out_idx+1));   
+      ErrorRaCI = [ErrorRaCI,LRatPFH(:,out_idx+1)];
    end
-%    title([outlier_ci]);
+   CLongRatiosPFiles(:,out_idx+1)=NaN;  data_plot(:,out_idx+1)=NaN;
 end
 
 %% GRÁFICOS 2D
