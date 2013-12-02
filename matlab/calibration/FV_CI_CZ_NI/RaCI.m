@@ -5,10 +5,10 @@ function [r,ab,rp,data,DataNumRFH_a,DataNumRFH_b,CLongRatio,CLongRatioP,TNumTota
 % Poner los nombres de los CI entre comillas.
 % El ratio es respecto a b(ref).
 % b y a pueden tener varias columnas (respuesta CI).
-% x= elementos comunes
-% r= ratio
-% ab= diferecia absoluta
-% rp= ration porcentual
+% x    = elementos comunes
+% r    = ratio
+% ab   = diferecia absoluta
+% rp   = ration porcentual
 % data = 3 columnas (1a es la longitud de onda, 2a son las Cuentas Segundo y la 3a se puede obviar)
 % 
 %
@@ -44,7 +44,7 @@ for j=1:length(DataNumRFH_a)
     [c{j},index_a{j},index_b]= intersect(DataNumRFH_a{j}(:,2),DataNumRFH_b{1}(:,2));
     data{j}=[c{j},DataNumRFH_a{j}(index_a{j},5:end),DataNumRFH_b{1}(index_b,5:end)];    
     if isempty(c{j})
-        error('no comon elemets to ratio')
+        error('no comon elements to ratio')
         return
     end  
     
@@ -54,11 +54,12 @@ for j=1:length(DataNumRFH_a)
     
    % we remove outliers from individual ratios
    if nargin==3 && outl
-      [a,b,c_,out_idx]=outliers_bp(rp{j}(:,2),3.5); 
+      [a,b,c_,out_idx]=outliers_bp(rp{j}(:,2),10.5); 
       if ~isempty(c_)
-          Error.out{j}=rp{j};
+          Error.out{j}=[rp{j};NaN,DataNumRFH_a{j}(1,1)];
       end
-      rp{j}(out_idx,2)=NaN;   
+      rp{j}(out_idx,2)  =NaN;   
+      data{j}(out_idx,2:end)=NaN;   
    end
    
     % Si comparamos ref con un archivo que contenga menos longitudes de
