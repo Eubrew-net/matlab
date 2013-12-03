@@ -33,29 +33,30 @@ if ~isempty(date_range)
     end
 end
 
+%%
 files=s; output=[];
 for d=1:length(files)   
-    date=brewer_date(00111);
     f=fopen(fullfile(path_to_files,files(d).name));
-
     if f < 0
        disp(files(d).name)
        continue
     end
+    
     s=fread(f);    fclose(f);    s=char(s)';
     d_fil=mmstrtok(s,char(10));
-    jco=strmatch(expr,d_fil);      
-
+    jco=find(cellfun(@(x) ~isempty(x),regexpi(d_fil,expr)));
+    switch expr 
+           case 'hg'
+             jco=jco(cellfun(@(x) ~isempty(x),regexpi(d_fil(jco),'hg.\d+')));
+    end
+    
     for l=1:length(jco)
-        if ~isempty(strmatch('hgscan',d_fil{jco(l)}))
-            continue
-        end
-        time_med=sscanf( d_fil{jco(l)}, '%*s%02d:%02d:%02d*s');
-        fileinfo=sscanf(files(d).name,'%*c%03d%02d.%*03d');
-        datefich=datejuli(fileinfo(2),fileinfo(1));
-        datefich=datefich+time_med(1)/24+time_med(2)/60/24+time_med(3)/60/60/24;
+           time_med=sscanf( d_fil{jco(l)}, '%*s%02d:%02d:%02d*s');
+           fileinfo=sscanf(files(d).name,'%*c%03d%02d.%*03d');
+           datefich=datejuli(fileinfo(2),fileinfo(1));
+           datefich=datefich+time_med(1)/24+time_med(2)/60/24+time_med(3)/60/60/24;
  
-        output=[output; datefich];
+           output=[output; datefich];
     end
 
     if printfile==1 % particular para los resets
