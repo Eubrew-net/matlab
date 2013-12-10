@@ -140,27 +140,27 @@ else
 end
 
 
-% READ HG
-% filtro de hg. 
+% READ HG: filtro de hg
   if isempty(jhgscan) % Con la version antigua nunca se escribe la diferencia de pasos??
-% Se asume como maximo 9 campos (version nueva)
+     % Se asume como maximo 9 campos (version nueva)
      hg=NaN*ones(length(jhg),9);
      if ~isempty(jhg)
          try
-             hg(:,1:end-1)=cell2mat(textscan(char(l(jhg))','hg %f:%f:%f %f %f %f %f %f',...
-                 'delimiter',char(13),'multipleDelimsAsOne',1));
+            hg(:,1:end-1)=cell2mat(cellfun(@(x) cell2mat(textscan(strrep(x,char(13),' '),'hg %f:%f:%f %f %f %f %f %f',...
+                                'delimiter',char(13),'multipleDelimsAsOne',1)),cellstr(char(l(jhg))),...
+                                'UniformOutput' ,0)); 
+
          catch
              haux=strrep(l(jhg),char(13),' ');
              haux=sscanf(char(haux)','hg %f:%f:%f %f %f %f %f %f\n ',[8,Inf]);
              hg(:,1:end-1)=haux';
-         end
-         
+         end        
          hg=hg';
      else
          hg=NaN*ones(2,9)';
      end
   else
-% This only accounts for changing to new sofware after the old one
+     % This only accounts for changing to new sofware after the old one
      hg=NaN*ones(length(setdiff(jhg,jhgscan)),9);
      jhg_old=find(jhg<jhgscan(1)); % these are the old ones
      if ~isempty(jhg_old)
@@ -169,7 +169,6 @@ end
                             'delimiter',char(13),'multipleDelimsAsOne',1));
         jhg=setdiff(jhg(1+idx_old:end),jhgscan); % after hgscan follows hg
      else
-        idx_old=[];       
         jhg=setdiff(jhg,jhgscan); % after hgscan follows hg
      end
      
@@ -183,60 +182,47 @@ end
         haux=sscanf(char(haux)','hg %f:%f:%f %f %f %f %f %f %f\n ',[9,Inf]);
         %haux=reshape(haux,9,[])';
         hg(length(jhg_old)+1:end,:)=haux';
-       
    end
    hg=hg';
   end
   
 %  aux_date=datevec(datefich(1)); aux_date=repmat(aux_date(1:3),size(hg(1:3,:)',1),2); aux_date(:,4:6)=hg(1:3,:)';
 %  aux_date=datenum(aux_date); aux=NaN*ones(size(hg,1)+1,size(hg,2)); aux(1,:)=aux_date;
+%  ix_bad=diff(time_hg); hg(ix_bad<0,:)=[]; time_hg=hg(1,:)*60+hg(2,:)+hg(3,:)/60;
   time_hg=hg(1,:)*60+hg(2,:)+hg(3,:)/60; %a minutos. Lo de sort es un APAÑO
-%   ix_bad=diff(time_hg); hg(ix_bad<0,:)=[]; time_hg=hg(1,:)*60+hg(2,:)+hg(3,:)/60;
   flaghg=abs(hg(5,:)-config(14))<2; % more than 2 steps change
-  %  flag_hg=find(diff(flaghg)==-1);   %
   if size(hg,2)>1
-        flag_hg=find(diff(flaghg)==-1);   %
-       
+        flag_hg=find(diff(flaghg)==-1);      
         if isempty(flag_hg)
-            time_badhg=[0,0];
+           time_badhg=[0,0];
         else
-            if flaghg(1)==0    % revisa
-                flag_hg=[1,flag_hg];
-            end
-        
-             %revisar no es el siguiente sino el proximo no negativo
-            % almacenar la constante en el fichero.
-
-            time_badhg=time_hg([flag_hg;flag_hg+1]');
-            time_badhg=[time_hg(1),time_hg(1);time_badhg];
+           if flaghg(1)==0 % revisa
+              flag_hg=[1,flag_hg];
+           end 
+           %revisar no es el siguiente sino el proximo no negativo
+           % almacenar la constante en el fichero.
+           time_badhg=time_hg([flag_hg;flag_hg+1]');
+           time_badhg=[time_hg(1),time_hg(1);time_badhg];
         end
     else
         time_badhg=[0,0];
   end
 
-   hgscan_date=datefich(1)+time_hg/60/24;
-   jaux=find(diff(hgscan_date)<0);
-   if ~isempty(jaux)
-       if time_hg(jaux)>21*60
-           hgscan_date(jaux+1:end)=hgscan_date(jaux+1:end)+1;
-       else
-           disp('hg fecha');
-       end
-   end
+  hgscan_date=datefich(1)+time_hg/60/24;
+  jaux=find(diff(hgscan_date)<0);
+  if ~isempty(jaux)
+      if time_hg(jaux)>21*60
+         hgscan_date(jaux+1:end)=hgscan_date(jaux+1:end)+1;
+      else
+         disp('hg fecha');
+      end
+  end
   hg_data.hg=[hgscan_date;hg;flaghg]';
   hg_data.hg_legend={'fecha'	'hora'	'min'	'seg'	'coef' 	'step'...
-      'step_int'	'int'	'temp'	'steps_chg'	'flag'...
-};
+                     'step_int'	'int'	'temp'	'steps_chg'	'flag'};
+  hg_data.time_badhg=time_badhg/60/24+datefich(1);
 
-
-    hg_data.time_badhg=time_badhg/60/24+datefich(1);
-  % aï¿½adir la fecha+datefich(1);
-
-
-
-
-  ndss=0;
-  nsls=0;
+  ndss=0;  nsls=0;
   for i=1:length(jsum)
       dsum=sscanf(l{jsum(i)},fmtsum);
       type=char(dsum(12:13)');
@@ -295,8 +281,6 @@ end
       end
   end
 
-
-
 if ~isempty(dss)
     %Time calculation
     % hora a formato matlab ->sumarios
@@ -316,32 +300,29 @@ if ~isempty(dss)
        ds(2,:)=64*dss(14,idx_ds);
      end
          
-      % cï¿½lculo de los ï¿½ngulos zenitales y masa ï¿½tica sumarios
+    % calculo de los angulos zenitales y masa optica sumarios
     [szadss,m2dss,m3dss]=brewersza(hora',fileinfo(2),fileinfo(3),lat,long);
     [sza,saz,tst_ds,snoon,sunrise,sunset]=sun_pos(timedsum(:,1),lat,-long);
     timedss=[timedsum,[szadss,m2dss,m3dss,sza,saz,tst_ds,snoon,sunrise,sunset]];
 
-    % cï¿½lculos se sza y masa op medidas individuales
+    % calculos se sza y masa op medidas individuales
     [szads,m2ds,m3ds]=brewersza(ds(3,:)',fileinfo(2),fileinfo(3),lat,long);
     [sza,saz,tst_ds,snoon,sunrise,sunset]=sun_pos(timeds(:,1),lat,-long);
     timeds=[timeds,[szads,m2ds,m3ds,sza,saz,tst_ds,snoon,sunrise,sunset]];
 
-
-
-    %HGFILTER
-    % -> falla si no hay ningun hg->
+    % HGFILTER (falla si no hay ningun hg)
     tb_ds=[];    tb_dsum=[];
     for ii=1:size(time_badhg,1)
-     tb_dsum=[tb_dsum,find((hora>time_badhg(ii,1)   & hora<time_badhg(ii,2)))];
-     tb_ds=[tb_ds,find((ds(3,:)>time_badhg(ii,1) & ds(3,:)<time_badhg(ii,2)))];
+        tb_dsum=[tb_dsum,find((hora>time_badhg(ii,1)   & hora<time_badhg(ii,2)))];
+        tb_ds  =[tb_ds,find((ds(3,:)>time_badhg(ii,1)  & ds(3,:)<time_badhg(ii,2)))];
     end
-    % flag hg utilizamos el numero de linea (ï¿½?)
+    % flag hg utilizamos el numero de linea
     timeds(:,2)=ones(size(timeds(:,2)));
     timedss(:,2)=ones(size(timedss(:,2)));
     if ~isempty(tb_dsum)
-     timeds(tb_ds,2)=0;
-     timedss(tb_dsum,2)=0;
-   end
+       timedss(tb_dsum,2)=0;
+       timeds(tb_ds,2)=0;
+    end
 
 %      % flag hg utilizamos el numero de linea (ï¿½?)
 %      timeds(:,2)=zeros(size(timeds(:,2)));

@@ -54,7 +54,7 @@ for j=1:length(DataNumRFH_a)
     
    % we remove outliers from individual ratios
    if nargin==3 && outl
-      [a,b,c_,out_idx]=outliers_bp(rp{j}(:,2),10.5); 
+      [a,b,c_,out_idx]=outliers_bp(rp{j}(:,2),5.5); 
       if ~isempty(c_)
           Error.out{j}=[rp{j};NaN,DataNumRFH_a{j}(1,1)];
       end
