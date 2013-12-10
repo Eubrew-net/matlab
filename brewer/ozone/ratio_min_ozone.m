@@ -186,15 +186,13 @@ if  nargin~=3 && ~strcmp(name_a,name_b)
     opts.selected.Marker='x';     opts.selected.Color='k';
     interactivelegend(P,cellstr(num2str(unique(diaj(data(:,1))))),opts);
      set(gca,'Xlim',OSC_lim,'Ylim',[-3,3]);
-     xlabel('Ozone slant path');
-     ylabel(' % Relative differences');
+     xlabel('Ozone slant path (DU)'); ylabel('Ozone Relative Difference (%)');
      title(sprintf('(%s - %s) / %s.  Grouped by day',name_a,name_b,name_b))
      box on;
     catch % falla cuando hay un solo dia revisar
      plot(osc,rp(:,2),'o');
      set(gca,'Xlim',OSC_lim);
-     xlabel('Ozone slant path');
-     ylabel(' % Relative differences');
+     xlabel('Ozone slant path (DU)'); ylabel('Ozone Relative Difference (%)');
      title( [name_a,' - ',name_b,'/ ',name_b])
      box on;
     end
@@ -212,8 +210,7 @@ if  nargin~=3 && ~strcmp(name_a,name_b)
     %j=find(data(:,1)-fix(data(:,1))<0.5);
     %plot(sza(j),rp(j,2),'+');
     gscatter(sza,rp(:,2),{diaj(data(:,1)),j},[],'o+'); set(findobj(gcf,'Tag','legend'),'Location','NorthEast');
-    xlabel('solar zenith angle');
-    ylabel(' % Relative differences');
+    xlabel('solar zenith angle'); ylabel('Ozone Relative Difference (%)');
     title(sprintf('(%s - %s) / %s.  AM=+ PM=o',name_a,name_b,name_b))
     box on;  grid;
     
@@ -226,21 +223,18 @@ if  nargin~=3 && ~strcmp(name_a,name_b)
      box on;
      grid;
      set(gca,'Xlim',OSC_lim,'YLim',[-3,3]);
-     xlabel('Ozone slant path');
-     ylabel(' % Relative differences');
+     xlabel('Ozone slant path (DU)'); ylabel('Ozone Relative Difference (%)');
      title(sprintf('(%s - %s) / %s',name_a,name_b,name_b))
      grid on;
      
      figure
      set(f,'Tag','RATIO_ERRORBAR');
      
-         errorbar(aux_x,m,2*s,'s-');
-         grid;
-         box on;
-         set(gca,'Xlim',OSC_lim,'YLim',[-3,3]);
-         xlabel('Ozone slant path');
-         ylabel(' % Relative differences');
-        title(sprintf('(%s - %s) / %s',name_a,name_b,name_b))
+       errorbar(aux_x,m,2*s,'s-');
+       set(gca,'Xlim',OSC_lim,'YLim',[-3,3]);
+       xlabel('Ozone slant path (DU)'); ylabel('Ozone Relative Difference (%)');
+       title(sprintf('(%s - %s) / %s',name_a,name_b,name_b))
+       grid; box on;
    
     %figure by filter 
     filter_name={'NoFilt','Filt#1','Filt#2','Filt#3','Filt#4','Filt#5'};
@@ -252,13 +246,13 @@ if  nargin~=3 && ~strcmp(name_a,name_b)
      set(l,'FontSize',12);
      set(gca,'Xlim',OSC_lim,'YLim',[-3 3]); hline(0,'-k');
      grid;   box on;
-     xlabel('Ozone slant path');     ylabel(' % Relative differences');
+     xlabel('Ozone slant path (DU)'); ylabel('Ozone Relative Difference (%)');
      title(sprintf('(%s-%s) / %s : #%s Filters',name_a,name_b,name_b,name_a));
     catch % falla cuando hay un solo dia revisar
      plot(osc,rp(:,2),'.');
      set(gca,'Xlim',OSC_lim,'YLim',[-3 3]); hline(0,'-k');
      grid;   box on;
-     xlabel('Ozone slant path');     ylabel(' % Relative differences');
+     xlabel('Ozone slant path (DU)'); ylabel('Ozone Relative Difference (%)');
      title(sprintf('(%s-%s) / %s : #%s Filters',name_a,name_b,name_b,name_a));
     end
     
@@ -281,7 +275,7 @@ if  nargin~=3 && ~strcmp(name_a,name_b)
        set(findobj(gcf,'Tag','legend'),'Location','EastOutside')
     opts.selected.Marker='x';     opts.selected.Color='k';
     interactivelegend(P,cellstr(num2str(unique(diaj(data(:,1))))),opts);
-       xlabel('Ozone slant path'); ylabel(' % Relative differences');
+       xlabel('Ozone slant path (DU)'); ylabel('Ozone Relative Difference (%)');
        title(sprintf('(%s - %s) / %s . Temperature',name_a,name_b,name_b))
         
     f=figure;   set(f,'Tag','RATIO_FILTER_REF');    
@@ -291,13 +285,12 @@ if  nargin~=3 && ~strcmp(name_a,name_b)
      set(l,'FontSize',12);
      set(gca,'Xlim',OSC_lim,'YLim',[-3 3]); hline(0,'-k');
      grid;   box on;
-     xlabel('Ozone slant path');     ylabel(' % Relative differences');
+     xlabel('Ozone slant path (DU)'); ylabel('Ozone Relative Difference (%)');
      title(sprintf('(%s-%s) / %s : #%s Filters',name_a,name_b,name_b,name_b));
     catch % falla cuando hay un solo dia revisar
      plot(osc,rp(:,2),'.');
      set(gca,'Xlim',OSC_lim);
-     xlabel('Ozone slant path');
-     ylabel(' % Relative differences');
+     xlabel('Ozone slant path (DU)'); ylabel('Ozone Relative Difference (%)');
      title(sprintf('(%s-%s) / %s : #%s Filters',name_a,name_b,name_b,name_b));
      box on;
     end

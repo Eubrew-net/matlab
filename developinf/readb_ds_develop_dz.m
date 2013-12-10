@@ -140,14 +140,22 @@ else
 end
 
 
-% READ HG
-% filtro de hg. 
+% READ HG: filtro de hg. 
   if isempty(jhgscan) % Con la version antigua nunca se escribe la diferencia de pasos??
 % Se asume como maximo 9 campos (version nueva)
      hg=NaN*ones(length(jhg),9);
      if ~isempty(jhg)
-     hg(:,1:end-1)=cell2mat(textscan(char(l(jhg))','hg %f:%f:%f %f %f %f %f %f',...
-                            'delimiter',char(13),'multipleDelimsAsOne',1));  hg=hg';
+         try
+            hg(:,1:end-1)=cell2mat(cellfun(@(x) cell2mat(textscan(strrep(x,char(13),' '),'hg %f:%f:%f %f %f %f %f %f',...
+                                'delimiter',char(13),'multipleDelimsAsOne',1)),cellstr(char(l(jhg))),...
+                                'UniformOutput' ,0)); 
+
+         catch
+             haux=strrep(l(jhg),char(13),' ');
+             haux=sscanf(char(haux)','hg %f:%f:%f %f %f %f %f %f\n ',[8,Inf]);
+             hg(:,1:end-1)=haux';
+         end        
+         hg=hg';
      else
      hg=NaN*ones(2,9)';
      end    
@@ -161,11 +169,21 @@ end
                             'delimiter',char(13),'multipleDelimsAsOne',1));
         jhg=setdiff(jhg(1+idx_old:end),jhgscan); % after hgscan follows hg
      else
-        idx_old=[];       
         jhg=setdiff(jhg,jhgscan); % after hgscan follows hg
      end
-   hg(length(jhg_old)+1:end,:)=cell2mat(textscan(char(l(jhg))','hg %f:%f:%f %f %f %f %f %f %f',...
-                            'delimiter',char(13),'multipleDelimsAsOne',1));  hg=hg';                                            
+
+   try  
+        %do not work on new versions of matlab ¿?
+        hg(length(jhg_old)+1:end,:)=cell2mat(textscan(char(l(jhg))','hg %f:%f:%f %f %f %f %f %f %f',...
+                            'delimiter',char(13),'multipleDelimsAsOne',1));   
+   catch
+        %hgs2=strrep(l(jhg),[char(13),char(13)],char(10)); 
+        haux=strrep(l(jhg),char(13),' ');
+        haux=sscanf(char(haux)','hg %f:%f:%f %f %f %f %f %f %f\n ',[9,Inf]);
+        %haux=reshape(haux,9,[])';
+        hg(length(jhg_old)+1:end,:)=haux';
+   end
+   hg=hg';
   end
   
 %  aux_date=datevec(datefich(1)); aux_date=repmat(aux_date(1:3),size(hg(1:3,:)',1),2); aux_date(:,4:6)=hg(1:3,:)';
