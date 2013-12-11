@@ -65,7 +65,7 @@ arg.addParamValue('O3_hday'   , NaN    , @isfloat);       % default NaN O3 std /
 arg.addParamValue('F_corr'    , []     , @(x)iscell(x) || isvector(x)); % default no filter corr
 arg.addParamValue('date_range', []     , @isfloat);       % default all airmasses
 arg.addParamValue('AOD'       , ''     , @(x)ischar(x));  % default no AoD filtering
-arg.addParamValue('plots'     , 0      , @(x)(x==0 || x==1));  % default no AoD filtering
+arg.addParamValue('plots'     , 0      , @(x)(x==0 || x==1));  % default no individual plots
 
 % validamos los argumentos definidos:
 arg.parse(data, varargin{:});

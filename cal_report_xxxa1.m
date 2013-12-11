@@ -121,6 +121,27 @@ printfiles_report(gcf,Cal.dir_figs,'Width',12.5,'Height',17);
 
 close all;
 
+%% DZ
+ Cal.Date.CALC_DAYS=CALC_DAYS;
+ dz=read_bdata_dz(Cal.n_inst,Cal);
+ 
+ if ~isempty(dz.dzsum)
+    dt=dz_process(dz);
+    data=cell2mat(dz.dz_raw0); check=cell2mat(dt);
+    figure; set(gcf,'Tag','DZ');
+    gscatter(data(:,1),check,data(:,6)); grid; datetick('x','keeplimits','keepticks');
+    set(gca,'YLim',[2*10^-8 4.5*10^-8]); box on;
+    title(sprintf('Dead Time constant derived from DZ measurements\r\nBrewer %s',Cal.brw_name{Cal.n_inst}));
+    ylabel('DT constant (seconds)');
+ end
+
+%%
+try
+   set(findobj(gcf,'Tag','legend'),'Orientation','Horizontal','Location','South');
+   printfiles_report(gcf,fullfile(Cal.path_root,Cal.dir_figs),'Width',14,'LockAxes',0);
+end
+close all
+
 %% CZ REPORT
 br=sprintf('%03d',Cal.brw(Cal.n_inst));
 try
@@ -132,7 +153,7 @@ end
 
 %%
 try
-    figure(findobj('tag','CZ_Report'));
+    figure(max(findobj('tag','CZ_Report')));
     printfiles_report(gcf,fullfile(Cal.path_root,Cal.dir_figs));
 catch exception
       fprintf('Error: %s, brewer %s\n',exception.message,Cal.brw_name{Cal.n_inst});
