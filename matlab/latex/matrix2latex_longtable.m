@@ -1,9 +1,7 @@
-function matrix2latex_config(matrix, filename, varargin)
+function matrix2latex_longtable(matrix, filename, varargin)
 
-% Enjoy life!!!
-
-    rowLabels = [];
-    colLabels = [];
+%% Function input
+    rowLabels = [];    colLabels = [];
     alignment = 'l';
     format = [];
     textsize = [];
@@ -17,9 +15,9 @@ function matrix2latex_config(matrix, filename, varargin)
         pval = varargin{j+1};
         k = strmatch(lower(pname), okargs);
         if isempty(k)
-            error('matrix2latex_config: ', 'Unknown parameter name: %s.', pname);
+            error('matrix2latex: ', 'Unknown parameter name: %s.', pname);
         elseif length(k)>1
-            error('matrix2latex_config: ', 'Ambiguous parameter name: %s.', pname);
+            error('matrix2latex: ', 'Ambiguous parameter name: %s.', pname);
         else
             switch(k)
                 case 1  % rowlabels
@@ -58,50 +56,60 @@ function matrix2latex_config(matrix, filename, varargin)
         end
     end
 
-    fid = fopen(filename, 'w');
-    
-    width = size(matrix, 2);
-    height = size(matrix, 1);
-
+%% Formatting data    
+    width = size(matrix, 2);    height = size(matrix, 1);    
     if isnumeric(matrix)
         matrix = num2cell(matrix);
-        for h=1:height
-            for w=1:width
-                if(~isempty(format))
-                    matrix{h, w} = num2str(matrix{h, w}, format);
-                else
-                    matrix{h, w} = num2str(matrix{h, w});
-                end
+    end
+    for h=1:height
+        for w=1:width            
+            if(~isempty(format))
+               if iscell(format)
+                  if isfloat(matrix{h, w})
+                     matrix{h,w} = num2str(matrix{h,w}, format{w});                        
+                  end
+               else
+                  if isfloat(matrix{h, w})
+                     matrix{h,w} = num2str(matrix{h,w}, format);                        
+                  end
+               end        
             end
         end
     end
-    
+
+%% Write file
+    fid = fopen(filename, 'w');
     if(~isempty(textsize))
         fprintf(fid, '\\begin{%s}', textsize);
     end
+    fprintf(fid, '\\begin{longtable}{%s}\r\n',strcat(repmat([alignment,'|'],1,size(matrix,2)-1),alignment));
+    fprintf(fid, '\\caption{%s}\\\\\r\n',caption);
 
-    fprintf(fid, '\\begin{longtable}{|');
-    if(~isempty(rowLabels))
-        fprintf(fid, 'l|');
-    end
-    for i=1:width
-        fprintf(fid, '%c|', alignment);
-    end
-    fprintf(fid, '}\r\n');
-    if exist('caption','var')
-       fprintf(fid, '\\caption{%s}\\\\\r\n',caption);
-    end
-    fprintf(fid, '\\hline\r\n');
-    
-    if(~isempty(colLabels))
-        if(~isempty(rowLabels))
-            fprintf(fid, '&');
+        if exist('rowlabels','var')
+           fprintf(fid, '&');
         end
         for w=1:width-1
             fprintf(fid, '\\textbf{%s}&', colLabels{w});
         end
-        fprintf(fid, '\\textbf{%s}\\\\\\hline\r\n', colLabels{width});
-    end
+        fprintf(fid, '\\textbf{%s}\\\\\r\n', colLabels{width});
+    
+    fprintf(fid, '\\endfirsthead\r\n');
+    fprintf(fid, '\\caption{%s}\\\\\r\n',caption);
+    
+        if exist('rowlabels','var')
+           fprintf(fid, '&');
+        end
+        for w=1:width-1
+            fprintf(fid, '\\textbf{%s}&', colLabels{w});
+        end
+        fprintf(fid, '\\textbf{%s}\\\\\r\n', colLabels{width});
+                 
+    fprintf(fid, '\\endhead\r\n');
+    fprintf(fid, '\\multicolumn{3}{c}{(Continuing in next page)} \\\\\r\n');
+    fprintf(fid, '\\endfoot\r\n');
+    fprintf(fid, '\\multicolumn{3}{c}{} \\\\\r\n');
+    fprintf(fid, '\\endlastfoot\r\n');
+    fprintf(fid, '\\toprule\r\n');
     
     for h=1:height
         if(~isempty(rowLabels))
@@ -110,13 +118,15 @@ function matrix2latex_config(matrix, filename, varargin)
         for w=1:width-1
             fprintf(fid, '%s&', matrix{h, w});
         end
-        fprintf(fid, '%s\\\\\\hline\r\n', matrix{h, width});
+        if h~=height
+        fprintf(fid, '%s\\\\\\midrule\r\n', matrix{h, width});
+        else
+        fprintf(fid, '%s\\\\\r\n\\bottomrule\r\n', matrix{h, width});
+        end
     end
-%    fprintf(fid, '\\caption{Configuration files}\r\n');
     fprintf(fid, '\\end{longtable}\r\n');
     
     if(~isempty(textsize))
         fprintf(fid, '\\end{%s}', textsize);
     end
-
     fclose(fid);
