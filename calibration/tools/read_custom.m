@@ -48,6 +48,8 @@ for d=1:length(files)
     switch expr 
            case 'hg'
              jco=jco(cellfun(@(x) ~isempty(x),regexpi(d_fil(jco),'hg.\d+')));
+           case 'sr'
+             jco=jco(cellfun(@(x) ~isempty(x),regexpi(d_fil(jco),'sr: Azimuth.\w+')));
     end
     
     for l=1:length(jco)
@@ -55,8 +57,11 @@ for d=1:length(files)
            fileinfo=sscanf(files(d).name,'%*c%03d%02d.%*03d');
            datefich=datejuli(fileinfo(2),fileinfo(1));
            datefich=datefich+time_med(1)/24+time_med(2)/60/24+time_med(3)/60/60/24;
- 
-           output=[output; datefich];
+           if strcmp(expr,'sr')
+              output=cat(1,output,[datefich, sscanf(d_fil{jco(l)},'%*s%*d%*c%*d%*c%*d%*s%*c%*s%*s%*s%*s%*s%*s%*c%d')]);
+           else
+              output=[output; datefich];
+           end
     end
 
     if printfile==1 % particular para los resets
