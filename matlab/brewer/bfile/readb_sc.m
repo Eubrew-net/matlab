@@ -188,14 +188,11 @@ try
                
                 ini_med=jco(jsc(jj));
                 fin_med=jco(jsc(jj+1));
-
                 sc_meas=sscanf(char(l{ini_med+1:fin_med-1})',fmtsc,[17,Inf])';
                 time_meas=datefich(1)+sc_meas(:,3)/60/24;
-
                 n=size(sc_meas,1);
                 % indice+ n_sc +scan
                 jj=100*(jj+1)/2+(1:n);
-
 
                 sc_temp=repmat(aux_sc(7),n,1);
                 %sc_airm=repmat(aux_sc(:,12),n,1);
