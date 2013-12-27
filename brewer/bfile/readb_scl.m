@@ -64,19 +64,12 @@ end
 hf=[]; 
 for i=1:length(s)
     [path nam ext]=fileparts(s(i).name);
-    if findstr(nam, 'dep')
+    if exist(fullfile(p,[nam,'_dep',ext]),'file')
        continue
     end
-    if (i>1 && strcmp([nam(1:6),ext],s(i-1).name))
-        continue
-    end
-    if exist(fullfile(p,[nam,'_dep',ext]))
-       file=[nam,'_dep',ext];
-       bfile=fullfile(p,file); 
-    else
-       file=s(i).name;
-       bfile=fullfile(p,file);
-    end
+    file=s(i).name;
+    bfile=fullfile(p,file);
+
     scraw=[];    scavg=[];
     try
         if isempty(config)
