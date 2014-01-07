@@ -217,9 +217,9 @@ if  nargin~=3 && ~strcmp(name_a,name_b)
      f=figure;      set(f,'Tag','RATIO_SMOOTH'); 
      aux2=(matadd(osc_smooth(:,[6,7]),-osc_smooth(:,2)));
      jk=find(~isnan(osc_smooth(:,1)));
-     errorfill(osc_smooth(jk,1)',osc_smooth(jk,2)',osc_smooth(jk,3)','b')
+     errorfill(osc_smooth(jk,1)',osc_smooth(jk,2)',osc_smooth(jk,3)','b.')
      hold on
-     errorfill(osc_smooth(jk,1)',osc_smooth(jk,2)',abs([aux2(jk,1),aux2(jk,2)])','r')
+     errorfill(osc_smooth(jk,1)',osc_smooth(jk,2)',abs([aux2(jk,1),aux2(jk,2)])','r.-')
      box on;
      grid;
      set(gca,'Xlim',OSC_lim,'YLim',[-3,3]);
