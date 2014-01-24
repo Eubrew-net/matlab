@@ -82,7 +82,7 @@ end
 
 % remove 2.5 sigma outlier
 if outlier_flag==1
-  [ax,bx,cx,dx]=outliers_bp(sls(:,22),2.5);
+  [ax,bx,cx,dx]=outliers_bp(sls(:,22),4.5);
 else 
    dx=[];
 end
@@ -161,7 +161,7 @@ sl_median(:,2)=[]; sl_median=sortrows(sl_median,1);
     else
         title('NO bad hg''s'); ylabel('R6'); 
     end
-    datetick('x',30,'keeplimits','keepticks'); rotateticklabel(gca,20); grid;
+    datetick('x',29,'keeplimits','keepticks'); rotateticklabel(gca,20); grid;
 
     cname={'R6','F1','F5','T'};
     ncols=[22,23,24,13];

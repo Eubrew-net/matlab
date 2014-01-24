@@ -37,7 +37,7 @@ f5=cellfun(@(x) x(:,6),countRates,'UniformOutput',false); f5_=f5;
 f7=cellfun(@(x) x(:,end),countRates,'UniformOutput',false);
 % Iterate steps until the value for T1 converges (10 times on Brewer code)
 clear log; % to avoid variables named as the matlab function for ln
-for count=1:30
+for count=1:20
     a=cellfun(@(x,y) matadd(x,y),f3,f5,'UniformOutput',false);
     t2=cellfun(@(x,y) matdiv(log(matdiv(x,y)),x),a,f7,'UniformOutput',false);
         
@@ -50,3 +50,5 @@ for count=1:30
     f3=cellfun(@(x,y,z) matmul(x,exp(matmul(y,z))),f3_,f3,t2,'UniformOutput',false);
     f5=cellfun(@(x,y,z) matmul(x,exp(matmul(y,z))),f5_,f5,t2,'UniformOutput',false);
 end
+t2=cellfun(@(x,y) cat(2,x(:,1),x(:,3),x(:,6),y),dz_raw0,t2,'UniformOutput',false);
+
