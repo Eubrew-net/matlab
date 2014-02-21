@@ -77,7 +77,7 @@ if ~isempty(date_range)
             if isempty(regexp(pathstr, '\d{4}'))
                 pathstr=strcat('..\',num2str(YEAR(i)),'\',pathstring);
             end
-            CZFiles{i}=dir(sprintf('%s\\%s',pathstr,f));
+            CZFiles{i}=dir(sprintf('%s%c%s',pathstr,filesep,f));
             dir_cell=struct2cell(CZFiles{i}); FilesCZ{i}=dir_cell(1,:);
             paths{i}=repmat({pathstr},length(CZFiles{i}),1);  
         end
