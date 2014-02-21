@@ -76,9 +76,9 @@ if ~isempty(date_range)
         for i=1:length(YEAR)
             pathstr=regexprep(pathstring, '\d{4}',num2str(YEAR(i)));
             if isempty(regexp(pathstr, '\d{4}'))
-               pathstr=strcat('..\',num2str(YEAR(i)),'\',pathstring);
+               pathstr=fullfile('..',num2str(YEAR(i)),pathstring);
             end
-            Bfiles{i}=dir(sprintf('%s\\%s',pathstr,f));
+            Bfiles{i}=dir(sprintf('%s\%c%s',pathstr,filesep,f));
             dir_cell=struct2cell(Bfiles{i}); FilesB{i}=dir_cell(1,:);
             paths{i}=repmat({pathstr},length(Bfiles{i}),1);  
         end
