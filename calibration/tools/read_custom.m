@@ -50,6 +50,10 @@ for d=1:length(files)
              jco=jco(cellfun(@(x) ~isempty(x),regexpi(d_fil(jco),'hg.\d+')));
            case 'sr'
              jco=jco(cellfun(@(x) ~isempty(x),regexpi(d_fil(jco),'sr: Azimuth.\w+')));
+           case 'ze'
+             jco=jco(cellfun(@(x) ~isempty(x),regexpi(d_fil(jco),'Zenith.\w+')));
+           case 'si'
+             jco=jco(cellfun(@(x) ~isempty(x),regexpi(d_fil(jco),'New SI')));
     end
     
     for l=1:length(jco)
@@ -59,6 +63,11 @@ for d=1:length(files)
            datefich=datefich+time_med(1)/24+time_med(2)/60/24+time_med(3)/60/60/24;
            if strcmp(expr,'sr')
               output=cat(1,output,[datefich, sscanf(d_fil{jco(l)},'%*s%*d%*c%*d%*c%*d%*s%*c%*s%*s%*s%*s%*s%*s%*c%d')]);
+           elseif strcmp(expr,'ze')
+              output=cat(1,output,[datefich, sscanf(d_fil{jco(l)},'%*s%*s%*s%*s%*s%*s%d')]);
+           elseif strcmp(expr,'si')
+              si=regexpi(d_fil{jco(l)}, '=','split'); old=sscanf(si{4},'%05d%*s%05d');
+              output=cat(1,output,[datefich,sscanf(si{2},'%05d%*s'),sscanf(si{3},'%05d%*s'),old(1),old(2)]);
            else
               output=[output; datefich];
            end
