@@ -50,6 +50,10 @@ for d=1:length(files)
              jco=jco(cellfun(@(x) ~isempty(x),regexpi(d_fil(jco),'hg.\d+')));
            case 'sr'
              jco=jco(cellfun(@(x) ~isempty(x),regexpi(d_fil(jco),'sr: Azimuth.\w+')));
+           case 'az'
+             jco=jco(cellfun(@(x,y) ~isempty(x) | ~isempty(y),regexpi(d_fil(jco),'az: Azimuth discrepancy'),...
+                                                              regexpi(d_fil(jco),'re: Azimuth discrepancy')));
+%              jco=jco(cellfun(@(x) ~isempty(x),regexpi(d_fil(jco),'az: Azimuth.\w+')));
            case 'ze'
              jco=jco(cellfun(@(x) ~isempty(x),regexpi(d_fil(jco),'Zenith.\w+')));
            case 'si'
@@ -63,6 +67,9 @@ for d=1:length(files)
            datefich=datefich+time_med(1)/24+time_med(2)/60/24+time_med(3)/60/60/24;
            if strcmp(expr,'sr')
               output=cat(1,output,[datefich, sscanf(d_fil{jco(l)},'%*s%*d%*c%*d%*c%*d%*s%*c%*s%*s%*s%*s%*s%*s%*c%d')]);
+           elseif strcmp(expr,'az')
+              az=regexpi(d_fil{jco(l)}, '=','split');
+              output=cat(1,output,[datefich, str2double(az{2})]);
            elseif strcmp(expr,'ze')
               output=cat(1,output,[datefich, sscanf(d_fil{jco(l)},'%*s%*s%*s%*s%*s%*s%d')]);
            elseif strcmp(expr,'si')
