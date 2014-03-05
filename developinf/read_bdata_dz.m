@@ -1,4 +1,4 @@
-function dz=read_bdata_dz(brewer,setup,fpath,spectral_setup)
+function [dz config]=read_bdata_dz(brewer,setup,fpath,spectral_setup)
  
 b_idx=brewer;  fprintf('\n\rBrewer: %s\n\r',setup.brw_name{b_idx});
 if isstruct(setup)
@@ -18,7 +18,7 @@ else
     eval(['scf',brw_str{b_idx},'=spectral_setup']);
 end
 
-dzsum={}; dz_raw0={};
+dzsum={}; dz_raw0={}; config={};
 if nargin<=2
     bfile_p='BFILES'; fpath='';
 else
@@ -89,14 +89,14 @@ for dd=CALC_DAYS
       if exist(['scf',brw_str{b_idx}],'var')
          scf=eval(['scf',brw_str{b_idx}]);  
          sfc_flag='sfc';
-         dz=readb_ds_develop(bfile,brw_config_files(b_idx,1:2),scf);
+         [dz_ config_]=readb_ds_develop(bfile,brw_config_files(b_idx,1:2),scf);
       else
          sfc_flag='  ';
          [a b c]=fileparts(brw_config_files{b_idx,2});
         if ~isempty(strcat(b,c))
-         dz_=readb_ds_develop_dz(bfile,brw_config_files(b_idx,1:2));
+         [dz_ config_]=readb_ds_develop_dz(bfile,brw_config_files(b_idx,1:2));
         else
-         dz_=readb_ds_develop_dz(bfile,brw_config_files{b_idx,1});
+         [dz_ config_]=readb_ds_develop_dz(bfile,brw_config_files{b_idx,1});
         end
       end
       if isempty(dz_.dzsum)
@@ -111,6 +111,7 @@ for dd=CALC_DAYS
     try
        dzsum=[dzsum;dz_.dzsum]; dz.dzsum=dzsum;
        dz_raw0=[dz_raw0;dz_.dz_raw0]; dz.dz_raw0=dz_raw0;
+       config=[config;config_]; dz.config=config;      
     catch
        disp('Error assigning variables');
     end

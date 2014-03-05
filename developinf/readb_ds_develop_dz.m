@@ -1,5 +1,5 @@
 
-function o3=readb_ds_develop_dz(bfile,config_file,spectral_config)
+function [o3 config]=readb_ds_develop_dz(bfile,config_file,spectral_config)
 
 ds=[]; dss=[]; dz=[]; dzs=[]; timedz=[]; timedzsum=[]; 
 
