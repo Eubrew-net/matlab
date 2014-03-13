@@ -187,15 +187,15 @@ else
     nn=5;
 end
     if ~isempty(arg.Results.AOD)
-       colhead={'Diaj','AM','PM','O3_std(am)','N(am)','O3_std(pm)','N(pm)','AOD_340'};
-       fms = {'d','d','d','.2f','d','.2f','d','.3f'};
+       colhead={'Diaj','AM','PM','O3_std(am)','N(am)','O3_std(pm)','N(pm)','AOD_340','AOD_340_std'};
+       fms = {'d','d','d','.2f','d','.2f','d','.3f','.4f'};
        
        fechs=cellfun(@(x) unique(fix(x(:,1))),m_ampm); 
        [id loc]=ismember(fix(aod_orig(:,1)),fechs); 
        loc(loc==0)=[]; aod_orig=aod_orig(id,:); 
        data_tab=[diaj(cellfun(@(x) fix(x(1,1)),m_ampm(loc))),cell2mat(j_am(loc)),cell2mat(j_pm(loc)),...
                  cellfun(@(x) x(1,2),s_ampm(loc)),floor(cellfun(@(x) x(1,2),n_ampm(loc))./nn),...
-                 cellfun(@(x) x(2,2),s_ampm(loc)),floor(cellfun(@(x) x(2,2),n_ampm(loc))./nn),aod_orig(:,2)];
+                 cellfun(@(x) x(2,2),s_ampm(loc)),floor(cellfun(@(x) x(2,2),n_ampm(loc))./nn),aod_orig(:,[2 3])];
        displaytable(data_tab, colhead, 10, fms, cellstr(datestr(cellfun(@(x) fix(x(1,1)),m_ampm(loc)))));
     else
        colhead={'Diaj','AM','PM','O3_std(am)','N(am)','O3_std(pm)','N(pm)'};
