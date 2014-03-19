@@ -314,7 +314,7 @@ if  nargin~=3 && ~strcmp(name_a,name_b)
             else
              subplot(2,1,s);  
              j=find(diaj(data(:,1))==dias(s+(idx-1)*2));
-             h=mmplotyy(diajul(data(j,1)),[data(j,3),data(j,3+data_l-1)],'k.-',...
+             h=mmplotyy(diajul(data(j,1)),[data(j,3),data(j,3+data_l-1)],'k.-',[min(data(j,3))-10 max(data(j,3))+10],...
                         rp(j,2),'g.',[-3,3]);  
              set(h(1),'Marker','x','Color','r');    grid; 
             end
