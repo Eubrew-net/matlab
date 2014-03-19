@@ -83,7 +83,6 @@ if ~isempty(arg.Results.date_range)
       data(fch>arg.Results.date_range(2))=[];    
    end
 end
-data_orig=data;
 
 %% Filter corr 
 if ~isempty(arg.Results.F_corr)
@@ -110,6 +109,7 @@ if ~isempty(arg.Results.F_corr)
         end
     end
 end
+data_orig=data;
 
 %% Second Depuration: airmass range (default [])
 if ~isempty(arg.Results.airmass)
@@ -172,7 +172,7 @@ if ~isempty(arg.Results.AOD)
        [id loc]=ismember(fix(aod_m(:,1)),fechs); loc(loc==0)=[];
        % igualamos aod y data
        aod_orig=aod_m; aod_m=aod_m(id,:); data=data(loc);
-       idx=aod_m(:,2)>0.05;
+       idx=aod_m(:,3)>0.03;
        % Mantenemos info para la tabla
        data(idx)=[];
     catch exception
@@ -210,7 +210,7 @@ end
 %% Ploteo de días individuales. Con / Sin filtros
     if arg.Results.plots
        for dd=1:length(data)
-           lgl_orig=data_orig{dd};            
+           lgl_orig=data{dd};            
            jpm=(lgl_orig(:,9)/60>12); jam=~jpm;
 
            figure; 
@@ -233,22 +233,23 @@ end
 
                axes(a(ampm)); 
                gscatter(m_ozone,P_brw_first,lgl_orig(jk,10),'','o',{},'off','','MS9'); 
-               hold on; g=gscatter(m_ozone,P_brw_second,lgl_orig(jk,10),'','.',6,'off','','');                    
+               hold on; g=gscatter(m_ozone,P_brw_second,lgl_orig(jk,10),'','.',6,'off','',''); 
+               if ~isempty(arg.Results.airmass)
+                  v=vline_v(arg.Results.airmass,'-k'); set(v,'LineWidth',2);
+               end
                ax(2) = axes('Units',get(a(ampm),'Units'),'Position',get(a(ampm),'Position'),...
                             'Parent',get(a(ampm),'Parent'));
                set(ax(2),'YAxisLocation','right','XAxisLocation','Top','Color','none', ...
-                         'XGrid','off','YGrid','off','Box','off', ...
-                         'XLim',get(a(ampm),'Xlim'),'Ticklength',[0 0],'XTicklabel',[]); 
-               hold on; plot(m_ozone,lgl_orig(jk,19),'.'); ylabel('O3 (DU)');
+                         'XGrid','off','YGrid','off','Box','off'); 
+               m_o3=grpstats(lgl_orig(jk,[1 33]),fix(lgl_orig(jk,3)/10),'mean');                                      
+               hold on; plot(m_o3(:,1),m_o3(:,2),'.'); set(gca,'YLim',[min(m_o3(:,2))-15 max(m_o3(:,2))+15]);
+               set(gca,'XTicklabels',datestr(get(gca,'XTick'),15),'XDir','reverse'); ylabel('O3 (DU)');
                title(sprintf('%s (%d)',datestr(nanmean(lgl_orig(jk,1)),0),diaj(unique(fix(lgl_orig(jk,1))))));
                text([.8,.8,.8,.8],[0.05,0.05*3,0.05*5,0.05*7] ,...
                     {sprintf('O3 std=%.2f',s_ampm{dd}(ampm+2)),...
                      sprintf('N=%d',n_ampm{dd}(ampm+2))       ,...
                      sprintf('ETC_1=%d',fix(coeff_first(1)))  ,...
                      sprintf('ETC_2=%d',fix(coeff_second(1)))},'Units','Normalized','FontSize',8,'BackgroundColor','w')
-               if ~isempty(arg.Results.airmass)
-                  v=vline_v(arg.Results.airmass,'-k'); set(v,'LineWidth',2);
-               end
                axes(a(ampm+2));
                gscatter(m_ozone,r_first,lgl_orig(jk,10),'','o',4,'off','','Residuos');
                hold on; gscatter(m_ozone,r_second,lgl_orig(jk,10),'','.',6,'off','','');              
