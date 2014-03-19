@@ -1,6 +1,5 @@
 
 function [sl_data,dt_data,rs_data,ap_data,hg_data,h2o_data,op_data,OUTliers]=brw_avg_report(brw_str,brw_config_files,varargin)  
-
 % AVG Report files
 %   History report for Standard Lamp, Dead Time , Run Stop and Power supply report 
 %%MODIFICADO

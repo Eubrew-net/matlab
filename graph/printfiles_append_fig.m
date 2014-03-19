@@ -19,7 +19,7 @@ Options.LockAxes=1;     %LockAxes'  one of 0 or 1 specifies that all axes limits
 
 
 Options.FontMode='fixed';  %one of the strings 'scaled', 'fixed'
-Options.FontSize=9;     %'scaled' mode multiplies with the font size of each  text object to obtain the exported font size
+Options.FontSize=12;     %'scaled' mode multiplies with the font size of each  text object to obtain the exported font size
                            %'fixed' mode specifies the font size of all text objects in points
                            %If FontMode is 'scaled' but FontSize is not specified then a  scaling factor is computed from the ratio of the size of the
                            %exported figure to the size of the actual figure. The default 'FontMode' setting is 'scaled'.
@@ -81,7 +81,8 @@ try
     set(h,'WindowStyle','normal');
     set(h,'PaperUnits','centimeters');
     set(h,'PaperPositionMode','Auto')
-
+    applytofig(h,Options);
+    %datetick;
     if ~isempty(strcmp(varargin,'no_export'))
         exportfig(h,[strtok(figura,'.')],Options);
     else

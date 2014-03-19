@@ -1,6 +1,5 @@
 
 function [LRatPFHT ErrorRaCI]=analyzeCI(path,nameb,varargin)
-
 % This function analyze CI files and gives the response for each one respect nameb.
 % We want all ratios appear.
 % The output is a matrix (Ratio %) with the Data/Time and T. 

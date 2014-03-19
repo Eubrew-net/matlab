@@ -106,8 +106,10 @@ end
     
 %% SLOAVG ploteos
 % R6 plot
-num_lab=11;                     labs=linspace(sla(1,1),sla(end,1),num_lab);
-f=figure; set(f,'tag','SLAVG_R6');     p1=errorbard(sla(:,[1,12,19]),'ks');
+num_lab=11;  
+labs=linspace(sla(1,1),sla(end,1),num_lab);
+f=figure; set(f,'tag','SLAVG_R6');
+p1=errorbard(sla(:,[1,12,19]),'ks');
 set(p1,'MarkerEdgeColor','k','color','g');
 set(gca,'XLim',[date_range(1)-1 sla(end,1)+4]);
 if length(ref)==2
