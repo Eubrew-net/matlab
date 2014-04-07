@@ -47,9 +47,9 @@ for d=1:length(files)
     jco=find(cellfun(@(x) ~isempty(x),regexpi(d_fil,expr)));
     switch expr 
            case 'hg'
-             jco=jco(cellfun(@(x) ~isempty(x),regexpi(d_fil(jco),'hg.\d+')));
+             jco=jco(cellfun(@(x) ~isempty(x),regexpi(d_fil(jco),'^hg.\d+')));
            case 'sr'
-             jco=jco(cellfun(@(x) ~isempty(x),regexpi(d_fil(jco),'sr: Azimuth.\w+')));
+             jco=jco(cellfun(@(x) ~isempty(x),regexpi(d_fil(jco),'sr: Azimuth Steps.\w+')));
            case 'az'
              jco=jco(cellfun(@(x,y) ~isempty(x) | ~isempty(y),regexpi(d_fil(jco),'az: Azimuth discrepancy'),...
                                                               regexpi(d_fil(jco),'re: Azimuth discrepancy')));
