@@ -1,56 +1,35 @@
 function [res,detail,DSP_QUAD,QUAD_SUM,QUAD_DETAIL,CUBIC_SUM,CUBIC_DETAIL,salida...
     ]=dsp_report(day,year,brewnb,path,cfg,comment,uvr)
 
-
 % Modificaciones:
 % 05/11/2009 Juanjo: modificada la línea 361 para mostrar las WL con 2
 % decimales
 % 
-
 day=day-1:day+1;
-%year=08;
-%brewnb=193;
-Lines=1:14;
-%path='f:\red_brewer\brewer193\bdata193\193\dsp078\';
-%comment='#193';
-% polinomial order
-polynb=3;
-% ozone pos-> from icf
-% using read_icf= cfg(14)+cfg(44)
-%cfg=read_icf('icf07808.193');
-ozonepos=cfg(14)+cfg(44);
-
+polynb=3;% polinomial order
+ozonepos=cfg(14)+cfg(44);% ozone pos-> from icf / or passed directly to function
 
 %% Ozone Dispersion analysis
 %function [wl,DSP,DSPstd,fwhm,fwhmstd,backlash,resup]=alldsp_(day,year,brew,lines,minslit,maxslit,usewl,dspp)
-h0=gcf;
+ h0=gcf;
 [wl,dsp,dspstd,fwhm,fwhmstd,backlash]=alldsp_(day,year,brewnb,1:14,[],[],[],path);
-dsp_orig=dsp;
-wl_orig=wl;
  if isempty(wl)
     return;
  else
-    fplotdsp=sprintf('lines_dsp_%03d%02d_%s%03d',day(1),year,'_',brewnb);
+    fprintf('lines_dsp_%03d%02d_%s%03d\n',day(1),year,'_',brewnb);
     h1=gcf;
     for i=h0:h1
        figure(i)
        set(i,'Tag',['DSP_LINES_',num2str(i)]);
     end
-    %printfigures(h0,h1,[fplotdsp]);
-    %close all
 end
 
-
-
-
-
-
 fnamealldsp=sprintf('alldsp_%03d%02d_%s.%03d',day(1),year,comment,brewnb);
-disp(sprintf('saving alldsp to %s',[path fnamealldsp]));
+fprintf('saving alldsp to %s\r\n',fullfile(path,fnamealldsp));
 
-%Bewer ozone lines
-  jl=find(wl<3410);
-  jnul=find(wl>wl(max(jl)))
+  % Brewer ozone lines
+  % for ozone only use wv <3340
+  jnul=wl>=3410;
   dsp(jnul,:)=[];
   wl(jnul,:)=[];
   dspstd(jnul,:)=[];
@@ -58,29 +37,18 @@ disp(sprintf('saving alldsp to %s',[path fnamealldsp]));
   fwhmstd(jnul,:)=[];
   backlash(jnul,:)=[];
 
-dsp_orig=dsp;
-wl_orig=wl;
+dsp_orig=dsp; wl_orig=wl;
   
   fnamealldsp=sprintf('ozonedsp_%03d%02d_%s.%03d',day(1),year,comment,brewnb);
-  save([path fnamealldsp],'wl','dsp','dspstd','fwhm','fwhmstd','backlash');
-
-  %h1=gcf;
-  %fplotdsp=sprintf('alldsp_%03d%02d_%s%03d',day(1),year,comment,brewnb);
-  %printfigures(h0,h1,[fplotdsp]);
-  %close all
-
+  save(fullfile(path,fnamealldsp),'wl','dsp','dspstd','fwhm','fwhmstd','backlash');
 
 %% now calculate normaldsp
-% for ozone only use wv <3340
-%j=find(wl<3400);
-
 [fwl,fstps,pwl,pstps]=normaldsp(wl,dsp);  % quad for every slit
 fnameN=sprintf('dspnorm_%03d%02d_%s.%03d',day(1),year,comment,brewnb);
 
 
 %% Depuracion
-% si el residuo es mayor que 0.1 y hay mas de tres lineas por slit se
-% elimina
+% si el residuo es mayor que 0.1 y no hay mas de tres lineas por slit se elimina
 jbad=[];
 lamda_nominal=[3032.06 3063.01 3100.53 3135.07 3168.09 3199.98];
 flag_reprocess=0;
@@ -121,9 +89,7 @@ for j=1:5
 
 if flag_reprocess
  [fwl,fstps,pwl,pstps]=normaldsp(wl,dsp);  % quad for every slit
- fnameN=sprintf('dspnorm_%03d%02d_%s.%03d',day(1),year,comment,brewnb);
- 
- 
+ fnameN=sprintf('dspnorm_%03d%02d_%s.%03d',day(1),year,comment,brewnb); 
 end      
 end
 end
@@ -133,11 +99,10 @@ if flag_reprocess
 end
  
 %%
-
 lamda_nominal=[3032.06 3063.01 3100.53 3135.07 3168.09 3199.98];
 
 fnamealldsp=sprintf('ozonedsp_%03d%02d_%s.%03d',day(1),year,comment,brewnb);
-save([path fnamealldsp],'wl','dsp','dspstd','fwhm','fwhmstd','backlash');
+save(fullfile(path,fnamealldsp),'wl','dsp','dspstd','fwhm','fwhmstd','backlash');
 
 disp_lines=[
             2893.600    1   1%  hg  9
@@ -152,9 +117,8 @@ disp_lines=[
             3499.950	12	2%	Cd	7
             3611.630	13	2%	Cd	8
             ];
-lamp_name=[  'Hg';'Hg';'Zn';'Zn';'Cd';...
-            'Cd' ;'Zn';'Hg';'Cd';'Cd';'Cd'];
-lamp_name=cellstr(lamp_name);
+lamp_name=[ 'Hg';'Hg';'Zn';'Zn';'Cd';...
+            'Cd' ;'Zn';'Hg';'Cd';'Cd';'Cd']; lamp_name=cellstr(lamp_name);
 
 f3=figure;  warning off MATLAB:tex;
 set(f3,'tag','DSP_QUAD_RES');
@@ -176,21 +140,20 @@ orient('portrait');
 %legend('slit #0','slit #1','slit #2','slit #3','slit #4','slit #5');
 
 
-disp(sprintf('saving normaldsp to %s as brewer compatible file',[path fnameN]));
+fprintf('saving normaldsp to %s as brewer compatible file\r\n',fullfile(path,fnameN));
 
 %save([path fnameN],'pwl','pstps');
 data=pwl(:,end:-1:1)';
 mydata=data(:);
-savefmt([path fnameN],[mydata(4:end);mydata(1:3)],'','%.7e');
+savefmt(fullfile(path,fnameN),[mydata(4:end);mydata(1:3)],'','%.7e');
 DSP_QUAD=[mydata(4:end);mydata(1:3)];
 disp('Use polyval(pwl(2,:),wl) for calculating normal wavelengths')
 
 %% now calculate ozonecoeffs
-
 outfname_cuadratic=sprintf('opos%03d%02d_%s.%03d',day(1),year,comment,brewnb);
-disp(sprintf('Saving ozonecoeffs to %s',[path outfname_cuadratic]));
+fprintf('Saving ozonecoeffs to %s\n',fullfile(path,outfname_cuadratic));
 
-salida=[path outfname_cuadratic];
+% salida=fullfile(path,outfname_cuadratic);
 % ozonepos is total steps from uvzero. #mircometer zero + ozone position
 % dcfname is dcfile name for brstps.
 % fname is data from alldsp
@@ -202,14 +165,13 @@ salida=[path outfname_cuadratic];
 %cfg=read_icf('icf07808.193');
 %ozonepos=cfg(14)+cfg(44);
 CALC_STEP=cfg(14); %fnameN='O3f30012.185';
-[res,detail,salida]=ozonecoeff3([path fnamealldsp],[ozonepos,cfg(44)],[path fnameN],[path outfname_cuadratic]);
+[res,detail,salida]=ozonecoeff3(fullfile(path,fnamealldsp),[ozonepos,cfg(44)],fullfile(path,fnameN),fullfile(path,outfname_cuadratic));
 
 jcal=find((res(:,1)==CALC_STEP),1);
 jumk=find((res(:,1)==CALC_STEP),1,'last');
 
 
 %% ozone vs UV comparison
-
 % Sun Scan simulation
 % asuming mo3=mRay=2 and o3=300UD ct during sc
 %Fi=300*res(:,2)*2-res(:,end);
@@ -227,10 +189,10 @@ if nslit<=polynb
 end
 dsp(isnan(dsp))=0;
 fname7=sprintf('dsp_%03d%02d_%s.%03d',day(1),year,comment,brewnb);
-disp(sprintf('saving powfiu7 to %s',[path fname7]));
+fprintf('saving powfiu7 to %s\n',fullfile(path,fname7));
 pos0=powfiu7;
 if nanmean(fwhm(fwhm(:,1)~=0,1))<65,pos0=powfiu7(1);end
-[fstd,slitpos,rmsf]=powfiu7(pos0,wl,dsp,polynb,[],[],[],[path fname7]);
+[fstd,slitpos,rmsf]=powfiu7(pos0,wl,dsp,polynb,[],[],[],fullfile(path,fname7));
 % disp('Residuals using powfiu7 [RMS]:');
 % disp(rmsf);
 
@@ -240,10 +202,10 @@ dsl=slitpos(end,:)-pos0;
 if any(abs(dsl)>0.05),  % do again with this one slit corrected
  ind=find(dsl==max(dsl));
  pos0(ind)=pos0(ind)+dsl(ind);% shift slitpos and recalculate
- disp(sprintf('Too large slitpos deviation: Recalc with slit #%d shifted by %.3f',ind,dsl(ind)));
- [fstd,slitpos,rmsf]=powfiu7(pos0,wl,dsp,polynb,[],[],[],[path fname7]);
+ fprintf('Too large slitpos deviation: Recalc with slit #%d shifted by %.3f\n',ind,dsl(ind));
+ [fstd,slitpos,rmsf]=powfiu7(pos0,wl,dsp,polynb,[],[],[],fullfile(path,fname7));
  disp('Residuals using powfiu7 [RMS]:');
-disp( rmsf);
+ disp( rmsf);
 end
 
 
@@ -274,17 +236,16 @@ set(gca,'Xlim',[2850,3450]);
 disp('Use brstps2 to calculate steps and wavelengths');
 
 %% And now show difference between both methods for slits 1 and 5.
-
 testwl1=3000:10:3500;
 testwl5=3500:10:3650;
-stps17=brstps2(testwl1,1,[],[path fname7]);  % reference steps to use
-stps57=brstps2(testwl5,5,[],[path fname7]);
+stps17=brstps2(testwl1,1,[],fullfile(path,fname7));  % reference steps to use
+stps57=brstps2(testwl5,5,[],fullfile(path,fname7));
 
 %quad1=polyval(pwl(2,:),stps17);
 %quad5=polyval(pwl(6,:),stps57);
 
 for i=1:6
- stps(i,:)=brstps2(testwl1,i-1,[],[path fname7])';  % reference steps to use
+ stps(i,:)=brstps2(testwl1,i-1,[],fullfile(path,fname7))';  % reference steps to use
  quad1(i,:)=polyval(pwl(i,:),stps(i,:)')';
 end
 
@@ -298,8 +259,6 @@ xlabel('wavelength [A]','FontSize',12,'FontWeight','bold');
 set(f1,'tag','DSP_QUAD_CUBIC');
 set(gca,'Xlim',[2850,3450]);
 
-
-
 %f3=figure;
 %set(f3,'Tag','DSP')
 %plot(testwl1,quad1-testwl1);%,testwl5,quad5-testwl5);
@@ -307,12 +266,9 @@ set(gca,'Xlim',[2850,3450]);
 %ylabel('normaldsp-powfiu7 [ï¿½]');
 %hline([-0.1,0.1]);
 
-
-
 %%
 outfname_cubic=sprintf('opos_pow7_%03d%02d_%s.%03d',day(1),year,comment,brewnb);
-disp(sprintf('Saving ozonecoeffs to %s',[path outfname_cubic]));
-
+fprintf('Saving ozonecoeffs to %s\n',fullfile(path, outfname_cubic));
 
 % ozonepos is total steps from uvzero. #mircometer zero + ozone position
 % dcfname is dcfile name for brstps.
@@ -325,7 +281,7 @@ disp(sprintf('Saving ozonecoeffs to %s',[path outfname_cubic]));
 %cfg=read_icf('icf07808.193');
 %ozonepos=cfg(14)+cfg(44);
 
-[res2,detail2,salida2]=ozonecoeff3([path fnamealldsp],[ozonepos,cfg(44)],[path fname7],[path outfname_cubic]);
+[res2,detail2,salida2]=ozonecoeff3(fullfile(path,fnamealldsp),[ozonepos,cfg(44)],fullfile(path,fname7),fullfile(path,outfname_cubic));
 
 
 %% Power fit vs Quadratic
@@ -391,5 +347,3 @@ legend('Quadratic','Cubic');
 res=cat(3,[res(jcal-6:jcal+6,:);res(end-1:end,:)],[res2(jcal-6:jcal+6,:);res2(end-1:end,:)]);
 detail=cat(4,detail(:,:,[jcal-6:jcal+6,end-1:end]),detail2(:,:,[jcal-6:jcal+6,end-1:end]));
 salida.QUAD=salida([jcal-6:jcal+6,end-1:end]); salida.CUBIC=salida2([jcal-6:jcal+6,end-1:end]);
-
-

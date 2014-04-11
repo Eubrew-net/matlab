@@ -101,12 +101,12 @@ for j=1:length(s)
            CSN(1)=csn;
        end
        coment=brw_str{n_inst};
-       if isempty(strfind(a,'DSP'))
-          cd('DSP');
-       else 
-          cd(fullfile('..','DSP'));
-       end
-       
+%        if isempty(strfind(a,'DSP'))
+%           cd('DSP');
+%        else 
+%           cd(fullfile('..','DSP'));
+%        end
+%        cd(a);
        uvr_file=dir(['..',filesep(),brw_str{n_inst},filesep(),'UVR*.',brw_str{n_inst}]);
        if ~isempty(uvr_file)
            uvr=load(['..',filesep(),brw_str{n_inst},filesep(),uvr_file(1).name]);
@@ -116,11 +116,11 @@ for j=1:length(s)
        if isempty(dsp_dir)
           [res{j},detail{j}, ...
           DSP_QUAD{j},QUAD_SUM{j},QUAD_DETAIL{j},CUBIC_SUM{j},CUBIC_DETAIL{j},salida{j}...
-          ]=dsp_report(day,year,brewnb,path,cfg,coment,uvr);
+          ]=dsp_report(day,year,brewnb,dsp_dir,cfg,coment,uvr);% path
        else
           [res,detail, ...
           DSP_QUAD,QUAD_SUM,QUAD_DETAIL,CUBIC_SUM,CUBIC_DETAIL,salida...
-          ]=dsp_report(day,year,brewnb,path,cfg,coment,uvr);           
+          ]=dsp_report(day,year,brewnb,dsp_dir,cfg,coment,uvr);           
        end
        
        dsp_sum.day=day;
@@ -131,13 +131,14 @@ for j=1:length(s)
        dsp_sum.res=res;
        dsp_sum.detail=detail;
        dsp_sum.salida=salida;
-       save( fullfile(path,sprintf('%03d_%02d_%03d',brewnb,year,day)),'dsp_sum') 
+       save(fullfile(dsp_dir,sprintf('%03d_%02d_%03d',brewnb,year,day)),'dsp_sum') 
+%        save(fullfile(path,sprintf('%03d_%02d_%03d',brewnb,year,day)),'dsp_sum') 
        
-       if isempty(strfind(a,'DSP'))
-          cd ..;
-       else 
-          cd(fullfile('..',num2str(calyear)));
-       end
+%        if isempty(strfind(a,'DSP'))
+%           cd ..;
+%        else 
+%           cd(fullfile('..',num2str(calyear)));
+%        end
    else
     disp('err');
    end
