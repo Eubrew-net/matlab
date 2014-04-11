@@ -44,15 +44,14 @@ for i=1:Cal.n_brw
 end
 cfg={};
 
-if any(Cal.Date.CALC_DAYS>366)                                % fecha matlab
-   fecha_days=fix(Cal.Date.CALC_DAYS);                               % todos los días considerados
+if any(Cal.Date.CALC_DAYS>366)                                  % fecha matlab
+   fecha_days=fix(Cal.Date.CALC_DAYS);                          % todos los días considerados
    
 else                                                            % dia juliano
    fecha_days=Cal.Date.CALC_DAYS+datenum(Cal.Date.cal_year,1,0);% todos los días considerados
 end
 
 % exist()
-
 for i=1:Cal.n_brw
     [xx,bb,ext]=fileparts(Cal.brw_config_files_new{i});% to check config style
     try
@@ -98,7 +97,7 @@ for i=1:Cal.n_brw
             cfg.old{i}=unique(a_old,'rows');
             
           if strcmp(ext,'.cfg')
-             y=group_time(fecha,cfg.old{i}(:,1)); % asociamos un indice a cada fecha de cal
+             y=group_time(fecha(idx),cfg.old{i}(:,1)); % asociamos un indice a cada fecha de cal
              if all(y==0) %solo hay uno y esta fuera del rango de fechas.
                 y=1;
              end
@@ -137,7 +136,7 @@ for i=1:Cal.n_brw
           cfg.new{i}=unique(a_new,'rows');
           
           if strcmp(ext,'.cfg')
-             y=group_time(fecha,cfg.new{i}(:,1)); % asociamos un indice a cada fecha de cal
+             y=group_time(fecha(idx),cfg.new{i}(:,1)); % asociamos un indice a cada fecha de cal
              if all(y==0) %solo hay uno y esta fuera del rango de fechas.
                 y=1;
              end 
