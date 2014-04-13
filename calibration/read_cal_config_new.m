@@ -44,21 +44,23 @@ for i=1:Cal.n_brw
 end
 cfg={};
 
-if any(Cal.Date.CALC_DAYS>366)                                  % fecha matlab
+if any(Cal.Date.CALC_DAYS>366) % fecha matlab
    fecha_days=fix(Cal.Date.CALC_DAYS);                          % todos los días considerados
    
-else                                                            % dia juliano
+else                           % dia juliano
    fecha_days=Cal.Date.CALC_DAYS+datenum(Cal.Date.cal_year,1,0);% todos los días considerados
 end
 
-% exist()
 for i=1:Cal.n_brw
-    [xx,bb,ext]=fileparts(Cal.brw_config_files_new{i});% to check config style
     try
         a=cell2mat(config{i}');
         fecha=a(end,2:3:end)';% ficheros cargados con éxito
         
-        idx=ismember(fecha_days,fecha);% 1 where the elements of A are in the set S, 0 elsewhere
+        [idx loc]=ismember(fecha_days,fecha); % EN ESTE ORDEN !!!!
+        if ~any(idx) % Algún brewer no tiene datos en el rango CALC_DAYS. Skipped
+           fprintf('Brewer %s data is out of CALC DAYS range. Skipped (clean var.)\n',Cal.brw_name{i});
+           continue
+        end
     catch exception
         a=[];
         fprintf('%s File: %s, line: %d, brewer: %s\n',...
@@ -66,8 +68,8 @@ for i=1:Cal.n_brw
     end
     
     if ~isempty(a)               
-       %configuracion inicial o de prueba dimesion 1
-       if isempty(ext)% si trabajamos con una única config. -> first = bfile
+       [xx,bb,ext]=fileparts(Cal.brw_config_files_new{i});
+       if isempty(ext)% trabajamos con una única config. -> first = bfile
           fprintf('Brewer %s:  1ª config -> Bfiles\t\t\t',Cal.brw_name{i}); 
           a_old=a(:,3:3:end)';
           if any(isnan(a_old(:)))
@@ -78,14 +80,14 @@ for i=1:Cal.n_brw
           % asignamos las fechas de los primeros ficheros con cambio
           cfg.old{i}=sortrows([a_old(ki,end),cfg.old{i}]);
           y=group_time(fecha,cfg.old{i}(:,1)); 
-          A.old(idx,i+1)= cfg.old{i}(y,8);
-          ETC.old(idx,i+1)= cfg.old{i}(y,11);
+          A.old(idx,i+1)= cfg.old{i}(y(loc(loc~=0)),8);
+          ETC.old(idx,i+1)= cfg.old{i}(y(loc(loc~=0)),11);
           SL_R.old(idx,i+1)= Cal.SL_OLD_REF(i);
           for f=1:6
               F_corr{i}.old(idx,f+1)=Cal.ETC_C{i}(f);                              
           end
-       else% dos configuraciones
-           
+          
+       else% dos configuraciones           
           % Primera configuracion
           [xx,bb,ext]=fileparts(Cal.brw_config_files{i,1});% to check config style                   
           fprintf('Brewer %s:  1ª config -> %s\t\t\t',Cal.brw_name{i},[bb,ext]);
@@ -97,14 +99,14 @@ for i=1:Cal.n_brw
             cfg.old{i}=unique(a_old,'rows');
             
           if strcmp(ext,'.cfg')
-             y=group_time(fecha(idx),cfg.old{i}(:,1)); % asociamos un indice a cada fecha de cal
-             if all(y==0) %solo hay uno y esta fuera del rango de fechas.
+             y=group_time(fecha,cfg.old{i}(:,1)); % asociamos una cal. a cada Bfile cargado
+             if all(y==0)                         % solo hay uno y esta fuera del rango de fechas.
                 y=1;
              end
-             A.old(idx,i+1)= cfg.old{i}(y,8);
-             ETC.old(idx,i+1)= cfg.old{i}(y,11);             
-             SL_R.old(idx,i+1)=cfg.old{i}(y,27);
-             F_corr{i}.old(idx,2:end)=cat(2,repmat(0,length(y),2),cfg.old{i}(y,29:32));
+             A.old(idx,i+1)= cfg.old{i}(y(loc(loc~=0)),8);
+             ETC.old(idx,i+1)= cfg.old{i}(y(loc(loc~=0)),11);             
+             SL_R.old(idx,i+1)=cfg.old{i}(y(loc(loc~=0)),27);
+             F_corr{i}.old(idx,2:end)=cat(2,repmat(0,length(loc(loc~=0)),2),cfg.old{i}(y(loc(loc~=0)),29:32));
           else
              A.old(idx,i+1)= cfg.old{i}(8);% si falta algun fichero -> NaN
              ETC.old(idx,i+1)=cfg.old{i}(11);
@@ -119,78 +121,74 @@ for i=1:Cal.n_brw
           end
        end
          
-          % Segunda configuracion
-          [xx,bb,ext]=fileparts(Cal.brw_config_files{i,2});% to check config style
-          if ~isempty(ext)             
-             fprintf('2ª config -> %s\n',[bb,ext]);
-             a_new=a(1:end-2,2:3:end)';
-          else
-             [xx,bb,ext]=fileparts(Cal.brw_config_files{i,1});% to check config style              
-             fprintf('2ª config -> %s\n',[bb,ext]);
-             a_new=a(1:end-2,1:3:end)';              
-          end
-          if any(isnan(a_new(:)))
-            a_new(isnan(a_new))=0;
-            fprintf('(warning NaN replaced by 0 in 2 config)');
-          end
-          cfg.new{i}=unique(a_new,'rows');
+       % Segunda configuracion
+       [xx,bb,ext]=fileparts(Cal.brw_config_files{i,2});% to check config style
+       if ~isempty(ext)             
+          fprintf('2ª config -> %s\n',[bb,ext]);
+          a_new=a(1:end-2,2:3:end)';
+       else % si sólo hemos pasado una configuración, la primera será Bfiles y la 2ª ésta
+          [xx,bb,ext]=fileparts(Cal.brw_config_files{i,1});% to check config style              
+          fprintf('2ª config -> %s\n',[bb,ext]);
+          a_new=a(1:end-2,1:3:end)';              
+       end
+       if any(isnan(a_new(:)))
+          a_new(isnan(a_new))=0;
+          fprintf('(warning NaN replaced by 0 in 2 config)');
+       end
+       cfg.new{i}=unique(a_new,'rows');
           
-          if strcmp(ext,'.cfg')
-             y=group_time(fecha(idx),cfg.new{i}(:,1)); % asociamos un indice a cada fecha de cal
-             if all(y==0) %solo hay uno y esta fuera del rango de fechas.
-                y=1;
-             end 
-             try 
-                 A.new(idx,i+1)= cfg.new{i}(y,8);
-                 ETC.new(idx,i+1)= cfg.new{i}(y,11);             
-                 SL_R.new(idx,i+1)=cfg.new{i}(y,27);
-                 F_corr{i}.new(idx,2:end)=cat(2,repmat(0,length(y),2),cfg.new{i}(y,29:32));                 
-             catch exception
-                 fprintf('Try reloading Brewer %s!! %s File: %s, line: %d\n',...
-                       Cal.brw_name{i},exception.message,exception.stack.name,exception.stack.line);
+       if strcmp(ext,'.cfg')
+          y=group_time(fecha,cfg.new{i}(:,1)); % asociamos un indice a cada fecha de cal
+          if all(y==0) %solo hay uno y esta fuera del rango de fechas.
+             y=1;
+          end 
+          A.new(idx,i+1)= cfg.new{i}(y(loc(loc~=0)),8);
+          ETC.new(idx,i+1)= cfg.new{i}(y(loc(loc~=0)),11);             
+          SL_R.new(idx,i+1)=cfg.new{i}(y(loc(loc~=0)),27);
+          F_corr{i}.new(idx,2:end)=cat(2,repmat(0,length(loc(loc~=0)),2),cfg.new{i}(y(loc(loc~=0)),29:32));                 
+       else
+          A.new(idx,i+1)= cfg.new{i}(8);% si falta algun fichero -> NaN
+          ETC.new(idx,i+1)=cfg.new{i}(11);               
+          SL_R.new(idx,i+1)=Cal.SL_NEW_REF(i);
+          try
+             for f=1:6
+                 F_corr{i}.new(idx,f+1)=Cal.ETC_C{i}(f);                              
              end
-          else
-             A.new(idx,i+1)= cfg.new{i}(8);% si falta algun fichero -> NaN
-             ETC.new(idx,i+1)=cfg.new{i}(11);               
-             SL_R.new(idx,i+1)=Cal.SL_NEW_REF(i);
-             try
-                for f=1:6
-                    F_corr{i}.new(idx,f+1)=Cal.ETC_C{i}(f);                              
-                end
-             catch exception
-                fprintf('(Warning: %s)  ',exception.message);
-             end
+          catch exception
+             fprintf('(Warning: %s)  ',exception.message);
           end
+       end
                     
-          % Tercera configuracion  %fichero b
-          a_b=a(1:end-2,3:3:end)'; a_b(:,1)=a(end,3:3:end)';
-          if any(isnan(a_b(:)))
-            a_b(isnan(a_b))=0;
-            fprintf('(warning NaN replaced by 0 in B config)');
-          end
-          cfg.b{i}=unique(a_b,'rows','first'); 
-          y=ismember(cfg.b{i}(:,1),fecha_days);
-          A.b(idx,i)= cfg.b{i}(y,8);
-          ETC.b(idx,i)= cfg.b{i}(y,11);
-          
-          % Creamos variable SL_B (mediana diaria, ver sl_report_jday: sl_median -> (median,std) daily values: 'time','R6','R5','T','F1','F5' )
-          if size(sl_s,2)==2 && iscell(sl_s{1})
+       % Tercera configuracion  %fichero b
+       a_b=a(1:end-2,3:3:end)'; a_b(:,1)=a(end,3:3:end)';
+       if any(isnan(a_b(:)))
+          a_b(isnan(a_b))=0;
+          fprintf('(warning NaN replaced by 0 in B config)');
+       end
+       cfg.b{i}=unique(a_b,'rows','first'); 
+       y=ismember(cfg.b{i}(:,1),fecha_days);
+       A.b(idx,i)= cfg.b{i}(y,8);
+       ETC.b(idx,i)= cfg.b{i}(y,11);
+       
+       % Creamos variable SL_B (mediana diaria, ver sl_report_jday: 
+       %          sl_median -> (median,std) daily values: 'time','R6','R5','T','F1','F5' )
+       if size(sl_s,2)==2 && iscell(sl_s{1})
           % tenemos dos celdas: 1 y 2 configs. Pero ... 
-           try
-             switch i<=length(sl_s{1})
-                 case 1 
-                     if isempty(sl_s{1}{i}) && ~isempty(sl_s{2}{i})
-                        fprintf('%s: estás corrigiendo SIEMPRE con las R6 -> 2º config\n',Cal.brw_name{i});                         
-                        sl_s_o=sl_s{2}{i}; sl_s_n=sl_s{2}{i}; 
-                     elseif isempty(sl_s{2}{i}) && ~isempty(sl_s{1}{i})
-                        fprintf('%s: estás corrigiendo SIEMPRE con las R6 -> 1ª config\n',Cal.brw_name{i});                         
-                        sl_s_o=sl_s{1}{i}; sl_s_n=sl_s{1}{i}; 
-                     elseif isempty(sl_s{1}{i}) && isempty(sl_s{2}{i})
-                        continue;
-                     else
-                        sl_s_o=sl_s{1}{i}; sl_s_n=sl_s{2}{i}; 
-                     end                     
-                 case 0 
+          try
+            switch i<=length(sl_s{1})
+              case 1 
+                   if isempty(sl_s{1}{i}) && ~isempty(sl_s{2}{i})
+                      fprintf('%s: estás corrigiendo SIEMPRE con las R6 -> 2º config\n',Cal.brw_name{i});                         
+                      sl_s_o=sl_s{2}{i}; sl_s_n=sl_s{2}{i}; 
+                   elseif isempty(sl_s{2}{i}) && ~isempty(sl_s{1}{i})
+                      fprintf('%s: estás corrigiendo SIEMPRE con las R6 -> 1ª config\n',Cal.brw_name{i});                         
+                      sl_s_o=sl_s{1}{i}; sl_s_n=sl_s{1}{i}; 
+                   elseif isempty(sl_s{1}{i}) && isempty(sl_s{2}{i})
+                      continue;
+                   else
+                      sl_s_o=sl_s{1}{i}; sl_s_n=sl_s{2}{i}; 
+                   end                     
+              case 0 
                      sl_s_o=sl_s{2}{i}; sl_s_n=sl_s{2}{i};                                           
              end
            catch exception

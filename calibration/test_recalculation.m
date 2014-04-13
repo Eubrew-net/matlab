@@ -53,6 +53,7 @@ end
 
 if ninst>length(ozone_ds) || isempty(ozone_ds{ninst})
    cal=[]; summary=NaN*ones(1,13); summary_old=NaN*ones(1,13); 
+   summary(1)=nanmean(fecha_days); summary_old(1)=nanmean(fecha_days);   
    fprintf('No data for Brewer %s\n',Cal.brw_name{ninst});
    return
 end
@@ -60,10 +61,10 @@ end
   % Si hay dos fechas en el fichero B esto dará error. Manejarlo 
   fecha=cellfun(@(x) unique(fix(x(:,1))),ozone_ds{ninst},'UniformOutput',false);  
   fecha=cat(1,fecha{:});% ficheros cargados con éxito
-  if any(Cal.Date.CALC_DAYS>366)                                % fecha matlab
-     fecha_days=fix(Cal.Date.CALC_DAYS);                               % todos los días considerados
+  if any(Cal.Date.CALC_DAYS>366) % fecha matlab
+     fecha_days=fix(Cal.Date.CALC_DAYS);                          % todos los días considerados
      
-  else                                                            % dia juliano
+  else % dia juliano
      fecha_days=Cal.Date.CALC_DAYS+datenum(Cal.Date.cal_year,1,0);% todos los días considerados
   end
  
@@ -72,8 +73,14 @@ end
   % se corresponde con la fecha de ozono
   d_=length(Cal.Date.CALC_DAYS);
   ozone=num2cell(repmat(NaN*ones(1,21),d_,1),2);  % 21 para cuando hay SL pero no ozono (p/e LAB)
-  idx=ismember(fecha_days,fecha);
-  ozone(idx)=ozone_ds{ninst}; 
+  [idx loc]=ismember(fecha_days,fecha); % EN ESTE ORDEN !!!!
+  if ~any(idx) % Algún brewer no tiene datos en el rango CALC_DAYS. Skipped
+     cal=[]; summary=NaN*ones(1,13); summary_old=NaN*ones(1,13); 
+     summary(1)=nanmean(fecha_days); summary_old(1)=nanmean(fecha_days);
+     fprintf('Brewer %s data is out of CALC DAYS range. Skipped\n',Cal.brw_name{ninst});
+     return
+  end
+  ozone(idx)=ozone_ds{ninst}(loc(loc~=0)); 
    
 %%
 if ~isempty(fecha)
