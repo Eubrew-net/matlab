@@ -48,8 +48,11 @@ try
     jhgscan=strmatch('hgscan',l);
     jloc=strmatch('version',l);
     % Read the head
-    %c=textscanf(l{jloc(1)},fmt_head,'delimiter',char(13));
-    c=textscan(strrep(l{jloc(1)},char(13),' '),fmt_head);
+    if isunix
+       c=textscan(strrep(l{jloc(1)},char(13),'  '),fmt_head);
+    elseif ispc
+       c=textscan(l{jloc(1)},fmt_head,'delimiter',char(13));
+    end
     loc=c{5};
     c(5)=[];
     c=cell2num(c);
