@@ -122,8 +122,7 @@ if isempty(sc_data)
                                        'date_range',date_range);
         else
             % del fichero de configuracion CSN_orig=
-            [sc_avg,sc_raw]=readb_scl(data_path,...
-                                       'config',brw_config,'date_range',date_range);
+            [sc_avg,sc_raw]=readb_scl(data_path,'config',brw_config,'date_range',date_range);
         end
     catch
         l=lasterror;
