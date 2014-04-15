@@ -49,13 +49,20 @@ try
     jloc=strmatch('version',l);
     % Read the head
     if isunix
-       c=textscan(strrep(l{jloc(1)},char(13),'  '),fmt_head);
+       c=(strrep(strtrim(mmcellstr(l{jloc(1)},char(13))),' ','_')); 
+       %c=mmstrtok(strrep(l{jloc(1)},char(13),','),','); 
+       loc=c{6};
+       c([1:2,6,10])=[];
+       c=cellfun(@str2num,c);
+       c=[NaN;c];
+       %c=textscan(strrep(strrep(strtrim(l{jloc(1)}),' ','_'),char(13),' '),fmt_head);
     elseif ispc
        c=textscan(l{jloc(1)},fmt_head,'delimiter',char(13));
+       loc=c{5};
+       c(5)=[];
+       c=cell2num(c);
     end
-    loc=c{5};
-    c(5)=[];
-    c=cell2num(c);
+    
     datebfile=datenum(c(4)+2000,c(3),c(2));
     if datebfile~=datefich(1)
         disp('warning Date error in file');
