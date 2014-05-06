@@ -1,31 +1,31 @@
-function data = langley_filter_lvl1(data,varargin)
+function [data data_tab] = langley_filter_lvl1(data,varargin)
 
 % General function for langley data level 1 filtering.
-% Normal data-filters applied to O3 summaries are now used to refine langley data. 
+% Normal data-filters applied to O3 summaries are now used to refine langley data.
 % Additionally we use data-filters specific to langley analysis
-% 
+%
 % It works with summaries as well as with individual measurements
-% In the case of summaries as calculated from test_recalculation.m function, it is not needed first 
+% In the case of summaries as calculated from test_recalculation.m function, it is not needed first
 % set of filters (already implemented / applied)
-%  
+%
 % It is mandatory to declare optional input summ = 1 when working with summaries
-% 
+%
 % FIRST SET OF FILTERS:
 % Common to all summaries (not needed when working directly with summaries from test recalculation)
-% 
+%
 % - std < 2.5    (it is better to work with more restricted 1.5 criterion) -> hardcode
 % - O3 100-600   (removing outliers in ozone)                              -> hardcode
 % - hg flag == 1 (bad Hg measurements removed)                             -> hardcode
 % - n = 5        (DS not aborted)                                          -> hardcode
-% 
-% SECOND SET OF FILTERS: 
+%
+% SECOND SET OF FILTERS:
 % Data-filters specific to langley analysis. Ussually we work we half-days, AM & PM, true solar time used
 % Defined through optional arguments (see below).
-% 
+%
 % INPUT
-% - data: langley data. Individual (langley_data_cell first output) or 
-%         summaries (langley_summ_sync / langley_data_cell output) 
-%         
+% - data: langley data. Individual (langley_data_cell first output) or
+%         summaries (langley_summ_sync / langley_data_cell output)
+%
 % Input optional:
 % - summ       : 0 (default) or 1 (It is mandatory to declare summ=1 when working with summaries)
 % - airmass    : Working airmass range (no filter default). It could be 1 or 2 length vector
@@ -33,20 +33,20 @@ function data = langley_filter_lvl1(data,varargin)
 % - O3_hday    : Maximum O3 std allowed for each half day (no filter by default)
 % - N_flt      : Number of mesurements / filter (NOT implemented)
 % - F_corr     : Filter correction factors to  be applied. It could be directly from configuration
-%                matrix (as produced by read_cal_config_new, F_corr variable). This is the preferred form 
+%                matrix (as produced by read_cal_config_new, F_corr variable). This is the preferred form
 %                (1 vector / day). It could be also simply a 6-vector, e.g. [0  0  0  11  NaN  0]
 % - date_range : As usual. Default No date filter
 % - AOD        : AOD lvl1.5 from AERONET. Daily AOD_340 < 0.05, when filtered (no filter by default)
-% 
-% OUTPUT: 
+%
+% OUTPUT:
 % - langley FILTERED data (either individuals or summaries, depending on the input). In all cases:
-%                    
+%
 % EXAMPLE:   (ozone_lgl{ii} is output from langley_data_cell function)
-% 
+%
 %   ozone_lgl_dep{ii}=langley_filter_lvl1(ozone_lgl{ii},...
 %                             'airmass',[1.15 4],'F_corr',Fcorr{ii},'O3_hday',2.5,...
 %                             'AOD','130101_131231_Izana.lev15');
-% 
+%
 
 %% Validacion de argumentos de entrada
 arg = inputParser;   % Create instance of inputParser class.
@@ -80,18 +80,18 @@ if ~isempty(arg.Results.date_range)
    data(fch<arg.Results.date_range(1))=[];
    if length(arg.Results.date_range)>1
       fch(fch<arg.Results.date_range(1))=[];
-      data(fch>arg.Results.date_range(2))=[];    
+      data(fch>arg.Results.date_range(2))=[];
    end
 end
 
-%% Filter corr 
+%% Filter corr
 if ~isempty(arg.Results.F_corr)
     f_corr=arg.Results.F_corr;
     if isstruct(f_corr)
-       a=ismember(f_corr.new(:,1),cellfun(@(x) unique(fix(x(:,1))),data)); 
+       a=ismember(f_corr.new(:,1),cellfun(@(x) unique(fix(x(:,1))),data));
        f_corr.old=f_corr.old(a,:); f_corr.new=f_corr.new(a,:);
     end
-    
+
     for dd=1:size(data,1)
         MS9_corr=data{dd}(:,[10 25 39]);
         if isstruct(f_corr)
@@ -119,7 +119,7 @@ if ~isempty(arg.Results.airmass)
            airmass=repmat({arg.Results.airmass},size(data,1),1);
            j_airmass=cellfun(@(x,y) x(:,5)<y,data,airmass,'UniformOutput',false);
         case 2
-          airmass=repmat({arg.Results.airmass},size(data,1),1); 
+          airmass=repmat({arg.Results.airmass},size(data,1),1);
           j_airmass=cellfun(@(x,y) x(:,5)>min(y) & x(:,5)<max(y),data,airmass,'UniformOutput',false);
     end
     data=cellfun(@(x,y) x(y,:), data,j_airmass,'UniformOutput',false);
@@ -132,24 +132,24 @@ end
 %% Number of ozone data for each half-day > N_hday
 j_=cellfun(@(x) x(:,9)/60>12,data,'UniformOutput',false);% 0=AM, 1=PM
 j_idx=cellfun(@(x) size(x,1)==2,cellfun(@(x) unique(x)==0 & unique(x)==1,j_,'UniformOutput',false));
-j_=j_(j_idx); data=data(j_idx); data_orig=data_orig(j_idx);
+j_=j_(j_idx); data=data(j_idx); % data_orig=data_orig(j_idx);
 [m_ampm,s_ampm,n_ampm,gname_ampm]=cellfun(@(x,y) grpstats(x(:,[1 33]),y,{'mean','std','numel','gname'}),...
-                                          data,j_,'UniformOutput',false);                                      
+                                          data,j_,'UniformOutput',false);
 if ~arg.Results.summ
-   N_hday=arg.Results.N_hday*5; 
+   N_hday=arg.Results.N_hday*5;
 else
    N_hday=arg.Results.N_hday;
 end
-N_hday=repmat({N_hday},size(n_ampm,1),1); 
+N_hday=repmat({N_hday},size(n_ampm,1),1);
 
 %% AM,PM std<2 Half-day constant ozone (default NaN -> no filter)
 if isnan(arg.Results.O3_hday)
    j_am=cellfun(@(x,y) x(1,1)>y,n_ampm,N_hday,'UniformOutput',false);
    j_pm=cellfun(@(x,y) x(2,1)>y,n_ampm,N_hday,'UniformOutput',false);
-else 
+else
    O3_hday=repmat({arg.Results.O3_hday},size(n_ampm,1),1);
    j_am=cellfun(@(x,y,z,w) x(1,2)<=y & z(1,1)>=w,s_ampm,O3_hday,n_ampm,N_hday,'UniformOutput',false);
-   j_pm=cellfun(@(x,y,z,w) x(2,2)<=y & z(2,1)>=w,s_ampm,O3_hday,n_ampm,N_hday,'UniformOutput',false);    
+   j_pm=cellfun(@(x,y,z,w) x(2,2)<=y & z(2,1)>=w,s_ampm,O3_hday,n_ampm,N_hday,'UniformOutput',false);
 end
 
 g_valid=cellfun(@(x) str2double(x),...
@@ -159,20 +159,20 @@ g_valid=cellfun(@(x) str2double(x),...
         cellfun(@(y,z) y(z),gname_ampm,j_pm,'UniformOutput',false),'UniformOutput',false);
 idx_valid_pm=cellfun(@(x,y) ismember(~x,y),j_,g_valid,'UniformOutput',false);
 idx_=cellfun(@(x,y) x | y,idx_valid_am,idx_valid_pm,'UniformOutput',false);
- 
+
 data=cellfun(@(x,y) x(y,:),data,idx_,'UniformOutput',false);
 data=data(cell2mat(cellfun(@(x) ~isempty(x),data,'UniformOutput', false)));
 
 %% Remove high AOD days (AOD_340 > 0.05)
 if ~isempty(arg.Results.AOD)
     try
-       fechs=cellfun(@(x) unique(fix(x(:,1))),data); 
-       
-       [aod,aod_m]=read_aeronet(arg.Results.AOD); 
+       fechs=cellfun(@(x) unique(fix(x(:,1))),data);
+
+       [aod,aod_m]=read_aeronet(arg.Results.AOD);
        [id loc]=ismember(fix(aod_m(:,1)),fechs); loc(loc==0)=[];
        % igualamos aod y data
        aod_orig=aod_m; aod_m=aod_m(id,:); data=data(loc);
-       idx=aod_m(:,3)>0.03;
+       idx=aod_m(:,3)>0.01;
        % Mantenemos info para la tabla
        data(idx)=[];
     catch exception
@@ -189,10 +189,10 @@ end
     if ~isempty(arg.Results.AOD)
        colhead={'Diaj','AM','PM','O3_std(am)','N(am)','O3_std(pm)','N(pm)','AOD_340','AOD_340_std'};
        fms = {'d','d','d','.2f','d','.2f','d','.3f','.4f'};
-       
-       fechs=cellfun(@(x) unique(fix(x(:,1))),m_ampm); 
-       [id loc]=ismember(fix(aod_orig(:,1)),fechs); 
-       loc(loc==0)=[]; aod_orig=aod_orig(id,:); 
+
+       fechs=cellfun(@(x) unique(fix(x(:,1))),m_ampm);
+       [id loc]=ismember(fix(aod_orig(:,1)),fechs);
+       loc(loc==0)=[]; aod_orig=aod_orig(id,:);
        data_tab=[diaj(cellfun(@(x) fix(x(1,1)),m_ampm(loc))),cell2mat(j_am(loc)),cell2mat(j_pm(loc)),...
                  cellfun(@(x) x(1,2),s_ampm(loc)),floor(cellfun(@(x) x(1,2),n_ampm(loc))./nn),...
                  cellfun(@(x) x(2,2),s_ampm(loc)),floor(cellfun(@(x) x(2,2),n_ampm(loc))./nn),aod_orig(:,[2 3])];
@@ -200,7 +200,7 @@ end
     else
        colhead={'Diaj','AM','PM','O3_std(am)','N(am)','O3_std(pm)','N(pm)'};
        fms = {'d','d','d','.2f','d','.2f','d'};
-       
+
        data_tab=[diaj(cellfun(@(x) fix(x(1,1)),m_ampm)),cell2mat(j_am),cell2mat(j_pm),...
                  cellfun(@(x) x(1,2),s_ampm),cellfun(@(x) x(1,2),n_ampm),...
                  cellfun(@(x) x(2,2),s_ampm),cellfun(@(x) x(2,2),n_ampm)];
@@ -209,56 +209,69 @@ end
 
 %% Ploteo de días individuales. Con / Sin filtros
     if arg.Results.plots
-       for dd=1:length(data)
-           lgl_orig=data{dd};            
-           jpm=(lgl_orig(:,9)/60>12); jam=~jpm;
+        props = {'ylabel', 'xlabel','title'}; 
+        uno=cellfun(@(x) unique(fix(x(:,1))),data_orig,'UniformOutput',1);
+        dos=cellfun(@(x) unique(fix(x(:,1))),data,'UniformOutput',1);
+        [s d f]=intersect(uno,dos);
 
-           figure; 
-           a(1)=subplot(3,2,[1 3]); a(3)=subplot(3,2,5); a(2)=subplot(3,2,[2 4]); a(4)=subplot(3,2,6);
+       for dd=1:length(d)
+           lgl_orig=data_orig{d(dd)};   jpm_orig=(lgl_orig(:,9)/60>12); jam_orig=~jpm_orig;
+           lgl_=data{f(dd)};            jpm=(lgl_(:,9)/60>12); jam=~jpm;
+           
+           figure; set(gcf,'Tag',sprintf('%s%d','DayLangley_',diaj(unique(fix(lgl_(:,1))))));
+           a(1)=subplot(3,2,[1 3]); a(3)=subplot(3,2,5); a(2)=subplot(3,2,[2 4]); a(4)=subplot(3,2,6);           
            for ampm=1:2
                if ampm==1
-                  jk=jam; 
+                  jk=jam; jk_orig=jam_orig;
                else
-                  jk=jpm; 
-               end        
-               if ~any(jk),  continue; end        
-               m_ozone=lgl_orig(jk,5);
-               X=[ones(size(m_ozone)),m_ozone];        
+                  jk=jpm; jk_orig=jpm_orig;
+               end
+               if ~any(jk),  continue; end
+               m_ozone=lgl_(jk,5);
+               X=[ones(size(m_ozone)),m_ozone];
 %              Brewer method: first cfg
-               P_brw_first =lgl_orig(jk,25);
+               P_brw_first =lgl_(jk,25);
                [coeff_first,ci_first,r_first,ri_first,st_first]=regress(P_brw_first,X);
-               P_brw_second=lgl_orig(jk,39); 
+               P_brw_second=lgl_(jk,39);
 %              Brewer method: second cfg
                [coeff_second,ci_second,r_second,ri_second,st_second]=regress(P_brw_second,X);
 
-               axes(a(ampm)); 
-               gscatter(m_ozone,P_brw_first,lgl_orig(jk,10),'','o',{},'off','','MS9'); 
-               hold on; g=gscatter(m_ozone,P_brw_second,lgl_orig(jk,10),'','.',6,'off','',''); 
+               % ajuste
+               axes(a(ampm));
+               gscatter(lgl_orig(jk_orig,5),lgl_orig(jk_orig,25),lgl_orig(jk_orig,10),'','x',{},'off','');
+               hold on; gscatter(lgl_orig(jk_orig,5),lgl_orig(jk_orig,39),lgl_orig(jk_orig,10),'','.',6,'off','','');
+               title(sprintf('%s (%d)',datestr(nanmean(lgl_(jk,1)),0),diaj(unique(fix(lgl_(jk,1))))));
+               xlim=get(gca,'XLim'); 
                if ~isempty(arg.Results.airmass)
                   v=vline_v(arg.Results.airmass,'-k'); set(v,'LineWidth',2);
                end
                ax(2) = axes('Units',get(a(ampm),'Units'),'Position',get(a(ampm),'Position'),...
                             'Parent',get(a(ampm),'Parent'));
                set(ax(2),'YAxisLocation','right','XAxisLocation','Top','Color','none', ...
-                         'XGrid','off','YGrid','off','Box','off'); 
-               m_o3=grpstats(lgl_orig(jk,[1 33]),fix(lgl_orig(jk,3)/10),'mean');                                      
-               hold on; plot(m_o3(:,1),m_o3(:,2),'.'); set(gca,'YLim',[min(m_o3(:,2))-15 max(m_o3(:,2))+15]);
-               set(gca,'XTicklabels',datestr(get(gca,'XTick'),15),'XDir','reverse'); ylabel('O3 (DU)');
-               title(sprintf('%s (%d)',datestr(nanmean(lgl_orig(jk,1)),0),diaj(unique(fix(lgl_orig(jk,1))))));
-               text([.8,.8,.8,.8],[0.05,0.05*3,0.05*5,0.05*7] ,...
-                    {sprintf('O3 std=%.2f',s_ampm{dd}(ampm+2)),...
-                     sprintf('N=%d',n_ampm{dd}(ampm+2))       ,...
+                         'XLim',get(a(ampm),'XLim'),'XTickLabels','','FontSize',7);
+               m_o3=grpstats(lgl_orig(jk_orig,[1 5 33]),fix(lgl_orig(jk_orig,3)/10),{'mean','std','numel'});
+               hold on; plot(m_o3(:,2),m_o3(:,3),'.');
+               ylabel('O3 (DU)'); set(gca,'YLim',[min(m_o3(:,3))-15 max(m_o3(:,3))+15],'HandleVisibility','Off'); 
+               text([.75,.75,.75,.75],[0.05,0.05*3,0.05*5,0.05*7] ,...
+                    {sprintf('O3 std=%.2f',nanstd(lgl_(jk,33))),...
+                     sprintf('N=%d',length(lgl_(jk,33)))       ,...
                      sprintf('ETC_1=%d',fix(coeff_first(1)))  ,...
                      sprintf('ETC_2=%d',fix(coeff_second(1)))},'Units','Normalized','FontSize',8,'BackgroundColor','w')
+
+               % residuos
                axes(a(ampm+2));
-               gscatter(m_ozone,r_first,lgl_orig(jk,10),'','o',4,'off','','Residuos');
-               hold on; gscatter(m_ozone,r_second,lgl_orig(jk,10),'','.',6,'off','','');              
+               gscatter(m_ozone,r_first,lgl_(jk,10),'','o',4,'off','','');
+               hold on; gscatter(m_ozone,r_second,lgl_(jk,10),'','.',3,'off','','');
                if ~isempty(arg.Results.airmass)
                   v=vline_v(arg.Results.airmass,'-k'); set(v,'LineWidth',2);
                end
-               set(a,'Xgrid','on','Ygrid','on','box','on');
            end
-%            pause
+           set(a,'Xgrid','on','Ygrid','on','box','on');
+           labelEdgeSubPlots('Airmass','Residuos'); 
+           set(findobj(gcf,'Type','axes'),'FontSize',8); 
+           set(cell2mat(get(a,props)),'FontSize',8);            
+           ylabel(a(1),'MS9');
+           snapnow                                                
        end
-    end  
+    end
 
