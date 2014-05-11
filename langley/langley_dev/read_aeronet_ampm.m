@@ -1,15 +1,10 @@
-function [aod,aod_m,aeronet]=read_aeronet(filename,varargin)
-%filename='090101_111231_Izana.lev2'
-    if isempty(varargin)
-       aod_idx=8;
-    else
-       aod_idx=varargin{:};
-    end
-    aeronet=[];
+function [aod_ampm,aod]=read_aeronet_ampm(filename,varargin)
+
+    aod_idx=9;
+
     aeronet_f=fopen(filename,'rt');
     aeronet=textscan(aeronet_f,'%f:%f:%f,%f:%f:%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d/%d/%d,%f\t',...
         'headerlines',5,'treatAsEmpty','N/A'); %Formato all points corresponent al format del Level 1.5 i 2.0 de la Versió 2 d'AERONET.
-    %aeronet=textscan(aeronet_f,'%f','headerlines',5,'treatAsEmpty','N/A','Delimiter',',:'); %Formato all points corresponent al format del Level 1.5 i 2.0 de la Versió 2 d'AERONET.
     fclose(aeronet_f);
 
 
@@ -42,7 +37,16 @@ function [aod,aod_m,aeronet]=read_aeronet(filename,varargin)
     water_cm=aeronet{1,24};
     aodL2_340=[date,AOD340];
 
-    aod = [ date,...
+    days=unique(fix(date)); lat=28.3081; long=-16.4992; 
+    aux=NaN*ones(size(date,1),1);
+    for dd=1:length(days)
+       [szax,sazx,tstx,snoon]=sun_pos(days(dd),lat,long);
+
+       aux(date>days(dd) & date<days(dd)+snoon/60/24)=1;
+       aux(date>=days(dd)+snoon/60/24 & date<days(dd)+1)=2;
+    end
+        
+    aod = [ date,aux,...
     dia_aeronet,mes_aeronet,any_aeronet,hora_aeronet,minut_aeronet,segon_aeronet,...
     AOD340,...
     AOD380,...
@@ -63,12 +67,13 @@ function [aod,aod_m,aeronet]=read_aeronet(filename,varargin)
     alfa440_870,...
     water_cm];
 
+    aod_am=aod(aod(:,2)==1,:);     aod_pm=aod(aod(:,2)==2,:);
+    [m_am,s_am,n_am]=grpstats([fix(aod_am(:,1)),aod_am(:,2:end)],fix(aod_am(:,1)),{'mean','std','numel'});
+    [m_pm,s_pm,n_pm]=grpstats([fix(aod_pm(:,1)), aod_pm(:,2:end)],fix(aod_pm(:,1)),{'mean','std','numel'});
 
-   [m,s,n]=grpstats(aod,[year(date),diaj(date)],{'mean','std','numel'});
-
-   aod_m=[m(:,1),m(:,aod_idx),s(:,aod_idx),n(:,aod_idx)];
-
-   %save aod_340_L2_m aod_340_m
-   %save aodL2_340 aodL2_340
-
-
+    m=scan_join(unique(fix(aod(:,1))),m_am);    m_=scan_join(m,m_pm);
+    n=scan_join(unique(fix(aod(:,1))),[m_am(:,1) n_am(:,2:end)]);    n_=scan_join(n,[m_pm(:,1) n_pm(:,2:end)]);
+    s=scan_join(unique(fix(aod(:,1))),[m_am(:,1) s_am(:,2:end)]);    s_=scan_join(s,[m_pm(:,1) s_pm(:,2:end)]);
+    
+    aod_ampm=[m_(:,1),m_(:,2),m_(:,aod_idx),s_(:,aod_idx),n_(:,aod_idx),...
+                      m_(:,27),m_(:,aod_idx+25),s_(:,aod_idx+25),n_(:,aod_idx+25)];

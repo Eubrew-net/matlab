@@ -37,22 +37,16 @@ function [data data_tab] = langley_filter_lvl1(data,varargin)
 %                (1 vector / day). It could be also simply a 6-vector, e.g. [0  0  0  11  NaN  0]
 % - date_range : As usual. Default No date filter
 % - AOD        : AOD lvl1.5 from AERONET. Daily AOD_340 < 0.05, when filtered (no filter by default)
-% - Cloud      :
-% - plots      :
-% - lgl_days   :
-% 
+%
 % OUTPUT:
 % - langley FILTERED data (either individuals or summaries, depending on the input). In all cases:
 %
-% EXAMPLE:   (ozone_lgl{ii} is output from langley_data_cell function
-%             AOD_data from aeronet webpage
-%             Cloud data from bsrn -> cloud_screening(path_to_aux_dir,AOD_file,1))
+% EXAMPLE:   (ozone_lgl{ii} is output from langley_data_cell function)
 %
-% ozone_lgl_dep{ii}=langley_filter_lvl1(ozone_lgl{ii},'plots',0,...
-%                           'airmass',[1.15 4],'F_corr',Fcorr{ii},'O3_hday',2.5,...
-%                           'AOD','130101_131231_Izana.lev15');
-%                           'Cloud',fullfile('bsrn','cloudScreening.txt'),...
-%                           'date_range',datenum(2014,1,[-200,125]),'lgl_days',1);
+%   ozone_lgl_dep{ii}=langley_filter_lvl1(ozone_lgl{ii},...
+%                             'airmass',[1.15 4],'F_corr',Fcorr{ii},'O3_hday',2.5,...
+%                             'AOD','130101_131231_Izana.lev15');
+%
 
 %% Validacion de argumentos de entrada
 arg = inputParser;   % Create instance of inputParser class.
@@ -71,9 +65,7 @@ arg.addParamValue('O3_hday'   , NaN    , @isfloat);       % default NaN O3 std /
 arg.addParamValue('F_corr'    , []     , @(x)iscell(x) || isvector(x)); % default no filter corr
 arg.addParamValue('date_range', []     , @isfloat);       % default all airmasses
 arg.addParamValue('AOD'       , ''     , @(x)ischar(x));  % default no AoD filtering
-arg.addParamValue('Cloud'     , ''     , @(x)ischar(x));  % default no cloud-screening
 arg.addParamValue('plots'     , 0      , @(x)(x==0 || x==1));  % default no individual plots
-arg.addParamValue('lgl_days'  , 0      , @(x)(x==0 || x==1));  % default no table
 
 % validamos los argumentos definidos:
 arg.parse(data, varargin{:});
@@ -132,161 +124,88 @@ if ~isempty(arg.Results.airmass)
     end
     data=cellfun(@(x,y) x(y,:), data,j_airmass,'UniformOutput',false);
 end
-data_days=data;
-j_empty=cellfun(@(x) isempty(x),data_days); data_days=data_days(~j_empty);
 
-%%  N filters (defaul 5) TODO
+%%  N filters (defaul 5)
 % n_filt=cellfun(@(x) grpstats(x(:,10),x(:,10),{'numel'}),data,'UniformOutput',false);
 % data=cellfun(@(x,y) x(y,:), data,j_airmass,'UniformOutput',false);
 
 %% Number of ozone data for each half-day > N_hday
-% We split data into AM / PM
-j_=cellfun(@(x) x(:,9)/60>12  ,data     ,'UniformOutput',false);% 0=AM, 1=PM
-data_AM=cellfun(@(x,y) x(~y,:),data,j_  ,'UniformOutput',false);
-data_PM=cellfun(@(x,y) x(y,:) ,data,j_  ,'UniformOutput',false);
-
-[s_am,n_am]=cellfun(@(x,y) grpstats(x(:,33),fix(x(:,1)),{'std','numel'}),data_AM,'UniformOutput',false);
-[s_pm,n_pm]=cellfun(@(x,y) grpstats(x(:,33),fix(x(:,1)),{'std','numel'}),data_PM,'UniformOutput',false);
-
+j_=cellfun(@(x) x(:,9)/60>12,data,'UniformOutput',false);% 0=AM, 1=PM
+j_idx=cellfun(@(x) size(x,1)==2,cellfun(@(x) unique(x)==0 & unique(x)==1,j_,'UniformOutput',false));
+j_=j_(j_idx); data=data(j_idx); % data_orig=data_orig(j_idx);
+[m_ampm,s_ampm,n_ampm,gname_ampm]=cellfun(@(x,y) grpstats(x(:,[1 33]),y,{'mean','std','numel','gname'}),...
+                                          data,j_,'UniformOutput',false);
 if ~arg.Results.summ
    N_hday=arg.Results.N_hday*5;
 else
    N_hday=arg.Results.N_hday;
 end
-j_am=cellfun(@(x,y) x<y,n_am,repmat({N_hday},length(n_am),1),'UniformOutput',false); j_am(cellfun(@(x) isempty(x),j_am))={false};
-j_pm=cellfun(@(x,y) x<y,n_pm,repmat({N_hday},length(n_pm),1),'UniformOutput',false); j_pm(cellfun(@(x) isempty(x),j_pm))={false};
+N_hday=repmat({N_hday},size(n_ampm,1),1);
 
-data_AM(cell2mat(j_am))={[]}; data_PM(cell2mat(j_pm))={[]};
-
-%% AM,PM O3std < 2 Half-day constant ozone (default NaN -> no filter)
-if ~isnan(arg.Results.O3_hday)
-   j_am=cellfun(@(x,y) x>y,s_am,repmat({arg.Results.O3_hday},length(n_am),1),'UniformOutput',false); j_am(cellfun(@(x) isempty(x),j_am))={false};
-   j_pm=cellfun(@(x,y) x>y,s_pm,repmat({arg.Results.O3_hday},length(n_pm),1),'UniformOutput',false); j_pm(cellfun(@(x) isempty(x),j_pm))={false};
-
-   data_AM(cell2mat(j_am))={[]}; data_PM(cell2mat(j_pm))={[]};
+%% AM,PM std<2 Half-day constant ozone (default NaN -> no filter)
+if isnan(arg.Results.O3_hday)
+   j_am=cellfun(@(x,y) x(1,1)>y,n_ampm,N_hday,'UniformOutput',false);
+   j_pm=cellfun(@(x,y) x(2,1)>y,n_ampm,N_hday,'UniformOutput',false);
+else
+   O3_hday=repmat({arg.Results.O3_hday},size(n_ampm,1),1);
+   j_am=cellfun(@(x,y,z,w) x(1,2)<=y & z(1,1)>=w,s_ampm,O3_hday,n_ampm,N_hday,'UniformOutput',false);
+   j_pm=cellfun(@(x,y,z,w) x(2,2)<=y & z(2,1)>=w,s_ampm,O3_hday,n_ampm,N_hday,'UniformOutput',false);
 end
+
+g_valid=cellfun(@(x) str2double(x),...
+        cellfun(@(y,z) y(z),gname_ampm,j_am,'UniformOutput',false),'UniformOutput',false);
+idx_valid_am=cellfun(@(x,y) ismember(x,y),j_,g_valid,'UniformOutput',false);
+g_valid=cellfun(@(x) str2double(x),...
+        cellfun(@(y,z) y(z),gname_ampm,j_pm,'UniformOutput',false),'UniformOutput',false);
+idx_valid_pm=cellfun(@(x,y) ismember(~x,y),j_,g_valid,'UniformOutput',false);
+idx_=cellfun(@(x,y) x | y,idx_valid_am,idx_valid_pm,'UniformOutput',false);
+
+data=cellfun(@(x,y) x(y,:),data,idx_,'UniformOutput',false);
+data=data(cell2mat(cellfun(@(x) ~isempty(x),data,'UniformOutput', false)));
 
 %% Remove high AOD days (AOD_340 > 0.05)
 if ~isempty(arg.Results.AOD)
-    data_AM(cellfun(@(x) isempty(x),data_AM))={NaN}; data_AM_=repmat({NaN},length(data_AM),1); 
-    data_PM(cellfun(@(x) isempty(x),data_PM))={NaN}; data_PM_=repmat({NaN},length(data_PM),1); 
     try
-       aod_m=read_aeronet_ampm(arg.Results.AOD);
+       fechs=cellfun(@(x) unique(fix(x(:,1))),data);
 
-       [id_am loc_am]=ismember(fix(aod_m(:,1)),cellfun(@(x) unique(fix(x(:,1))),data_AM));
-       data_AM_(loc_am(loc_am~=0))=data_AM(loc_am(loc_am~=0));
-       aod_am=aod_m(id_am,:);        idx_am=aod_am(:,4)>0.01; 
-       [id_am loc_am]=ismember(fix(aod_am(idx_am,1)),cellfun(@(x) unique(fix(x(:,1))),data_AM_)); 
-       data_AM_(loc_am)={NaN}; data_AM_(cellfun(@(x) length(x)==1,data_AM_))={[]};
-       
-       [id_pm loc_pm]=ismember(fix(aod_m(:,1)),cellfun(@(x) unique(fix(x(:,1))),data_PM)); 
-       data_PM_(loc_pm(loc_pm~=0))=data_PM(loc_pm(loc_pm~=0));
-       aod_pm=aod_m(id_pm,:);        idx_pm=aod_m(id_pm,8)>0.01; 
-       [id_pm loc_pm]=ismember(fix(aod_pm(idx_pm,1)),cellfun(@(x) unique(fix(x(:,1))),data_PM_)); 
-       data_PM_(loc_pm)={NaN}; data_PM_(cellfun(@(x) length(x)==1,data_PM_))={[]};
-        
+       [aod,aod_m]=read_aeronet(arg.Results.AOD);
+       [id loc]=ismember(fix(aod_m(:,1)),fechs); loc(loc==0)=[];
+       % igualamos aod y data
+       aod_orig=aod_m; aod_m=aod_m(id,:); data=data(loc);
+       idx=aod_m(:,3)>0.01;
        % Mantenemos info para la tabla
+       data(idx)=[];
     catch exception
        fprintf('%s (AOD filter fails!!)\n',exception.message);
     end
-    data_AM=data_AM_;  data_PM=data_PM_;
 end
 
-%% Cloud Screening
-if ~isempty(arg.Results.Cloud)
-    data_AM(cellfun(@(x) isempty(x),data_AM))={NaN}; data_AM_=repmat({NaN},length(data_AM),1); 
-    data_PM(cellfun(@(x) isempty(x),data_PM))={NaN}; data_PM_=repmat({NaN},length(data_PM),1); 
-    try       
-       clouds=load(arg.Results.Cloud);
+%% Tablas: creamos alguna tabla con la informaciòn relevante
+if arg.Results.summ
+    nn=1;
+else
+    nn=5;
+end
+    if ~isempty(arg.Results.AOD)
+       colhead={'Diaj','AM','PM','O3_std(am)','N(am)','O3_std(pm)','N(pm)','AOD_340','AOD_340_std'};
+       fms = {'d','d','d','.2f','d','.2f','d','.3f','.4f'};
 
-       [id_am loc_am]=ismember(fix(clouds(:,1)),cellfun(@(x) unique(fix(x(:,1))),data_AM)); 
-       data_AM_(loc_am(loc_am~=0))=data_AM(loc_am(loc_am~=0));
-       clouds_am=clouds(id_am,:);        idx_am=clouds(id_am,3)~=1; 
-       [id_am loc_am]=ismember(fix(clouds_am(idx_am,1)),cellfun(@(x) unique(fix(x(:,1))),data_AM_)); 
-       data_AM_(loc_am)={NaN}; data_AM_(cellfun(@(x) length(x)==1,data_AM_))={[]};
-                     
-       [id_pm loc_pm]=ismember(fix(clouds(:,1)),cellfun(@(x) unique(fix(x(:,1))),data_PM)); 
-       data_PM_(loc_pm(loc_pm~=0))=data_PM(loc_pm(loc_pm~=0));
-       clouds_pm=clouds(id_pm,:);        idx_pm=clouds(id_pm,4)~=1; 
-       [id_pm loc_pm]=ismember(fix(clouds_pm(idx_pm,1)),cellfun(@(x) unique(fix(x(:,1))),data_PM_)); 
-       data_PM_(loc_pm)={NaN}; data_PM_(cellfun(@(x) length(x)==1,data_PM_))={[]};
-        
-       % Mantenemos info para la tabla
-    catch exception
-       fprintf('%s (AOD filter fails!!)\n',exception.message);
+       fechs=cellfun(@(x) unique(fix(x(:,1))),m_ampm);
+       [id loc]=ismember(fix(aod_orig(:,1)),fechs);
+       loc(loc==0)=[]; aod_orig=aod_orig(id,:);
+       data_tab=[diaj(cellfun(@(x) fix(x(1,1)),m_ampm(loc))),cell2mat(j_am(loc)),cell2mat(j_pm(loc)),...
+                 cellfun(@(x) x(1,2),s_ampm(loc)),floor(cellfun(@(x) x(1,2),n_ampm(loc))./nn),...
+                 cellfun(@(x) x(2,2),s_ampm(loc)),floor(cellfun(@(x) x(2,2),n_ampm(loc))./nn),aod_orig(:,[2 3])];
+       displaytable(data_tab, colhead, 10, fms, cellstr(datestr(cellfun(@(x) fix(x(1,1)),m_ampm(loc)))));
+    else
+       colhead={'Diaj','AM','PM','O3_std(am)','N(am)','O3_std(pm)','N(pm)'};
+       fms = {'d','d','d','.2f','d','.2f','d'};
+
+       data_tab=[diaj(cellfun(@(x) fix(x(1,1)),m_ampm)),cell2mat(j_am),cell2mat(j_pm),...
+                 cellfun(@(x) x(1,2),s_ampm),cellfun(@(x) x(1,2),n_ampm),...
+                 cellfun(@(x) x(2,2),s_ampm),cellfun(@(x) x(2,2),n_ampm)];
+       displaytable(data_tab, colhead, 10, fms, cellstr(datestr(cellfun(@(x) fix(x(1,1)),m_ampm))));
     end
-    data_AM=data_AM_;  data_PM=data_PM_;
-end
-
-%% Preparing output
-%  cat AM / PM, empty days removed
-data=cellfun(@(x,y) cat(1,x,y),data_AM, data_PM,'UniformOutput',false);
-data=data(cellfun(@(x) ~isempty(x),data));
-
-%% Tabla
-fprintf('Selected days: conditions\r\n');
-
-j_=cellfun(@(x) x(:,9)/60>12,data,'UniformOutput',false);
-j_idx=cellfun(@(x) unique(x)+1,j_,'UniformOutput',false); 
-[s_ampm,n_ampm]=cellfun(@(x,y) grpstats(x(:,33),y,{'std','numel'}),data,j_,'UniformOutput',false);
-
-aux_ampm=NaN*ones(length(data),12); 
-for jj=1:length(data)% cellfun doesn't support explicit assignment
-   aux_ampm(jj,j_idx{jj})=1;
-   aux_ampm(jj,j_idx{jj}+2)=s_ampm{jj};
-   aux_ampm(jj,j_idx{jj}+4)=n_ampm{jj};
-end
-
-if ~isempty(arg.Results.AOD)
-    id=ismember(fix(aod_m(:,1)),cellfun(@(x) unique(fix(x(:,1))),data)); 
-    aod_ampm=aod_m(id,:);
-    aux_ampm(:,7:10)=aod_ampm(:,[3 4 7 8]);
-end
-
-if ~isempty(arg.Results.Cloud)
-    id=ismember(fix(clouds(:,1)),cellfun(@(x) unique(fix(x(:,1))),data)); 
-    cloud_ampm=clouds(id,:);
-    aux_ampm(:,11:12)=cloud_ampm(:,3:4);
-end
-
-data_tab=[diaj(cellfun(@(x) fix(x(1,1)),data)),aux_ampm(:,[1 3 5 7:8 11 2 4 6 9:10 12])];
-colhead={'Diaj','AM','O3_std','N','AOD','AOD_std','Cld',...
-                'PM','O3_std','N','AOD','AOD_std','Cld'};
-fms = {'d','d','.2f','d','.4f','.5f','d','d','.2f','d','.4f','.5f','d'};
-displaytable(data_tab, colhead, 8, fms, cellstr(datestr(cellfun(@(x) fix(x(1,1)),data))));
- 
-%% Tabla con condiciones para todos los días
-if arg.Results.lgl_days
-   fprintf('\nAll days: conditions\r\n');
-   j_=cellfun(@(x) x(:,9)/60>12  ,data_days     ,'UniformOutput',false);% 0=AM, 1=PM
-   j_idx=cellfun(@(x) unique(x)+1,j_,'UniformOutput',false); 
-
-   [s_ampm,n_ampm]=cellfun(@(x,y) grpstats(x(:,33),[fix(x(:,1)) y],{'std','numel'}),data_days,j_,'UniformOutput',false);      
-   
-   aux_ampm=NaN*ones(length(data_days),12); 
-   aux_ampm(:,1)=cellfun(@(x) fix(x(1,1)),data_days); aux_ampm(:,2)=cellfun(@(x) diaj(x(1,1)),data_days);
-   for jj=1:length(data_days)
-       aux_ampm(jj,j_idx{jj}+2)=s_ampm{jj};
-       aux_ampm(jj,j_idx{jj}+4)=n_ampm{jj}; 
-   end
-
-   if ~isempty(arg.Results.AOD)
-    [id loc]=ismember(fix(aod_m(:,1)),unique(fix(aux_ampm(:,1)))); 
-    aod_ampm=aod_m(id,:); aux_ampm=aux_ampm(loc(loc~=0),:);
-    aux_ampm(:,7:10)=aod_ampm(:,[3 4 7 8]);
-   end
-
-   if ~isempty(arg.Results.Cloud)
-      [id loc]=ismember(fix(clouds(:,1)),unique(fix(aux_ampm(:,1)))); 
-      cloud_ampm=clouds(id,:); aux_ampm=aux_ampm(loc(loc~=0),:);
-      aux_ampm(:,11:12)=cloud_ampm(:,3:4);
-   end
-
-   colhead={'Diaj','O3_std','N','AOD','AOD_std','Cld',...
-                   'O3_std','N','AOD','AOD_std','Cld'};
-   fms = {'d','.2f','d','.4f','.5f','d','.2f','d','.4f','.5f','d'};
-   displaytable(aux_ampm(:,[2 3 5 7:8 11 4 6 9:10 12]), colhead, 8, fms, cellstr(datestr(fix(aux_ampm(:,1)))));
-end
 
 %% Ploteo de días individuales. Con / Sin filtros
     if arg.Results.plots
@@ -312,16 +231,17 @@ end
                X=[ones(size(m_ozone)),m_ozone];
 %              Brewer method: first cfg
                P_brw_first =lgl_(jk,25);
-               [coeff_first,ci_first,r_first]=regress(P_brw_first,X);
+               [coeff_first,ci_first,r_first,ri_first,st_first]=regress(P_brw_first,X);
                P_brw_second=lgl_(jk,39);
 %              Brewer method: second cfg
-               [coeff_second,ci_second,r_second]=regress(P_brw_second,X);
+               [coeff_second,ci_second,r_second,ri_second,st_second]=regress(P_brw_second,X);
 
                % ajuste
                axes(a(ampm));
                gscatter(lgl_orig(jk_orig,5),lgl_orig(jk_orig,25),lgl_orig(jk_orig,10),'','x',{},'off','');
                hold on; gscatter(lgl_orig(jk_orig,5),lgl_orig(jk_orig,39),lgl_orig(jk_orig,10),'','.',6,'off','','');
                title(sprintf('%s (%d)',datestr(nanmean(lgl_(jk,1)),0),diaj(unique(fix(lgl_(jk,1))))));
+               xlim=get(gca,'XLim'); 
                if ~isempty(arg.Results.airmass)
                   v=vline_v(arg.Results.airmass,'-k'); set(v,'LineWidth',2);
                end
