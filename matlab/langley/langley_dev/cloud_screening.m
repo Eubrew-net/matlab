@@ -15,18 +15,40 @@ function cloud_screening(bsrn_dir,aod_file,varargin)
 % Stratus & Altostratus           Low or mid-level layer of clouds, uniform, usually overcast, grey
 % Cumulonimbus & Nimbostratus     Dark, thick clouds, mostly overcast, grey
 % 
-%  Example: cloud_screening(bsrn,140101_141231_Izana.lev15,1)
+%  Example: cloud_screening(path_to_bsrn,aod_file,'date_range',datenum(Cal.Date.cal_year,1,111),'plot',1)            
+
+%% Validacion de argumentos de entrada
+arg = inputParser;   % Create instance of inputParser class.
+arg.FunctionName = 'cloud_screening';
+
+% input obligatorio
+arg.addRequired('bsrn_dir',@ischar); arg.addRequired('aod_file',@ischar);
+
+% input param - value
+arg.addParamValue('plot'       , 0  , @(x)(x==0 || x==1)); % por defecto no individual plots
+arg.addParamValue('date_range' , [] , @isfloat);           % default all data in bsrn dir
+arg.addParamValue('file_write' , 1  , @(x)(x==0 || x==1)); % default writing results
+arg.addParamValue('cld_umbral' , 100, @isfloat);           % 100% clear conditions
+
+% validamos los argumentos definidos:
+arg.parse(bsrn_dir,aod_file,varargin{:});
 
 %% Declaring variables
-plot_=0;
-if nargin>2, plot_=1; end  
-
 % AOD para el ajuste (mejora introducida por Rosa)
 try
    [aod,DATA0]=read_aeronet(fullfile(bsrn_dir,aod_file),14);% AOD_500
 catch exception
     fprintf('%s: %s Aborting\n',fullfile(bsrn_dir,aod_file),exception.message);
     return
+end
+
+if ~isempty(arg.Results.date_range)
+   DATA0(DATA0(:,1)<arg.Results.date_range(1),:)=[];
+   if length(arg.Results.date_range)>1
+      DATA0(DATA0(:,1)<arg.Results.date_range(1),:)=[];
+      DATA0(DATA0(:,1)>arg.Results.date_range(2),:)=[];
+   end
+
 end
 l1=size(DATA0(:,1),1);
 
@@ -162,11 +184,11 @@ for i=1:l1
                                              100*length(find(CRIT(1:j_szanoon,7)>0))/length(1:j_szanoon),length(1:j_szanoon),...                       
                                              100*length(find(CRIT(j_szanoon+1:end,7)==0))/length(CRIT(j_szanoon+1:end,7)),... 
                                              100*length(find(CRIT(j_szanoon+1:end,7)>0))/length(CRIT(j_szanoon+1:end,7)),length(CRIT(j_szanoon+1:end,7))];
-    if plot_
+    if arg.Results.plot
        figure;
        [ax b c]=plotyy(Hdec,Rglobal,Hdec,Rdifusa); 
        set([b c],'Marker','.','LineStyle','None');
-       ylabel(ax(2),'Rdiffuse'); ylabel(ax(1),'Rglobal');
+       ylabel(ax(2),'Rdiffuse'); ylabel(ax(1),'Rglobal'); grid;
        title(sprintf('%s (%d) AM: clear %4.1f%%, cloudy %4.1f%% -- PM: clear %4.1f%%, cloudy %4.1f%%',...
              datestr(DATA0(i,1),1),diaj(DATA0(i,1)),results{i}(4),results{i}(5),results{i}(7),results{i}(8)));         
        vl=vline_v(DATA2(j_szanoon,3)/60,'-r',{'noon'}); set(vl,'LineWidth',2);
@@ -177,21 +199,22 @@ end
 results=results(cellfun(@(x) ~isempty(x),results));
 
 %% Resultados en 1/0
-umbral=100;
 
-f1 = fopen(fullfile(bsrn_dir,'cloudScreening.txt'),'w');
-fprintf(f1,'%%date dayj clear_AM clear_PM\n');
-for i=1:size(results,2)
-    if results{i}(4)>=umbral
-       AM=1;
-    else
-       AM=0;        
+ if arg.Results.file_write
+    f1 = fopen(fullfile(bsrn_dir,'cloudScreening.txt'),'w');
+    fprintf(f1,'%%date dayj clear_AM clear_PM\n');
+    for i=1:size(results,2)
+        if results{i}(4)>=arg.Results.cld_umbral
+           AM=1;
+        else
+           AM=0;        
+        end
+        if results{i}(7)>=arg.Results.cld_umbral
+           PM=1;
+        else
+           PM=0;        
+        end
+        fprintf(f1,'%f %03d %d %d\n',results{i}(1),diaj(results{i}(1)),AM,PM);
     end
-    if results{i}(7)>=umbral
-       PM=1;
-    else
-       PM=0;        
-    end
-    fprintf(f1,'%f %03d %d %d\n',results{i}(1),diaj(results{i}(1)),AM,PM);
-end
-fclose all;
+ end   
+ fclose all;
