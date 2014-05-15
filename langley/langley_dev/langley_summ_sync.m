@@ -1,4 +1,4 @@
-function [langsumm_sync_data langsumm_sync_data_legend] = langley_summ_sync(summary,summary_old,Cal,varargin)
+function [langsumm_sync_data langsumm_sync_data_legend] = langley_summ_sync(data,Cal,varargin)
 
 % function [langsumm_sync_data langsumm_sync_data_legend] = langley_summ_sync(summary,summary_old,Cal,varargin)
 % 
@@ -31,46 +31,66 @@ arg = inputParser;   % Create instance of inputParser class.
 arg.FunctionName = 'langley_summ_sync';
 
 % input obligatorio
-arg.addRequired('summary');
-arg.addRequired('summary_old');
+arg.addRequired('data');
 arg.addRequired('Cal');
 
 % input param - value
 arg.addParamValue('lalo', [28.3090,16.4994], @isfloat); % por defecto, Izana
 
 % validamos los argumentos definidos:
-arg.parse(summary,summary_old,Cal,varargin{:});
-mmv2struct(arg.Results);
+arg.parse(data,Cal,varargin{:});
 
 %% Obtenemos los datos simultáneos: Medidas individuales
 TSYNC=5; orden=Cal.n_ref;
-idx_=find(cellfun (@(x) ~isempty(x),summary)==1);
+idx_=find(cellfun (@(x) ~isempty(x),data)==1);
 
-ref_sza=[]; ref_m2=[];   ref_m3=[];      ref_tst=[]; 
-ref_flt=[]; ref_temp=[]; ref_o3_old=[]; ref_o3_new=[];
-ref_ms9_old=[]; ref_ms9_new=[];
+% preparamos los datos 
+time_ref=cellfun(@(x) fix(x(1,1)),data{1}); data_{1}=data{1};
+
+ for tt=idx_(2:end)
+     [idx_1 b]=ismember(time_ref,cellfun(@(x) fix(x(1,1)),data{tt})); 
+     id=find(b==0);  b(b==0)=[];
+     data_{tt}=repmat({[]},length(time_ref),1); data_{tt}(idx_1,:)=data{tt}(b);
+     for id_=1:length(id)   
+         data_{tt}(id(id_))={cat(2,time_ref(id(id_)),NaN*ones(1,38))};    
+     end
+ end
+
+ref_sza=repmat({[]},size(data{1}),1);
+ref_m2=repmat({[]},size(data{1}),1);
+ref_m3=repmat({[]},size(data{1}),1);
+ref_tst=repmat({[]},size(data{1}),1);
+ref_flt=repmat({[]},size(data{1}),1);
+ref_temp=repmat({[]},size(data{1}),1);
+ref_o3_old=repmat({[]},size(data{1}),1);
+ref_o3_new=repmat({[]},size(data{1}),1);
+ref_ms9_old=repmat({[]},size(data{1}),1);
+ref_ms9_new=repmat({[]},size(data{1}),1);
 for ii=idx_
-    time=fix(summary{ii}(:,1)*24*60/TSYNC)/24/60*TSYNC;
+    SYNC=repmat({TSYNC},length(data_{ii}),1);
+    ll=repmat({arg.Results.lalo},length(data_{ii}),1);
+    time=cellfun(@(x,y) fix(x(:,1)*24*60/y)/24/60*y,data_{ii},SYNC,'UniformOutput',0);
 
-    [ZA,m2,m3]=brewersza((summary{ii}(:,1)-fix(summary{ii}(:,1)))*24*60,diaj(time),year(time)-2000,lalo(1),lalo(2));
-    [no,no_,tst]=sun_pos(summary{ii}(:,1),lalo(1),-lalo(2));
-    med_r6=summary_old{ii}(:,8); % (8 = filter corrected)
-    med_r6c=summary{ii}(:,8);    % (8 = filter corrected)
-    med_o3=summary_old{ii}(:,6); 
-    med_o3c=summary{ii}(:,6); 
-    med_flt=summary{ii}(:,5); 
-    med_temp=summary{ii}(:,4);    
+    [ZA,m2,m3]=cellfun(@(x,y,z) brewersza((x(:,1)-fix(x(:,1)))*24*60,diaj(y),year(y)-2000,z(1),z(2)),data_{ii},time,ll,'UniformOutput',0);
+    [no,no_,tst]=cellfun(@(x,y) sun_pos(x(:,1),y(1),-y(2)),data_{ii},ll,'UniformOutput',0);
+    
+    med_r6=cellfun(@(x,y) x(:,25),data_{ii},'UniformOutput',0);
+    med_r6c=cellfun(@(x,y) x(:,39),data_{ii},'UniformOutput',0); 
+    med_o3=cellfun(@(x,y) x(:,19),data_{ii},'UniformOutput',0);
+    med_o3c=cellfun(@(x,y) x(:,33),data_{ii},'UniformOutput',0);
+    med_flt=cellfun(@(x,y) x(:,10),data_{ii},'UniformOutput',0);
+    med_temp=cellfun(@(x,y) x(:,11),data_{ii},'UniformOutput',0);   
 %           -------------------------------------     
-    ref_sza=scan_join(ref_sza,cat(2,time,ZA));     
-    ref_m2=scan_join(ref_m2,cat(2,time,m2));
-    ref_m3=scan_join(ref_m3,cat(2,time,m3));     
-    ref_tst=scan_join(ref_tst,cat(2,time,tst));     
-    ref_flt=scan_join(ref_flt,cat(2,time,med_flt));
-    ref_temp=scan_join(ref_temp,cat(2,time,med_temp));     
-    ref_o3_old=scan_join(ref_o3_old,cat(2,time,med_o3));
-    ref_o3_new=scan_join(ref_o3_new,cat(2,time,med_o3c));
-    ref_ms9_old=scan_join(ref_ms9_old,cat(2,time,med_r6));
-    ref_ms9_new=scan_join(ref_ms9_new,cat(2,time,med_r6c));
+    ref_sza= cellfun(@(x,y,z) scan_join(x,cat(2,y,z)),ref_sza,time,ZA,'UniformOutput',0);     
+    ref_m2 = cellfun(@(x,y,z) scan_join(x,cat(2,y,z)),ref_m2,time,m2,'UniformOutput',0); 
+    ref_m3 = cellfun(@(x,y,z) scan_join(x,cat(2,y,z)),ref_m3,time,m3,'UniformOutput',0); 
+    ref_tst = cellfun(@(x,y,z) scan_join(x,cat(2,y,z)),ref_tst,time,tst,'UniformOutput',0); 
+    ref_flt = cellfun(@(x,y,z) scan_join(x,cat(2,y,z)),ref_flt,time,med_flt,'UniformOutput',0); 
+    ref_temp = cellfun(@(x,y,z) scan_join(x,cat(2,y,z)),ref_temp,time,med_temp,'UniformOutput',0); 
+    ref_o3_old = cellfun(@(x,y,z) scan_join(x,cat(2,y,z)),ref_o3_old,time,med_o3,'UniformOutput',0); 
+    ref_o3_new = cellfun(@(x,y,z) scan_join(x,cat(2,y,z)),ref_o3_new,time,med_o3c,'UniformOutput',0); 
+    ref_ms9_old = cellfun(@(x,y,z) scan_join(x,cat(2,y,z)),ref_ms9_old,time,med_r6,'UniformOutput',0); 
+    ref_ms9_new = cellfun(@(x,y,z) scan_join(x,cat(2,y,z)),ref_ms9_new,time,med_r6c,'UniformOutput',0); 
 end
 
 %% Final format
@@ -82,16 +102,15 @@ langsumm_sync_data_legend={
     'O3 new'  'NaN'  'NaN'  'NaN'  'NaN'  'NaN'  'MS9 new'  ... % 33-39 
                           };
 
-dds=unique(fix(ref_ms9_old(:,1))); langsumm_sync_data=cell(length(idx_),1);    
-for inst=1:length(idx_)
-    y=group_time(fix(ref_ms9_old(:,1)),dds);
-    for dd=1:length(dds)
-        idx=y==dd;
-        langsumm_sync_data{inst}{dd,1}=NaN*ones(length(find(idx==1)),39);
-        langsumm_sync_data{inst}{dd,1}(:,[1 2 3 4 5 6 9 10 11 19 25 33 39])=cat(2,ref_ms9_old(idx,1),lalo(1)*ones(length(find(idx==1)),1),...
-            lalo(2)*ones(length(find(idx==1)),1),ref_sza(idx,inst+1),...
-            ref_m2(idx,inst+1),ref_m3(idx,inst+1),ref_tst(idx,inst+1),ref_flt(idx,inst+1),ref_temp(idx,inst+1),...
-            ref_o3_old(idx,inst+1),ref_ms9_old(idx,inst+1),...
-            ref_o3_new(idx,inst+1),ref_ms9_new(idx,inst+1));
-    end
+langsumm_sync_data=cell(max(idx_),1);
+aux=cellfun(@(x) NaN*ones(size(x,1),1),ref_sza,'UniformOutput',0);
+for jj=1:length(idx_)
+    jj_=cellfun(@(x) x+1,repmat({jj},size(data_{1}),1),'UniformOutput',0);
+    langsumm_sync_data{idx_(jj)}=cellfun(@(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,z,N) cat(2,a1(:,[1 z]),N,N,a2(:,z),...
+        a3(:,z),N,N,a4(:,z),a5(:,z),a6(:,z),N,N,N,N,N,N,N,...
+        a7(:,z),N,N,N,N,N,a8(:,z),...
+        N,N,N,N,N,N,N,...
+        a9(:,z),N,N,N,N,N,a10(:,z)),...
+        ref_sza,ref_m2,ref_m3,ref_tst,ref_flt,ref_temp,...  
+        ref_o3_old,ref_ms9_old,ref_o3_new,ref_ms9_new,jj_,aux,'UniformOutput',0);
 end

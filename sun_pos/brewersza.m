@@ -101,12 +101,12 @@ AZ(ra>0 & AZ>=0)=360-AZ(ra>0 & AZ>=0);
 %  m2=R/(R+h2);
 %  m3=R/(R+h3);
 %  
-  % from brewer soft
+ % from brewer soft
  % 7865 M2=.999216*SIN(E):GOSUB 7920:M3=M2:M2=.99656*SIN(E):GOSUB 7920
  % 7920 M2=1/COS(ATN(M2/SQR(1-M2*M2) ))
  % 7930 M2=INT(P3%*M2+.5)/P3%:RETURN
- m2=.99656;
- m3=.999216;
+ m2=.99656; % R=6370 km/R=6370 km + z=22 km
+ m3=.999216;% R=6370 km/R=6370 km + z=5 km
  m3=m3*sin(e); m3=1./cos(asin(m3));
  m3=fix(1000*m3+.5)/1000;
  m2=m2*sin(e);  m2=1./cos(asin(m2));
