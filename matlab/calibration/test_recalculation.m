@@ -60,7 +60,7 @@ end
   
   % Si hay dos fechas en el fichero B esto dará error. Manejarlo 
   fecha=cellfun(@(x) unique(fix(x(:,1))),ozone_ds{ninst},'UniformOutput',false);  
-  fecha=cat(1,fecha{:});% ficheros cargados con éxito
+  fecha=unique(cat(1,fecha{:}));% ficheros cargados con éxito
   if any(Cal.Date.CALC_DAYS>366) % fecha matlab
      fecha_days=fix(Cal.Date.CALC_DAYS);                          % todos los días considerados
      
