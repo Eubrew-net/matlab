@@ -185,11 +185,10 @@ if ~isempty(arg.Results.AOD)
        [id_pm loc_pm]=ismember(fix(aod_pm(idx_pm,1)),cellfun(@(x) unique(fix(x(:,1))),data_PM_)); 
        data_PM_(loc_pm)={NaN}; data_PM_(cellfun(@(x) length(x)==1,data_PM_))={[]};
         
-       % Mantenemos info para la tabla
+       data_AM=data_AM_;  data_PM=data_PM_;
     catch exception
        fprintf('%s (AOD filter fails!!)\n',exception.message);
     end
-    data_AM=data_AM_;  data_PM=data_PM_;
 end
 
 %% Cloud Screening
@@ -211,11 +210,10 @@ if ~isempty(arg.Results.Cloud)
        [id_pm loc_pm]=ismember(fix(clouds_pm(idx_pm,1)),cellfun(@(x) unique(fix(x(:,1))),data_PM_)); 
        data_PM_(loc_pm)={NaN}; data_PM_(cellfun(@(x) length(x)==1,data_PM_))={[]};
         
-       % Mantenemos info para la tabla
+       data_AM=data_AM_;  data_PM=data_PM_;
     catch exception
        fprintf('%s (AOD filter fails!!)\n',exception.message);
     end
-    data_AM=data_AM_;  data_PM=data_PM_;
 end
 
 %% Preparing output
@@ -300,7 +298,7 @@ end
            lgl_=data{f(dd)};            jpm=(lgl_(:,9)/60>12); jam=~jpm;
            
            figure; set(gcf,'Tag',sprintf('%s%d','DayLangley_',diaj(unique(fix(lgl_(:,1))))));
-           a(1)=subplot(3,2,[1 3]); a(3)=subplot(3,2,5); a(2)=subplot(3,2,[2 4]); a(4)=subplot(3,2,6);           
+           ax(1)=subplot(3,2,[1 3]); ax(3)=subplot(3,2,5); ax(2)=subplot(3,2,[2 4]); ax(4)=subplot(3,2,6);           
            for ampm=1:2
                if ampm==1
                   jk=jam; jk_orig=jam_orig;
@@ -318,17 +316,17 @@ end
                [coeff_second,ci_second,r_second]=regress(P_brw_second,X);
 
                % ajuste
-               axes(a(ampm));
+               axes(ax(ampm));
                gscatter(lgl_orig(jk_orig,5),lgl_orig(jk_orig,25),lgl_orig(jk_orig,10),'','x',{},'off','');
                hold on; gscatter(lgl_orig(jk_orig,5),lgl_orig(jk_orig,39),lgl_orig(jk_orig,10),'','.',6,'off','','');
                title(sprintf('%s (%d)',datestr(nanmean(lgl_(jk,1)),0),diaj(unique(fix(lgl_(jk,1))))));
                if ~isempty(arg.Results.airmass)
                   v=vline_v(arg.Results.airmass,'-k'); set(v,'LineWidth',2);
                end
-               ax(2) = axes('Units',get(a(ampm),'Units'),'Position',get(a(ampm),'Position'),...
-                            'Parent',get(a(ampm),'Parent'));
-               set(ax(2),'YAxisLocation','right','XAxisLocation','Top','Color','none', ...
-                         'XLim',get(a(ampm),'XLim'),'XTickLabel','','FontSize',7);
+               ax_(2) = axes('Units',get(ax(ampm),'Units'),'Position',get(ax(ampm),'Position'),...
+                            'Parent',get(ax(ampm),'Parent'));
+               set(ax_(2),'YAxisLocation','right','XAxisLocation','Top','Color','none', ...
+                         'XLim',get(ax(ampm),'XLim'),'XTickLabel','','FontSize',7);
                m_o3=grpstats(lgl_orig(jk_orig,[1 5 33]),fix(lgl_orig(jk_orig,3)/10),{'mean'});
                hold on; plot(m_o3(:,2),m_o3(:,3),'.');
                ylabel('O3 (DU)'); set(gca,'YLim',[min(m_o3(:,3))-15 max(m_o3(:,3))+15],'HandleVisibility','Off'); 
@@ -339,18 +337,18 @@ end
                      sprintf('ETC_2=%d',fix(coeff_second(1)))},'Units','Normalized','FontSize',8,'BackgroundColor','w')
 
                % residuos
-               axes(a(ampm+2));
+               axes(ax(ampm+2));
                gscatter(m_ozone,r_first,lgl_(jk,10),'','o',4,'off','','');
                hold on; gscatter(m_ozone,r_second,lgl_(jk,10),'','.',3,'off','','');
                if ~isempty(arg.Results.airmass)
                   v=vline_v(arg.Results.airmass,'-k'); set(v,'LineWidth',2);
                end
            end
-           set(a,'Xgrid','on','Ygrid','on','box','on');
+           set(ax,'Xgrid','on','Ygrid','on','box','on');
            labelEdgeSubPlots('Airmass','Residuos'); 
            set(findobj(gcf,'Type','axes'),'FontSize',8); 
-           set(cell2mat(get(a,props)),'FontSize',8);            
-           ylabel(a(1),'MS9');
+           set(cell2mat(get(ax,props)),'FontSize',8);            
+           ylabel(ax(1),'MS9');
            snapnow                                                
        end
     end

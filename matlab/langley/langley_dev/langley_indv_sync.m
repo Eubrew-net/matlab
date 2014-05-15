@@ -1,4 +1,4 @@
-function [langindv_sync_data] = langley_indv_sync(ozone_lgl,Cal,varargin)
+function langindv_sync_data = langley_indv_sync(ozone_lgl,Cal,varargin)
 
 % function [langsumm_sync_data langsumm_sync_data_legend] = langley_summ_sync(summary,summary_old,Cal,varargin)
 % 

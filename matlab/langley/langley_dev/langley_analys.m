@@ -153,7 +153,7 @@ for dd=1:length(lgl_data{brw})
                 stats_dbs.ci(dd,ci_idx,ncfg)        = ci_dbs(1,:);
                 stats_dbs.r{dd}(jk_idx,ampm+3,ncfg) = r_dbs; 
                 stats_dbs.rs(dd,ampm+1,ncfg)        = st_dbs(1);                
-            catch
+            catch exception
                 resp_brw(dd,ampm+1,ncfg)=NaN; resp_dbs(dd,ampm+1,ncfg)=NaN;
             end
 %             data{ampm,ncfg,idx}=[lgl(jk,5),X(:,1:2)*c1(1:2),RC,r,ri];
