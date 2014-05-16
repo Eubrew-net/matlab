@@ -1,5 +1,4 @@
 function [ozone_lgl,cfg,icf,ozone_lgl_legend ] = langley_data(ozone_raw,ozone_ds,config)
-
 % function [ozone_lgl,cfg,icf,ozone_lgl_legend ] = langley_data(ozone_raw,ozone_ds,config);
 % 
 % Input : readb_ds_develop / readb_data output
