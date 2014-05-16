@@ -60,17 +60,17 @@ for ii=1:length(sname)
             else
              disp(sprintff('%s  Not in location %s (%s)',bfile,loc,location.str));
              disp(locaton)
-             log{index_day}={'ERROR',bfile,ext,'Location'};
+             log{index_day}={'ERROR',bfile,ext,'Location',''};
             end    
                 
                 catch
             disp('Error assingnig variables');
-            log{index_day}={'ERROR',bfile,ext,'Variables'};
+            log{index_day}={'ERROR',bfile,ext,'Variables',''};
         end
     else
         %disp(['Missing   ',bfile])
         missing(index_day)=NaN;
-        log{index_day}={'ERROR',bfile,ext,'Not found'};
+        log{index_day}={'ERROR',bfile,ext,'Not found',''};
     end
 end
 disp(ext);
