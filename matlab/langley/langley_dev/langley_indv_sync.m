@@ -47,6 +47,7 @@ idx_=find(cellfun (@(x) ~isempty(x),ozone_lgl)==1);
 
 % preparamos los datos 
 
+% usar como tiempo de referencia el periodo de tiempo: Cal.Date.CALC_Days
 time_ref=cellfun(@(x) fix(x(1,1)),ozone_lgl{1});
 lgl_{1}=ozone_lgl{1};
 
@@ -60,7 +61,7 @@ lgl_{1}=ozone_lgl{1};
  end
 
 ref_hg_id=repmat({[]},size(lgl_{1}),1); ref_nds=repmat({[]},size(lgl_{1}),1); ref_sza=repmat({[]},size(lgl_{1}),1);
-ref_m2=repmat({[]},size(lgl_{1}),1); ref_m3=repmat({[]},size(lgl_{1}),1); ref_sza=repmat({[]},size(lgl_{1}),1); 7
+ref_m2=repmat({[]},size(lgl_{1}),1); ref_m3=repmat({[]},size(lgl_{1}),1); ref_sza_cal=repmat({[]},size(lgl_{1}),1);
 ref_saz=repmat({[]},size(lgl_{1}),1); ref_tst=repmat({[]},size(lgl_{1}),1); ref_flt=repmat({[]},size(lgl_{1}),1);
 ref_temp=repmat({[]},size(lgl_{1}),1);
 ref_f0=repmat({[]},size(lgl_{1}),1); ref_f1=repmat({[]},size(lgl_{1}),1); ref_f2=repmat({[]},size(lgl_{1}),1); 
@@ -84,7 +85,7 @@ for ii=idx_
     med_sza=cellfun(@(x) x(:,4),o3_lgl,'UniformOutput',false);     
     med_m2=cellfun(@(x) x(:,5),o3_lgl,'UniformOutput',false);    
     med_m3=cellfun(@(x) x(:,6),o3_lgl,'UniformOutput',false); 
-    med_sza=cellfun(@(x) x(:,7),o3_lgl,'UniformOutput',false);    
+    med_sza_cal=cellfun(@(x) x(:,7),o3_lgl,'UniformOutput',false);    
     med_saz=cellfun(@(x) x(:,8),o3_lgl,'UniformOutput',false);   
     med_tst=cellfun(@(x) x(:,9),o3_lgl,'UniformOutput',false);     
     med_flt=cellfun(@(x) x(:,10),o3_lgl,'UniformOutput',false);    
@@ -134,8 +135,8 @@ for ii=idx_
       ref_sza=cellfun(@(x,y,z) scan_join(x,cat(2,y,z)),ref_sza,time,med_sza,'UniformOutput',false); 
       ref_m2=cellfun(@(x,y,z) scan_join(x,cat(2,y,z)),ref_m2,time,med_m2,'UniformOutput',false); 
       ref_m3=cellfun(@(x,y,z) scan_join(x,cat(2,y,z)),ref_m3,time,med_m3,'UniformOutput',false); 
-      ref_sza=cellfun(@(x,y,z) scan_join(x,cat(2,y,z)),ref_sza,time,med_sza,'UniformOutput',false); 
-      ref_saz=cellfun(@(x,y,z) scan_join(x,cat(2,y,z)),ref_saz,time,med_sza,'UniformOutput',false); 
+      ref_sza_cal=cellfun(@(x,y,z) scan_join(x,cat(2,y,z)),ref_sza_cal,time,med_sza_cal,'UniformOutput',false); 
+      ref_saz=cellfun(@(x,y,z) scan_join(x,cat(2,y,z)),ref_saz,time,med_saz,'UniformOutput',false); 
       ref_tst=cellfun(@(x,y,z) scan_join(x,cat(2,y,z)),ref_tst,time,med_tst,'UniformOutput',false); 
       ref_flt=cellfun(@(x,y,z) scan_join(x,cat(2,y,z)),ref_flt,time,med_flt,'UniformOutput',false); 
       ref_temp=cellfun(@(x,y,z) scan_join(x,cat(2,y,z)),ref_temp,time,med_temp,'UniformOutput',false); 
@@ -189,7 +190,7 @@ for jj=1:length(idx_)
         a19(:,z),a20(:,z),a21(:,z),a22(:,z),a23(:,z),a24(:,z),a25(:,z),a26(:,z),...
         a27(:,z),a28(:,z),a29(:,z),a30(:,z),a31(:,z),a32(:,z),a33(:,z),a34(:,z),...
         a35(:,z),a36(:,z),a37(:,z),a38(:,z)),...
-        ref_hg_id,ref_nds,ref_sza,ref_m2,ref_m3,ref_sza,ref_saz,ref_tst,ref_flt,ref_temp,...  
+        ref_hg_id,ref_nds,ref_sza,ref_m2,ref_m3,ref_sza_cal,ref_saz,ref_tst,ref_flt,ref_temp,...  
         ref_f0,ref_f1,ref_f2,ref_f3,ref_f4,ref_f5,ref_f6,...
         ref_o3_1,ref_r1,ref_r2,ref_r3,ref_r4,ref_r5,ref_r6,...
         ref_F0,ref_F1,ref_F2,ref_F3,ref_F4,ref_F5,ref_F6,...
