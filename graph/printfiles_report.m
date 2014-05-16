@@ -1,17 +1,17 @@
 function Options=printfiles_report(n0,patern,varargin)
 % function Options=printfiles_report(n0,patern,varargin)
 % print eps files acording with format
-% 30/04/2010 Juanjo: para el caso de múltiples figuras habrán varias
+% 30/04/2010 Juanjo: para el caso de m?ltiples figuras habr?n varias
 %                    posibilidades: 
 %                    1) No se especifica un 'aux_pattern'. En ese caso se
-%                    imprimen todas las figuras sin añadir ningun
+%                    imprimen todas las figuras sin a?adir ningun
 %                    identificador al nombre. El problema surge cuando hay
 %                    multiples figuras con igual Tag. En este caso las
 %                    segundas sustituyen a las primeras
 %                    2) Si se especifica el argumento 'aux_pattern', en ese
-%                    caso se enumeran las figuras señaladas en n0, la
-%                    primera no y a partir de ahí empezando con 1 en
-%                    adelante. Cabe la posibilidad también de especificar
+%                    caso se enumeran las figuras se?aladas en n0, la
+%                    primera no y a partir de ah? empezando con 1 en
+%                    adelante. Cabe la posibilidad tambi?n de especificar
 %                    un cell de strings, tantos como figuras se quieran
 %                    imprimir.
 
@@ -23,7 +23,7 @@ Options.Width=12;  %cm a positive scalar specifies the width in the figure's Pap
 Options.Height=6.5;  %a positive scalar  specifies the height in the figure's PaperUnits
                    %Specifying only one dimension sets the other  dimension so that the exported aspect ratio is the same as the
                    %figure's or reference axes' current aspect ratio. 
-Options.Bounds='loose';  %'Bounds' one of the strings 'tight', 'loose'  specifies a tight or loose bounding box. Defaults to 'tight'.
+Options.Bounds='tight';  %'Bounds' one of the strings 'tight', 'loose'  specifies a tight or loose bounding box. Defaults to 'tight'.
 % Options.Reference='auto';   %'Reference' an axes handle or a string  specifies that the width and height parameters
                          %are relative to the given axes. If a string is  specified then it must evaluate to an axes handle.
  
