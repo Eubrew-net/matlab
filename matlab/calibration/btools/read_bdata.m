@@ -1,9 +1,9 @@
-function [ozone,log,missing]=read_bdata(brewer,setup,fpath,spectral_setup)
+function [ozone,log,missing]=read_bdata(brewer,setup,fpath,spectral_setup,location)
 % lee los ficheros del directorio bfiles
 % 
 % INPUT: 
 % - brw_id
-% - setup. De aquí toma configuración y dates
+% - setup. De aqu? toma configuraci?n y dates
 % - fpath filepath
 %   if empty the files are in BFILES else ->campaing data
 %   else
@@ -25,7 +25,7 @@ function [ozone,log,missing]=read_bdata(brewer,setup,fpath,spectral_setup)
 % MODIFICADO:
 % Juanjo (05/2011): modificado para considerar en primer lugar ficheros 
 %                   depurados, Bdddyy_dep.###
-%                   Si no existe B_dep, entonces será Bdddyy.###, como
+%                   Si no existe B_dep, entonces ser? Bdddyy.###, como
 %                   habitualmente
 % Alberto .
 b_idx=brewer;  fprintf('\n\rBrewer: %s\n\r',setup.brw_name{b_idx});
@@ -40,7 +40,11 @@ else
   end
 end
 
-if nargin<4
+if nargin<5
+    location=[];
+end
+
+if nargin<4 
     spectral_setup=[];
 else
     eval(['scf',brw_str{b_idx},'=spectral_setup']);
@@ -57,6 +61,8 @@ if nargin<=2
 else
     bfile_p=fpath;
 end
+%default
+if isempty(fpath) bfile_p='BFILES'; end 
 
 index_day=1;
 for dd=CALC_DAYS
@@ -120,7 +126,7 @@ for dd=CALC_DAYS
     else
        disp(['Missing   ',bfile_f]);
        missing(index_day)=NaN;
-       log{index_day}={'ERROR',bfile_f,brw_name{b_idx},'Not found','   ','  ','  '};
+       log{index_day}={'ERROR',bfile_f,brw_name{b_idx},'Not found','   ','  ','',''};
        continue
     end
 
@@ -129,19 +135,19 @@ for dd=CALC_DAYS
       if exist(['scf',brw_str{b_idx}],'var')
          scf=eval(['scf',brw_str{b_idx}]);  
          sfc_flag='sfc';
-         [ o3,config_,sl_,hg_]=readb_ds_develop(bfile,brw_config_files(b_idx,1:2),scf);
+         [ o3,config_,sl_,hg_,loc_]=readb_ds_develop(bfile,brw_config_files(b_idx,1:2),scf);
       else
          sfc_flag='  ';
          [a b c]=fileparts(brw_config_files{b_idx,2});
         if ~isempty(strcat(b,c))
-         [o3,config_,sl_,hg_]=readb_ds_develop(bfile,brw_config_files(b_idx,1:2));
+         [o3,config_,sl_,hg_,loc_]=readb_ds_develop(bfile,brw_config_files(b_idx,1:2));
          if ~isempty(o3.ozone_ds)
             disp(['OK-> ',bfile,' ',brw_name{b_idx},' ozone obs day ',num2str(unique(diaj(o3.ozone_ds(:,1)))')]);
          else
             disp(['OK-> ',bfile,' ',brw_name{b_idx},' No ozone for day ',num2str(unique(diaj(sl_.sl_cr(:,1)))')]);
          end
         else
-         [o3,config_,sl_,hg_]=readb_ds_develop(bfile,brw_config_files{b_idx,1});
+         [o3,config_,sl_,hg_,loc_]=readb_ds_develop(bfile,brw_config_files{b_idx,1});
          if ~isempty(o3.ozone_ds)
             disp(['OK-> ',bfile,' ',brw_name{b_idx},' ozone obs day ',num2str(unique(diaj(o3.ozone_ds(:,1)))')]);
          else
@@ -157,6 +163,8 @@ for dd=CALC_DAYS
     end
         
     try
+        
+    if isempty(location) || ~isempty(strmatch(lower(location),lower(strtrim(loc_.str))))
       dsum=[dsum;o3.dsum];
       ozone_raw0=[ozone_raw0;o3.ds_raw0];
       ozone_sum=[ozone_sum;o3.ozone_s];
@@ -171,7 +179,7 @@ for dd=CALC_DAYS
           ozone_ratios=[ozone_ratios;[o3.ds_raw0,o3.ozone_ds(:,[9:14,16:21])]];
       end
       missing(index_day)=0;
-      log{index_day}={'OK',bfile,brw_name{b_idx},lastwarn,sfc_flag,datestr(config_(1,1)),datestr(config_(1,2))};
+      log{index_day}={'OK ',location,bfile,brw_name{b_idx},lastwarn,sfc_flag,datestr(config_(1,1)),datestr(config_(1,2))};
    %  leyendas
       ozone.ds_legend=o3.ozone_ds_legend;
    %  sumarios y medidas tal y como estan en el fichero
@@ -180,10 +188,18 @@ for dd=CALC_DAYS
    %  recalculadas
       ozone.ds_legend=o3.ozone_ds_legend;
       ozone.s_legend=o3.ozone_s_legend;  
+    else
+      disp(sprintf('%s (%s) Not in location %s',bfile,location ,strtrim(loc_.str)));
+      disp(loc_)  
+      disp('Error assigning variables');
+      log{index_day}={'ERROR',location,bfile,brw_name{b_idx},'Variables',sfc_flag,' ',''};
+    end
+
+        
        
     catch
       disp('Error assigning variables');
-      log{index_day}={'ERROR',bfile,brw_name{b_idx},'Variables',sfc_flag,' ',''};
+      log{index_day}={'ERROR',location,bfile,brw_name{b_idx},'Variables',sfc_flag,' ',''};
     end
     index_day= index_day+1;
 end
