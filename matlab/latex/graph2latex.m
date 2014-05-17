@@ -24,15 +24,21 @@ function graph2latex(path,pattern,brew,varargin)
     fid = fopen(fullfile(path,filename), 'w');
     
     
-    for jj=1:length(idx)    
-        fprintf(fid,'\\begin{figure}[htbp!]\r\n');
-         fprintf(fid,'\t\\begin{center}\r\n'); 
-         if strcmp(varargin{1},'scale')
-          fprintf(fid,'\\includegraphics[scale=%s]{./%s_figures/%s_figures_%s.eps}\r\n',...
-                      num2str(varargin{2}),brew,brew,get(idx(jj),'Tag'));
-         end
-         fprintf(fid,'\t\\end{center}\r\n');
+    for jj=1:length(idx)   
+        if jj==1
+           fprintf(fid,'\\begin{figure}[h!]\r\n');
+        else
+           fprintf(fid,'\\begin{figure}[p]\r\n');            
+        end
+        fprintf(fid,'\t\\begin{center}\r\n'); 
+        if strcmp(varargin{1},'scale')
+           fprintf(fid,'\\includegraphics[scale=%s]{./%s_figures/%s_figures_%s.eps}\r\n',...
+                       num2str(varargin{2}),brew,brew,get(idx(jj),'Tag'));
+        end
+        fprintf(fid,'\t\\end{center}\r\n');
         fprintf(fid,'\\end{figure}\r\n\r\n');
-        
+        if mod(jj,15)==0
+           fprintf(fid,'\\clearpage\r\n\r\n');
+        end            
     end
     fclose(fid);
