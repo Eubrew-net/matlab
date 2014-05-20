@@ -1,5 +1,5 @@
-function [data_stat, data_events]=meanperiods(events, period, data)
-% function [data_stat, data_events]=meanperiods(events, period, data)
+function [data_tab, data_events]=meanperiods(events, period, data)
+% function [data_tab, data_events]=meanperiods(events, period, data)
 %   
 % imput:
 %  events: fecha_lotus fecha_matlab describing_string  icf SL_ref 
@@ -25,8 +25,8 @@ function [data_stat, data_events]=meanperiods(events, period, data)
 %    same dimension as data, third dimension is the event.
 %       
 n_out=3; %(mean std and n)
-events=cell2mat(events(:,2));
-clms=unique(group_time(period',evnts));
+events_=cell2mat(events(:,2));
+clms=unique(group_time(period',events_));
 events_lbs=events(unique(clms),3)';
 
 if isempty(data)
@@ -34,13 +34,13 @@ if isempty(data)
    data_tab.m=m; data_tab.std=std; data_tab.N=N; data_tab.evnts=events_lbs;     
    return;
 end
-a=group_time(data(:,1),events);
+a=group_time(data(:,1),events_);
 [id1 id2]=intersect(clms,unique(a));
 [m std N]=grpstats(data,a,{@(x) nanmean(x,1),@(x) nanstd(x,1,1),'numel'});
 
 data_tab.evnts=events_lbs;        
 data_tab.m=NaN*ones(length(clms),size(m,2));
-data_tab.m(:,1)=evnts(clms);
+data_tab.m(:,1)=events_(clms);
 
 %init
 data_tab.std=data_tab.m;
@@ -59,7 +59,7 @@ data_events=NaN*ones(n_events,n_col,3);
 
 data_events(:,:,1)=data_tab.m;
 data_events(:,:,2)=data_tab.std;
-data_events(:,:,2)=data_tab.N;
+data_events(:,:,3)=data_tab.N;
 
 
 
