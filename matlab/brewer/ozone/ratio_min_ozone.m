@@ -27,7 +27,7 @@ function [x,r,ab,rp,data,osc_out,osc_smooth,outliers]=ratio_min_ozone(a,b,n_min,
 % 
 %  MODIFICADO: 
 % 
-% Juanjo 12/04/2011: Se añade control de inputs opcionales a la funcion. Uso de inputparser
+% Juanjo 12/04/2011: Se a?ade control de inputs opcionales a la funcion. Uso de inputparser
 % 
 % Juanjo 17/04/2012: En el caso de que name_a=name_b (o nargin=3), no ploteos
 % 
@@ -295,6 +295,31 @@ if  nargin~=3 && ~strcmp(name_a,name_b)
      box on;
     end
     
+    %%
+     f=figure; 
+     set(f,'Tag','RATIO_TIME_S');    
+    try
+     [m,s,n,mci]=grpstats([rp(:,1),rp(:,2)],diaj(rp(:,1)),{'mean','sem','numel','meanci'});
+     seb=shadedErrorBar(m(:,1),m(:,2),abs(matadd(mci(:,[2,4]),-m(:,2)))); hold on;
+     datetick;
+     he=errorbar(m(:,1),m(:,2),s(:,2),'o');
+     l=legend([seb.mainLine,he,seb.patch],'mean','se','mci');
+     set(l,'FontSize',12);
+     %set(gca,'YLim',[-3 3]);
+     hline(0,'-k');
+     grid;
+     box on;
+     xlabel('Day '); 
+     ylabel('Ozone Relative Difference (%)');
+     title(sprintf('(%s-%s) / %s : #%s by day',name_a,name_b,name_b,name_b));
+    catch % falla cuando hay un solo dia revisar
+    %plot(osc,rp(:,2),'.');
+    % set(gca,'Xlim',OSC_lim);
+    % xlabel('Ozone slant path (DU)'); ylabel('Ozone Relative Difference (%)');
+    % title(sprintf('(%s-%s) / %s : #%s Filters',name_a,name_b,name_b,name_b));
+    % box on;
+    end
+    %%
     end
     
     %figure by day
