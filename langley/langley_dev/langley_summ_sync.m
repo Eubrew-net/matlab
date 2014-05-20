@@ -2,16 +2,16 @@ function [langsumm_sync_data langsumm_sync_data_legend] = langley_summ_sync(data
 
 % function [langsumm_sync_data langsumm_sync_data_legend] = langley_summ_sync(summary,summary_old,Cal,varargin)
 % 
-% Devuelve como salida los datos simultáneos (Tsync=5 minutos) de la triada RBCC-E para el análisis Langley. 
+% Devuelve como salida los datos simult?neos (Tsync=5 minutos) de la triada RBCC-E para el an?lisis Langley. 
 % Se mantiene para la salida el mismo formato de la antigua ozone_lgl: 39 campos
 % MS9's para las dos configuraciones consideradas: new y old (checking configuration)
 % 
-% Los  summarios están corregidos por filtros, con lo cual se trabaja con el campo 9 (si no se aplica 
-% la función filter_corr, entonces tendríamos que el campo 9 es la MS9 std !!)
+% Los  summarios est?n corregidos por filtros, con lo cual se trabaja con el campo 9 (si no se aplica 
+% la funci?n filter_corr, entonces tendr?amos que el campo 9 es la MS9 std !!)
 % 
 % OUTPUT:
-% - langsumm_sync_data: datos simultáneos de la triada RBCC-E para el análisis Langley.
-%                       Celda para cada intrumento con tantas matrices como días analizados
+% - langsumm_sync_data: datos simult?neos de la triada RBCC-E para el an?lisis Langley.
+%                       Celda para cada intrumento con tantas matrices como d?as analizados
 % - langsumm_sync_data_legend={
 %     'date'  'lat'  'long' 'sza'  'm2 '  'm3 '  'flag'  'NaN'  'tst'  'filt'  'temp' ... % 1-11              
 %      'NaN'  'NaN'  'NaN'  'NaN'  'NaN'  'NaN'  'NaN'  ...      % 12-18 
@@ -20,11 +20,11 @@ function [langsumm_sync_data langsumm_sync_data_legend] = langley_summ_sync(data
 %      'O3 new'  'NaN'  'NaN'  'NaN'  'NaN'  'NaN'  'MS9 new'  ...  % 33-39 
 %                           };
 % INPUT:
-% - summary, summary_old: (salida de test_recalculation -> celda de NºBrws elementos)
+% - summary, summary_old: (salida de test_recalculation -> celda de N?Brws elementos)
 % - Cal
 % 
 % Input opcional:
-% - lalo: [latitud,longitud], por defecto los de Izaña 
+% - lalo: [latitud,longitud], por defecto los de Iza?a 
 
 %% Validacion de argumentos de entrada
 arg = inputParser;   % Create instance of inputParser class.
@@ -38,9 +38,9 @@ arg.addRequired('Cal');
 arg.addParamValue('lalo', [28.3090,16.4994], @isfloat); % por defecto, Izana
 
 % validamos los argumentos definidos:
-arg.parse(data,Cal,varargin{:});
+% arg.parse(data,Cal,varargin{:});
 
-%% Obtenemos los datos simultáneos: Medidas individuales
+%% Obtenemos los datos simult?neos: Medidas individuales
 TSYNC=5; orden=Cal.n_ref;
 idx_=find(cellfun (@(x) ~isempty(x),data)==1);
 
