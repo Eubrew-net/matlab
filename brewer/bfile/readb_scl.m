@@ -1,16 +1,16 @@
 function [sc_avg,sc_raw]=readb_scl(path,varargin)
 % MODIFICADO:
-%  Juanjo 09/02/2011: Redefino los inputs de la función (Chequeada con la sintaxis original)
+%  Juanjo 09/02/2011: Redefino los inputs de la funci?n (Chequeada con la sintaxis original)
 %                     Obligatorio; path a ficheros B (normalmente bfile)
 %                     Otros dos opcionales;
 %                       - 'date_range' -> array de uno o dos elementos (fecha matlab)
 %                                         Lo interesante es que se aplica al directorio !!
 %                       - 'config'     -> Configuracion (por defecto no config)
 %
-%  Juanjo 09/02/2012: Hasta ahora, si teníamos un un fichero B y el mismo B_dep
-%                     leía los dos, sumando ambos. Corregido (sólo lee el dep, si existe)
+%  Juanjo 09/02/2012: Hasta ahora, si ten?amos un un fichero B y el mismo B_dep
+%                     le?a los dos, sumando ambos. Corregido (s?lo lee el dep, si existe)
 %
-%%%%%%%   VALIDACIÓN DE ARGUMENTOS DE ENTRADA    %%%%%%%%%%%%
+%%%%%%%   VALIDACI?N DE ARGUMENTOS DE ENTRADA    %%%%%%%%%%%%
 arg = inputParser;   % Create instance of inputParser class.
 arg.FunctionName = 'readb_scl';
 
@@ -41,7 +41,7 @@ catch % compatibilidad con version original
   end
   chk=0;
 end
-%%%%%%%   FIN DE VALIDACIÓN   %%%%%%%%%%%%%%%
+%%%%%%%   FIN DE VALIDACI?N   %%%%%%%%%%%%%%%
 
 sc_avg=[];  sc_raw=[];
 
@@ -53,7 +53,7 @@ if ~isempty(date_range)
     dir_cell=struct2cell(s); files=dir_cell(1,:);
     myfunc=@(x)sscanf(x,'%*c%3d%2d.%*d')';
     A=cell2mat(cellfun(myfunc,files, 'UniformOutput', false)');
-%                    Año    Dia
+%                    A?o    Dia
     dates=datejuli(A(:,2),A(:,1));    
     s(dates<fix(date_range(1)))=[];    dates(dates<fix(date_range(1)))=[];
     if length(date_range)>1
@@ -127,21 +127,21 @@ end
 
 if chk
     % Se muestran los argumentos que toman los valores por defecto
-  disp('--------- Validation OK --------------') 
-  disp('List of arguments given default values:') 
+%  disp('--------- Validation OK --------------') 
+%  disp('List of arguments given default values:') 
   if ~numel(arg.UsingDefaults)==0
      for k=1:numel(arg.UsingDefaults)
         field = char(arg.UsingDefaults(k));
         value = arg.Results.(field);
         if isempty(value),   value = '[]';   
         elseif isfloat(value), value = num2str(value); end
-        disp(sprintf('   ''%s''    defaults to %s', field, value))
+%        disp(sprintf('   ''%s''    defaults to %s', field, value))
      end
   else
-     disp('               None                   ')
+%     disp('               None                   ')
   end
-  disp('--------------------------------------') 
+%  disp('--------------------------------------') 
 else
-     disp('NO INPUT VALIDATION!!')
-     disp(sprintf('%s',errval.message))
+%     disp('NO INPUT VALIDATION!!')
+%     disp(sprintf('%s',errval.message))
 end
