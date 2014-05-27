@@ -22,18 +22,18 @@ function [step_cal,sc_avg,sc_raw,Args]=sc_report(brw_str,brw_config,varargin)
 %                    Ahora el CSN_orig se coge de la configuracion inicial (config_orig).                        
 %                    (Se le pasa como argumento desde el cal_report_###)
 %                                                
-% Juanjo 30/10/2010: Se retoma versión anterior, fusionando novedades de Alberto (sc_data como input opcional)
-%                    Se añade como argumento opcional residual_limit (por defecto 25) (línea )
-%                    sc_data (se le pasan los datos, opcional, línea 90)
-%                    hg_time (por defecto no depuración, <0, línea 274). Util por ejemplo para el #064
-%                    Se reorganiza residual remove (se mantiene = filosofía, aunque ahora hg_limit = parametro, línea 193)
-%                    Se reorganiza bad HG remove (se mantiene = filosofía, limite = 1.15)
-%                    Se añade plot en AIRMASS filter (temporal)
-%                    Añadido flag de ploteo individual (one_flag). Por defecto ploteo
+% Juanjo 30/10/2010: Se retoma versi?n anterior, fusionando novedades de Alberto (sc_data como input opcional)
+%                    Se a?ade como argumento opcional residual_limit (por defecto 25) (l?nea )
+%                    sc_data (se le pasan los datos, opcional, l?nea 90)
+%                    hg_time (por defecto no depuraci?n, <0, l?nea 274). Util por ejemplo para el #064
+%                    Se reorganiza residual remove (se mantiene = filosof?a, aunque ahora hg_limit = parametro, l?nea 193)
+%                    Se reorganiza bad HG remove (se mantiene = filosof?a, limite = 1.15)
+%                    Se a?ade plot en AIRMASS filter (temporal)
+%                    A?adido flag de ploteo individual (one_flag). Por defecto ploteo
 % 
-%                    También output Args, con la configuración de entrada (línea 48)
+%                    Tambi?n output Args, con la configuraci?n de entrada (l?nea 48)
 % 
-% Juanjo 03/11/2011:  Se añade input opcional 'data_path'. Por defecto bdata###
+% Juanjo 03/11/2011:  Se a?ade input opcional 'data_path'. Por defecto bdata###
 % 
 % Ejemplo:
 % [cal_step{1},sc_avg{1},sc_raw{1},Args{1}]=sc_report_mio(Cal.brw_str{Cal.n_inst},Cal.brw_config_files{Cal.n_inst,2},... 
@@ -62,7 +62,7 @@ arg.addParamValue('OSC', 680, @isfloat); % por defecto: 680
 arg.addParamValue('control_flag', 0, @(x)(x==1 || x==0)); % por defecto: no outlier control
 arg.addParamValue('residual_limit', 25, @(x)(x>1 || x<100)); % por defecto 25
 arg.addParamValue('one_flag', 1, @(x)(x==1 || x==0)); % por defecto: ploteo de SC's escogidos
-arg.addParamValue('hg_time', [], @isfloat); % por defecto: no depuración
+arg.addParamValue('hg_time', [], @isfloat); % por defecto: no depuraci?n
 arg.addParamValue('cor_hg', [], @isfloat); % hg step correction is added to the calc_step
 arg.addParamValue('hg_limit', 1.25, @isfloat); % hg step correction is added to the calc_step
 try
@@ -411,21 +411,21 @@ step_cal=[mean(unique(sc_raw(:,1))),step_cal,step0,step1,CSN_orig];    sc_avg=a;
 
 if chk
     % Se muestran los argumentos que toman los valores por defecto
-  disp('--------- Validation OK --------------') 
-  disp('List of arguments given default values:') 
+  %disp('--------- Validation OK --------------') 
+  %disp('List of arguments given default values:') 
   if ~numel(arg.UsingDefaults)==0
      for k=1:numel(arg.UsingDefaults)
         field = char(arg.UsingDefaults(k));
         value = arg.Results.(field);
         if isempty(value),   value = '[]';   
         elseif isfloat(value), value = num2str(value); end
-        disp(sprintf('   ''%s''    defaults to %s', field, value))
+        %disp(sprintf('   ''%s''    defaults to %s', field, value))
      end
   else
-     disp('               None                   ')
+  %   disp('               None                   ')
   end
-  disp('--------------------------------------') 
+  %disp('--------------------------------------') 
 else
-     disp('NO INPUT VALIDATION!!')
-     disp(sprintf('%s',errval.message))
+   %  disp('NO INPUT VALIDATION!!')
+   %  disp(sprintf('%s',errval.message))
 end
