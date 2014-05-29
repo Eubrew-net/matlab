@@ -1,33 +1,43 @@
 function [data_tab, data_events]=meanperiods(events, period, data)
+
 % function [data_tab, data_events]=meanperiods(events, period, data)
 %   
-% imput:
-%  events: fecha_lotus fecha_matlab describing_string  icf SL_ref 
-%  period: date vector :matlab date  (integer)
-%  data: matrix first column is  matlab date.
-% dates are integers (day).
-%% TODO: resolution lower than an day
+% INPUT
+% 
+%  - events: column 2=fecha_matlab; column 3=describing_string
+%  - period: date vector (matlab date, integer)
+%  - data  : matrix. First column is  matlab date.
+% 
+% TODO: resolution lower than an day
 %
-% output: 
-% data_tab
-%  .events= strig with the label
-%  .m     = mean same dimension as data,  %eventos cerrados abiertos  ?  
-%  .std   = std  same 
-%  .n     = n    same
+% OUTPUT:
+% 
+% - data_tab: struct with following variables
+%             events = strig with the label
+%             m      = mean same dimension as data,  %eventos cerrados abiertos  ?  
+%             std    = std  same 
+%             n      = n    same
 %
-% matrix output
-%  1 - n  columns 
-%  2 - m evets
-%  3 - s stats (1 mean, 2 std, 3 nobs, ....)
-%% TODO
+% - matrix output:
+%        1D - n  columns 
+%        2D - m evets
+%        3D - s stats (1 mean, 2 std, 3 nobs, ....)
+% 
+% TODO
 % data_events; data splited by events, 3 dimension matrix,
 %    data selected by events  
 %    same dimension as data, third dimension is the event.
 %       
-n_out=3; %(mean std and n)
+
 events_=cell2mat(events(:,2));
 clms=unique(group_time(period',events_));
-events_lbs=events(unique(clms),3)';
+if any(clms==0)
+   events_=cat(1,period(1),events_);
+   events_lbs=cat(2,'Bef. 1st evnt',events(clms(clms~=0),3)');
+   clms=clms+1;
+else
+   events_lbs=events(clms,3)';    
+end
 
 if isempty(data)
    m=NaN*ones(length(clms),30); m(:,1)=evnts(clms); std=m; N=m;
