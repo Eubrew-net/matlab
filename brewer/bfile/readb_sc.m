@@ -38,15 +38,19 @@ try
     [PATHSTR,NAME,EXT] = fileparts(bfile);
     fileinfo=sscanf([NAME,EXT],'%c%03d%02d.%03d');
     datefich=datejul(fileinfo(3),fileinfo(2));
-    %datestr(datefich(1))
     l=mmstrtok(s,char(10));
-    %jsum=strmatch('summary',l);
 
-    jco=strmatch('co',l);
-    jsc=strmatch('sc',l);
+    jco=strmatch('co',l);  jsc=strmatch('sc',l);
+    if isempty(jsc) || isempty(jco)
+       o3.sc_avg=[];      o3.sc_raw=[];
+       sc=[];    sc_raw=[];    co='No SC';
+       fprintf('%s: No SC''s\n',bfile);
+       return
+    end
     jhg=strmatch('hg',l);
     jhgscan=strmatch('hgscan',l);
     jloc=strmatch('version',l);
+
     % Read the head
     if isunix
        c=(strrep(strtrim(mmcellstr(l{jloc(1)},char(13))),' ','_')); 
@@ -67,8 +71,6 @@ try
     if datebfile~=datefich(1)
         disp('warning Date error in file');
         datevec(datebfile-datefich(1))
-    %else
-    %   disp(loc);
     end
     lat=c(5);
     long=c(6);

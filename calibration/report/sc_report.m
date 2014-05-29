@@ -134,13 +134,13 @@ else
 end
 
 if isempty(sc_avg) 
-    step_cal=[NaN,NaN,NaN,NaN,NaN];
+    step_cal=[nanmean(date_range),NaN,NaN,NaN,NaN];
     return
 end
 
 %sale si no hay datos
 if all(isnan(sc_avg(:,1))) %isempty(sc_avg) 
-    step_cal=[NaN,NaN,NaN,NaN,NaN];
+    step_cal=[nanmean(date_range),NaN,NaN,NaN,NaN];
     return
 end
 
