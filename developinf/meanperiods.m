@@ -1,24 +1,28 @@
-function [data_tab, data_events]=meanperiods(events, period, data)
+function data_tab=meanperiods(data,event)
 
-% function [data_tab, data_events]=meanperiods(events, period, data)
-%   
+%   function data_tab = meanperiods(data,event)
+%  
+% Calculo de estadisticas (promedio, desviacion standard y numero de elementos) para
+% un conjunto de periodos. Los intervalos de produccion de estadisticas estan definidos 
+% a partir de un vector de eventos (fechas) y un periodo de analisis (fechas) 
+% 
 % INPUT
 % 
-%  - events: column 2=fecha_matlab; column 3=describing_string
-%  - period: date vector (matlab date, integer)
-%  - data  : matrix. First column is  matlab date.
+%  - data  : matrix. First column is event date (matlab)
+%  - events: Salida de la funcion getevents (dates y labels)
 % 
 % TODO: resolution lower than an day
 %
 % OUTPUT:
+%  
+%  - data_tab: Structure with following fields
 % 
-% - data_tab: struct with following variables
-%             events = strig with the label
-%             m      = mean same dimension as data,  %eventos cerrados abiertos  ?  
-%             std    = std  same 
-%             n      = n    same
+%             1) m      = mean 
+%             2) std    = std   
+%             3) n      = n    
+%             4) events = cellstring with events' labels
 %
-% - matrix output:
+% - matrix output: TODO
 %        1D - n  columns 
 %        2D - m evets
 %        3D - s stats (1 mean, 2 std, 3 nobs, ....)
@@ -28,51 +32,32 @@ function [data_tab, data_events]=meanperiods(events, period, data)
 %    data selected by events  
 %    same dimension as data, third dimension is the event.
 %       
-
-events_=cell2mat(events(:,2));
-clms=unique(group_time(period',events_));
-if any(clms==0)
-   events_=cat(1,period(1),events_);
-   events_lbs=cat(2,'Bef. 1st evnt',events(clms(clms~=0),3)');
-   clms=clms+1;
-else
-   events_lbs=events(clms,3)';    
-end
-
+ 
+%%
 if isempty(data)
-   m=NaN*ones(length(clms),30); m(:,1)=evnts(clms); std=m; N=m;
-   data_tab.m=m; data_tab.std=std; data_tab.N=N; data_tab.evnts=events_lbs;     
+   m=NaN*ones(event.dates,30); m(:,1)=event.dates; std=m; N=m;
+   data_tab.m=m; data_tab.std=std; data_tab.N=N; data_tab.evnts=event.labels;     
    return;
 end
-a=group_time(data(:,1),events_);
-[id1 id2]=intersect(clms,unique(a));
+
+a=group_time(data(:,1),event.dates);
 [m std N]=grpstats(data,a,{@(x) nanmean(x,1),@(x) nanstd(x,1,1),'numel'});
 
-data_tab.evnts=events_lbs;        
-data_tab.m=NaN*ones(length(clms),size(m,2));
-data_tab.m(:,1)=events_(clms);
+%% Structure: init
+data_tab.m=NaN*ones(length(event.dates),size(m,2));
+data_tab.m(:,1)=event.dates; data_tab.std=data_tab.m; data_tab.N=data_tab.m;
 
-%init
-data_tab.std=data_tab.m;
-data_tab.N=data_tab.m;
+% assigning
+data_tab.m(unique(a),:)=m; data_tab.m(:,1)=event.dates;
+data_tab.std(unique(a),:)=std;
+data_tab.N(unique(a),:)=N;
+data_tab.evnts=event.labels;        
 
-
-
-data_tab.m(id2,:)=m;
-data_tab.std(id2,:)=std;
-data_tab.N(id2,:)=N;
-
-n_events=length(events_lbs);
-n_col=size(data,2);
-
-data_events=NaN*ones(n_events,n_col,3);
-
-data_events(:,:,1)=data_tab.m;
-data_events(:,:,2)=data_tab.std;
-data_events(:,:,3)=data_tab.N;
-
-
-
-
-
-
+%% Matrix: init
+% n_events=length(event.labels); n_col=size(data,2);
+% data_events=NaN*ones(n_events,n_col,3);
+% 
+% % assigning
+% data_events(:,:,1)=data_tab.m;
+% data_events(:,:,2)=data_tab.std;
+% data_events(:,:,3)=data_tab.N;
