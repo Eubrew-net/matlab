@@ -4,11 +4,11 @@ function data_tab=meanperiods(data,event)
 %  
 % Calculo de estadisticas (promedio, desviacion standard y numero de elementos) para
 % un conjunto de periodos. Los intervalos de produccion de estadisticas estan definidos 
-% a partir de un vector de eventos (fechas) y un periodo de analisis (fechas) 
+% a partir de un vector de eventos (fechas) 
 % 
 % INPUT
 % 
-%  - data  : matrix. First column is event date (matlab)
+%  - data  : matrix. First column is date (matlab)
 %  - events: Salida de la funcion getevents (dates y labels)
 % 
 % TODO: resolution lower than an day
