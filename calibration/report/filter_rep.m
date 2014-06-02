@@ -306,9 +306,9 @@ if plot_flag
    datetick('x','mmmyy','keeplimits','keepticks');
    end
    samexaxis('abc','xmt','on','ytac','join','yld',1)
-%legend(label_lamda); 
+   %legend(label_lamda); 
 %mmplotyy('shrink');
-
+suptitle(' % vs average ')
 %% Mensual
 fh=figure; set(fh,'tag','FI_TIME_MONTH');
 subaxis(3,2,1,'sv',0,'sh',0.1)
@@ -322,24 +322,25 @@ for ii=1:6
 end
 %set(subaxis(6),'xticklabelmode','auto')
 legend(label_lamda); 
+suptitle('Monthly Values');
 
 
-% Mensual2
+%% Mensual2
 fh=figure; set(fh,'tag','FI_TIME_MONTH');
 
 for ii=1:6
   subplot(6,1,ii);
   plot( fi_month{ii}.media(:,1),...
-      matdiv(fi_month{ii}.media(:,[6:end]),med(2:end,ii)'),'.-.');
+      matdiv(fi_month{ii}.media(:,[6:end]),med(2:end,ii)'),'o-.');
   axis('tight');
   datetick('x','mmm','keeplimits','keepticks'); 
   if ii==1 legend(label_lamda,'Location','North','orientation','horizontal'); end
   ylabel(label_filter{ii});
 end
 samexaxis('abc','xmt','on','ytac','join','yld',1)
-suptitle('Month ratios vs mean');
+suptitle('Monthly ratio attenuation vs mean attenuation');
 
-%
+%%
 fh=figure; set(fh,'tag','FI_TIME_ETC');
 for ii=1:6
   subplot(2,3,ii);
@@ -354,7 +355,7 @@ end
 suptitle([brw_str, 'ETC correction factor time evolution']);
 %legend(label_lamda); 
 
-% Mensual
+%% Mensual
 fh=figure; set(fh,'tag','FI_TIME_ETC2');
 ploty(filter_month(:,[1,3:end]));
 legend(label_filter(2:end), 'Orientation','Horizontal','Location','NorthOutside');
