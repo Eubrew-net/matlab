@@ -1,4 +1,4 @@
-function Options=printfiles_report(n0,patern,varargin)
+function [Options,figura]=printfiles_report(n0,patern,varargin)
 % function Options=printfiles_report(n0,patern,varargin)
 % print eps files acording with format
 % 30/04/2010 Juanjo: para el caso de m?ltiples figuras habr?n varias
