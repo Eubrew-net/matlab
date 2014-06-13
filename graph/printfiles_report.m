@@ -1,4 +1,4 @@
-function [Options,figura]=printfiles_report(n0,patern,varargin)
+function [Options,figuras]=printfiles_report(n0,patern,varargin)
 % function Options=printfiles_report(n0,patern,varargin)
 % print eps files acording with format
 % 30/04/2010 Juanjo: para el caso de m?ltiples figuras habr?n varias
@@ -19,8 +19,8 @@ function [Options,figura]=printfiles_report(n0,patern,varargin)
 Options.Format='eps';   %'Format'  a string specifies the output format. Defaults to 'eps'. For 
 Options.Preview='tiff'; %'Preview' one of the strings 'none', 'tiff' specifies a preview for EPS files. Defaults to 'none'.  
 
-Options.Width=12;  %cm a positive scalar specifies the width in the figure's PaperUnits
-Options.Height=6.5;  %a positive scalar  specifies the height in the figure's PaperUnits
+Options.Width=18;  %cm a positive scalar specifies the width in the figure's PaperUnits
+Options.Height=14;  %a positive scalar  specifies the height in the figure's PaperUnits
                    %Specifying only one dimension sets the other  dimension so that the exported aspect ratio is the same as the
                    %figure's or reference axes' current aspect ratio. 
 Options.Bounds='tight';  %'Bounds' one of the strings 'tight', 'loose'  specifies a tight or loose bounding box. Defaults to 'tight'.
@@ -93,6 +93,7 @@ end
                                
 cwd=pwd; cd(patern);
 naux=1; % contador de figuras
+figuras={};
 try
  for i=n0
      set(findobj(gcf,'Tag','legend'),'HandleVisibility','Off');
@@ -136,6 +137,7 @@ try
      end
      %saveas(h,figura,'fig');
      saveas(h,figura,'png');
+     figuras{i}=[figura,'.eps'];
 end
 cd(cwd);
 catch exception
