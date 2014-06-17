@@ -355,33 +355,41 @@ a(isnan(a(:,10)),:)=[];
 % hg correction
 a(isnan(a(:,21)),21)=0;
 x=a(:,10)-a(:,21)/2;
-X=x;
-y=polyval(p,x);
-try  %fails with only one
- xlims=[invpred(x,y,2000);invpred(x,y,300)];
- x=sort([x;xlims]);
-catch
-    x=sort(x);
-    xlims=[300,1800];
+
+if ~isempty(x)
+    X=x;
+    y=polyval(p,x);
+    try  %fails with only one
+        xlims=[invpred(x,y,2000);invpred(x,y,300)];
+        x=sort([x;xlims]);
+    catch
+        x=sort(x);
+        xlims=[300,1800];
+    end
+    [y,delta]=polyconf(p,x,s);
+    
+    figure
+    gscatter(X,a(:,8).*a(:,11),{month(a(:,1)),year(a(:,1))});
+    
+    f_end=figure; set(f_end,'Tag','Final_SC_Calculation');
+    h0=plot(X,a(:,8).*a(:,11),'s'); set(gca,'LineWidth',1);
+    hold on;
+    hconf=confplot(x,y,delta); set(hconf(1),'Marker','none')
+    ylim([300 1700]); xlim(xlims);
+    hold on;
+    h1=plot(X,a(:,8).*a(:,11),'o');
+
 end
-[y,delta]=polyconf(p,x,s);
 
-figure
-gscatter(X,a(:,8).*a(:,11),{month(a(:,1)),year(a(:,1))});
-
-f_end=figure; set(f_end,'Tag','Final_SC_Calculation');
-h0=plot(X,a(:,8).*a(:,11),'s'); set(gca,'LineWidth',1);
-hold on;
-hconf=confplot(x,y,delta); set(hconf(1),'Marker','none')
-ylim([300 1700]); xlim(xlims);
-hold on;
-h1=plot(X,a(:,8).*a(:,11),'o');
 try
 step_cal=invpred(x,y,ref_iau);
 catch
     step_cal=NaN;
 end
+
 [y1,delta1]=polyconf(p,step_cal,s);
+
+
 try   
     step0=invpred(x,y,ref_iau+delta1);
 catch
@@ -395,6 +403,7 @@ end
 
 hl=hline([ref_iau,ref_iau+delta1,ref_iau-delta1],{'b-','r:','r:'},{'','',''}); 
 vl=vline(([step0,step_cal,step1]),{'r:','b-','r:'},{'','',''}); 
+
 try
 title(sprintf('OSC clim. =%.0f   Calc Step = %.1f [%.1f,%.1f] \n   Calibration Step from config file %s = %.0f ',...
                ref_iau,step_cal,step0,step1,brw_config(end-11:end),CSN_orig));
