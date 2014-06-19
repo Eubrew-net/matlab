@@ -22,6 +22,12 @@ function [ grp,g ] = group_time( data,periods )
 % 
 
 g=NaN*ones( size(data,1) ,length(periods)+1);
+if ~issorted(periods)  
+  warning('Periods is not sorted !! , is automatically sorted');  
+  periods=sort(periods);
+end
+
+
 for ii=0:length(periods);
     if(ii==0)
      g(:,ii+1)=(data(:,1)<periods(1));% Las configs. se aplican a partir de   
