@@ -92,7 +92,7 @@ for j=1:2:(length(varargin)-1)
 end
                                
 cwd=pwd; cd(patern);
-naux=1; % contador de figuras
+naux=0; % contador de figuras
 figuras={};
 try
  for i=n0
@@ -105,6 +105,7 @@ try
         if isnumeric(aux_pattern)
            if i==n0(1)
               figura=[brw{1},'_',label]; 
+              naux=1;
            else
               figura=[brw{1},'_',label,'_',num2str(naux)];    
               naux=naux+1;   
@@ -116,6 +117,7 @@ try
      else
 %         if i==n0(1)
          figura=[brw{1},'_',label]; 
+         naux=naux+1;
 %         else
 %          figura=[brw{1},'_',label,'_',num2str(naux)];    
 %          naux=naux+1;   
@@ -137,7 +139,7 @@ try
      end
      %saveas(h,figura,'fig');
      saveas(h,figura,'png');
-     figuras{i}=[figura,'.eps'];
+     figuras{naux}=[figura,'.eps'];
 end
 cd(cwd);
 catch exception
