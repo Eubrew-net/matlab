@@ -1,12 +1,12 @@
 %function Options=printfiles(n0,n1,patern,varargin)
 
-function Options=printfiles(n0,n1,patern,varargin)
+function Options=printfiles_append(n0,n1,patern,varargin)
 
 Options.Format='ps';   %'Format'  a string specifies the output format. Defaults to 'eps'. For 
 Options.Preview='tiff'; %'Preview' one of the strings 'none', 'tiff' specifies a preview for EPS files. Defaults to 'none'.  
 
-Options.Width=20.5;  %cm a positive scalar specifies the width in the figure's PaperUnits
-Options.Height=17.5;  %a positive scalar  specifies the height in the figure's PaperUnits
+Options.Width=20;  %cm a positive scalar specifies the width in the figure's PaperUnits
+Options.Height=15;  %a positive scalar  specifies the height in the figure's PaperUnits
                    %Specifying only one dimension sets the other  dimension so that the exported aspect ratio is the same as the
                    %figure's or reference axes' current aspect ratio. 
 Options.Bounds='loose';  %'Bounds' one of the strings 'tight', 'loose'  specifies a tight or loose bounding box. Defaults to 'tight'.
@@ -15,7 +15,7 @@ Options.Bounds='loose';  %'Bounds' one of the strings 'tight', 'loose'  specifie
  
 Options.Color='cmyk' ;  %one of the strings 'bw', 'gray', 'cmyk','rgb' The default color setting is 'bw'.
 Options.Resolution=300; %a positive scalar  specifies the resolution in dots-per-inch.
-Options.LockAxes=1;     %LockAxes'  one of 0 or 1 specifies that all axes limits and ticks should be fixed  while exporting.
+Options.LockAxes=0;     %LockAxes'  one of 0 or 1 specifies that all axes limits and ticks should be fixed  while exporting.
       
       
 Options.FontMode='fixed';  %one of the strings 'scaled', 'fixed'
@@ -78,23 +78,27 @@ try
     figura=[patern,'_'];%,num2str(i)];
     
     
-    set(h,'WindowStyle','normal');
+    set(h,'WindowStyle','Normal');
     set(h,'PaperUnits','centimeters');
     set(h,'PaperPositionMode','Auto')
   
-    if ~isempty(strcmp(varargin,'no_export'))
-        exportfig(h,[strtok(figura,'.')],Options);
-    else
-        applytofig(h,Options);
-        print(h,'-dpsc','-r300','-cmyk','-append',[figura,'.ps']);
-        saveas(h,[patern,label,num2str(i)],'fig');  
-    end
+    %if ~isempty(strcmp(varargin,'no_export'))
+    %    exportfig(h,[strtok(figura,'.')],Options);
+    %else
+    %    applytofig(h,Options);
+    %    print(h,'-dpsc','-r300','-cmyk','-append',[figura,'.ps']);
+    %    saveas(h,[patern,label,num2str(i)],'fig');  
+    %end
     
     applytofig(h,Options);
-        print(h,'-dpsc','-r300','-cmyk','-append',[figura,'.ps']);
-        saveas(h,[patern,label,num2str(i)],'fig');  
-        hgexport(h,'-clipboard');  
-        print(h,'-r300','-dpng',[patern,label,num2str(i)]);
+    if i==n0
+        print(h,'-dpsc','-r300','-cmyk',[figura,'.ps']);
+    else    
+         print(h,'-dpsc','-r300','-cmyk','-append',[figura,'.ps']);
+    end
+        %saveas(h,[patern,label,num2str(i)],'fig');  
+        %hgexport(h,'-clipboard');  
+        %print(h,'-r300','-dpng',[patern,label,num2str(i)]);
 close(h);
 %    save as fig file
 
