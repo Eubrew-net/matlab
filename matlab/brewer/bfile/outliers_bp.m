@@ -1,11 +1,12 @@
 function [m,s,outl,index]=outliers_bp(data,LIM)
-%calcula la media y la sigma de los datos quitando los que estan fuera de 3s bo
-%function [m,s,outl,index]=outliers_bp(data,LIM)
+
+% function [m,s,outl,index]=outliers_bp(data,LIM)
 % 
-index=[];
+% calcula la media y la sigma de los datos quitando los que estan fuera de 3s bo
 % no es necesario quitar NaNs (no recomendable -> no coincidencia de indices)
 % data=data(find(~isnan(data)));
 % quantile treats NaNs as missing values and removes them (ver abajo, 33)
+
 if nargin==1
     LIM=2.5;    fprintf('Por defecto, LIM=%3.1f (en boxparams)\n',LIM);
 end

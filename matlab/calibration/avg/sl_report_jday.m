@@ -193,7 +193,7 @@ sl_median(:,2)=[]; sl_median=sortrows(sl_median,1);
         if ~isempty(cell2mat(events_raw(:,1)))
            dates=cell2mat(events_raw(:,2)); indx=dates>=sl_median(1,1) & dates<=sl_median(end,1); 
            if any(indx)
-              h=vline_v(dates(indx),'-k',events_raw(indx,3)); set(h,'LineWidth',2);
+              h=vline_v(dates(indx),'-k',events_raw(indx,3)); set(h,'LineWidth',1);
            end
         end
         datetick('x','mm/dd/yy','keeplimits','keepticks');
@@ -201,12 +201,11 @@ sl_median(:,2)=[]; sl_median=sortrows(sl_median,1);
         if ~isempty(events_raw)
            dates=cell2mat(events_raw(:,2)); indx=dates>=sl_median(1,1) & dates<=sl_median(end,1); 
            if any(indx)
-              h=vline_v(diaj(dates(indx)),'-k',events_raw(indx,3)); set(h,'LineWidth',2);
+              h=vline_v(diaj(dates(indx)),'-k',events_raw(indx,3)); set(h,'LineWidth',1);
            end                           
         end
     end
     grid;    xlabel('Date');   ylabel('SL R6  ratios');
-    set(gca,'LineWidth',1);%,'XTick',diaj(sl_medianplot(:,1))%,'XTickLabel',diaj(sl_medianplot(:,1))
    
     f=figure;
     set(f,'tag','SL_R5_report');

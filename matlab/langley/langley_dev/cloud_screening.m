@@ -61,15 +61,15 @@ for i=1:l1
     % Leemos BSRN: Cabecera + Datos
     bsrn_f=fopen(fullfile(bsrn_dir,file),'rt');
     if bsrn_f~=-1
-       cab=fgetl(bsrn_f); cab_=regexp(cab(2:end), ' ', 'split');
+       cab=fgetl(bsrn_f); cab_=regexp(cab(2:end), ' ', 'split'); cab_=cellfun(@(x) upper(x),cab_,'UniformOutput',0);
        bsrn=textscan(bsrn_f,repmat('%f ',1,length(cab_)),'CommentStyle','#');      
     else
        continue
     end
     fclose(bsrn_f);
     
-    col_sza = strmatch('SZA',cab_);     col_minuto = strmatch('minuto_campbell',cab_);
-    col_GLB = strmatch('GLB_Avg',cab_); col_DIF    = strmatch('Dif_Avg',cab_);     
+    col_sza = strmatch('SZA',cab_);     col_minuto = strmatch('MINUTO_CAMPBELL',cab_);
+    col_GLB = strmatch('GLB_AVG',cab_); col_DIF    = strmatch('DIF_AVG',cab_);     
     DATA1=cell2mat(bsrn([1 col_sza,col_minuto,col_GLB,col_DIF])); DATA1(:,1)=datenum(year(DATA0(i,1)),1,dayj,0,DATA1(:,3),0);
     DATA2=DATA1(DATA1(:,2)<70.0,:);% Valores con sza<80
     DATA2(DATA2(:,4)<0,:)=[]; DATA2(DATA2(:,5)<0,:)=[]; DATA2(isnan(DATA2(:,4)),:)=[];
