@@ -5,15 +5,12 @@ function [NTC,ajuste,Args,Fr,FN]=temp_coeff_raw(setup_file,sl,varargin)
 %  fexha	hg	idx	temp	filter1	filter2	min	sli0 slit1	cy	
 %  raw counts 
 %  11	12	13	14	15	16  17	
-%  rL0	rL1	rL2	rL3	rL4	rL5	rL6
-%counts/second calculated with TC=0 
-% cL0	cL1	cL2	cL3	cL4	cL5	cL6	
-% 18	19	20	21	22	23	24	
-% ratios and F1 F5 calculated with TC of the file (m8,m9,F1,F5 7xsummary)
-% ms4	ms5	ms6	ms7	ms8(R5)	ms9(R6)	F1	F5
-% 25	26	27	28	  29	  30	31	32
-% 
-% 
+%  rL0	rL1	rL2	rL3	rL4	rL5	rL6 raw counts
+%  18	19	20	21	22	23	24	
+%  cL0	cL1	cL2	cL3	cL4	cL5	cL6	counts/second calculated with TC=0 
+%  25	26	27	28	  29	  30	31	32
+%  ms4	ms5	ms6	ms7	ms8(R5)	ms9(R6)	F1	F5 ratios,F1 & F5 calc. with TC=bfile (m8,m9,F1,F5 7xsummary)
+%  
 % TODO :
 %           -Separar calculos y salidas    
 % 
