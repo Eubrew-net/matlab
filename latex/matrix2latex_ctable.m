@@ -143,13 +143,29 @@ function matrix2latex_ctable(matrix, filename, varargin)
             fprintf(fid, '&');
         end
         for w=1:width-1
-            fprintf(fid, '\\textbf{%s}&', colLabels{w});
+           if isstr(colLabels{w})
+              colLabels{w}=strrep(colLabels{w},'#','\#');
+              colLabels{w}=strrep(colLabels{w},'_',' ');
+              colLabels{w}=strrep(colLabels{w},'%','\% ');
+              colLabels{w}=strrep(colLabels{w},'&','\&');
+              colLabels{w}=strrep(colLabels{w},'<','$<$');
+              colLabels{w}=strrep(colLabels{w},'>','$>$');
+           end
+           fprintf(fid, '\\textbf{%s}&', colLabels{w});
         end
         fprintf(fid, '\\textbf{%s}\\\\\\midrule\r\n', colLabels{width});
     end
     
     for h=1:height
         if(~isempty(rowLabels))
+            if isstr(rowLabels{h})
+               rowLabels{h}=strrep(rowLabels{h},'#','\#');
+               rowLabels{h}=strrep(rowLabels{h},'_',' ');
+               rowLabels{h}=strrep(rowLabels{h},'%','\% ');
+               rowLabels{h}=strrep(rowLabels{h},'&','\&');
+               rowLabels{h}=strrep(rowLabels{h},'<','$<$');
+               rowLabels{h}=strrep(rowLabels{h},'>','$>$');
+            end
             fprintf(fid, '\\textbf{%s}&', rowLabels{h});
         end
         for w=1:width-1
