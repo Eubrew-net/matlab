@@ -1,4 +1,4 @@
-function [data data_tab] = langley_filter_lvl1(data,varargin)
+function [data selected_days all_days] = langley_filter_lvl1(data,varargin)
 
 % General function for langley data level 1 filtering.
 % Normal data-filters applied to O3 summaries are now used to refine langley data.
@@ -42,7 +42,16 @@ function [data data_tab] = langley_filter_lvl1(data,varargin)
 % - lgl_days   :
 % 
 % OUTPUT:
-% - langley FILTERED data (either individuals or summaries, depending on the input). In all cases:
+% - langley FILTERED data (either individuals or summaries, depending on the input).
+% 
+% - selected_days: Struct var with fields:
+%           - data = 2D matrix with auxiliary information for langley processing. Just selected days 
+%           - labels = 'Date','AM','O3','O3_std','N','AOD','AOD_std','Cld','PM','O3','O3_std','N','AOD','AOD_std','Cld'
+% 
+% - all_days     : Struct var with fields:
+%           - data = 2D matrix with auxiliary information for langley processing. All days
+%           - labels = 'Date','AM','O3','O3_std','N','AOD','AOD_std','Cld','PM','O3','O3_std','N','AOD','AOD_std','Cld'
+% 
 %
 % EXAMPLE:   (ozone_lgl{ii} is output from langley_data_cell function
 %             AOD_data from aeronet webpage
@@ -221,69 +230,71 @@ end
 data=cellfun(@(x,y) cat(1,x,y),data_AM, data_PM,'UniformOutput',false);
 data=data(cellfun(@(x) ~isempty(x),data));
 
-%% Tabla
-fprintf('Selected days: conditions\r\n');
+%% Tabla: Selected days
+% fprintf('Selected days: conditions\r\n');
 
 j_=cellfun(@(x) x(:,9)/60>12,data,'UniformOutput',false);
 j_idx=cellfun(@(x) unique(x)+1,j_,'UniformOutput',false); 
-[s_ampm,n_ampm]=cellfun(@(x,y) grpstats(x(:,33),y,{'std','numel'}),data,j_,'UniformOutput',false);
+[m_ampm s_ampm,n_ampm]=cellfun(@(x,y) grpstats(x(:,33),y,{'mean','std','numel'}),data,j_,'UniformOutput',false);
 
-aux_ampm=NaN*ones(length(data),12); 
+aux_ampm=NaN*ones(length(data),14); 
 for jj=1:length(data)% cellfun doesn't support explicit assignment
    aux_ampm(jj,j_idx{jj})=1;
-   aux_ampm(jj,j_idx{jj}+2)=s_ampm{jj};
-   aux_ampm(jj,j_idx{jj}+4)=n_ampm{jj};
+   aux_ampm(jj,j_idx{jj}+2)=m_ampm{jj};
+   aux_ampm(jj,j_idx{jj}+4)=s_ampm{jj};
+   aux_ampm(jj,j_idx{jj}+6)=n_ampm{jj};
 end
 
 if ~isempty(arg.Results.AOD)
     id=ismember(fix(aod_m(:,1)),cellfun(@(x) unique(fix(x(:,1))),data)); 
     aod_ampm=aod_m(id,:);
-    aux_ampm(:,7:10)=aod_ampm(:,[3 4 7 8]);
+    aux_ampm(:,9:12)=aod_ampm(:,[3 4 7 8]);
 end
 
 if ~isempty(arg.Results.Cloud)
     id=ismember(fix(clouds(:,1)),cellfun(@(x) unique(fix(x(:,1))),data)); 
     cloud_ampm=clouds(id,:);
-    aux_ampm(:,11:12)=cloud_ampm(:,3:4);
+    aux_ampm(:,13:14)=cloud_ampm(:,3:4);
 end
 
-data_tab=[diaj(cellfun(@(x) fix(x(1,1)),data)),aux_ampm(:,[1 3 5 7:8 11 2 4 6 9:10 12])];
-colhead={'Diaj','AM','O3_std','N','AOD','AOD_std','Cld',...
-                'PM','O3_std','N','AOD','AOD_std','Cld'};
-fms = {'d','d','.2f','d','.4f','.5f','d','d','.2f','d','.4f','.5f','d'};
-displaytable(data_tab, colhead, 8, fms, cellstr(datestr(cellfun(@(x) fix(x(1,1)),data))));
- 
+selected_days.data  =[cellfun(@(x) fix(x(1,1)),data),aux_ampm(:,[1 3 5 7 9 10 13 2 4 6 8 11 12 14])];
+selected_days.labels={'Diaj','AM','O3','O3_std','N','AOD','AOD_std','Cld',...
+                      'PM','O3','O3_std','N','AOD','AOD_std','Cld'};
+% fms = {'d','d','.1f','.2f','d','.4f','.5f','d','d','.1f','.2f','d','.4f','.5f','d'};
+% displaytable([diaj(selected_days.data(:,1)) selected_days.data(:,2:end)], selected_days.labels, 8, fms, cellstr(datestr(cellfun(@(x) fix(x(1,1)),data))));
+
 %% Tabla con condiciones para todos los días
 if arg.Results.lgl_days
-   fprintf('\nAll days: conditions\r\n');
+%    fprintf('\nAll days: conditions\r\n');
    j_=cellfun(@(x) x(:,9)/60>12  ,data_days     ,'UniformOutput',false);% 0=AM, 1=PM
    j_idx=cellfun(@(x) unique(x)+1,j_,'UniformOutput',false); 
 
-   [s_ampm,n_ampm]=cellfun(@(x,y) grpstats(x(:,33),[fix(x(:,1)) y],{'std','numel'}),data_days,j_,'UniformOutput',false);      
+   [m_ampm s_ampm,n_ampm]=cellfun(@(x,y) grpstats(x(:,33),[fix(x(:,1)) y],{'mean','std','numel'}),data_days,j_,'UniformOutput',false);      
    
-   aux_ampm=NaN*ones(length(data_days),12); 
+   aux_ampm=NaN*ones(length(data_days),14); 
    aux_ampm(:,1)=cellfun(@(x) fix(x(1,1)),data_days); aux_ampm(:,2)=cellfun(@(x) diaj(x(1,1)),data_days);
    for jj=1:length(data_days)
-       aux_ampm(jj,j_idx{jj}+2)=s_ampm{jj};
-       aux_ampm(jj,j_idx{jj}+4)=n_ampm{jj}; 
+       aux_ampm(jj,j_idx{jj}+2)=m_ampm{jj};
+       aux_ampm(jj,j_idx{jj}+4)=s_ampm{jj};
+       aux_ampm(jj,j_idx{jj}+6)=n_ampm{jj}; 
    end
 
    if ~isempty(arg.Results.AOD)
     [id loc]=ismember(fix(aod_m(:,1)),unique(fix(aux_ampm(:,1)))); 
     aod_ampm=aod_m(id,:); aux_ampm=aux_ampm(loc(loc~=0),:);
-    aux_ampm(:,7:10)=aod_ampm(:,[3 4 7 8]);
+    aux_ampm(:,9:12)=aod_ampm(:,[3 4 7 8]);
    end
 
    if ~isempty(arg.Results.Cloud)
       [id loc]=ismember(fix(clouds(:,1)),unique(fix(aux_ampm(:,1)))); 
       cloud_ampm=clouds(id,:); aux_ampm=aux_ampm(loc(loc~=0),:);
-      aux_ampm(:,11:12)=cloud_ampm(:,3:4);
+      aux_ampm(:,13:14)=cloud_ampm(:,3:4);
    end
-
-   colhead={'Diaj','O3_std','N','AOD','AOD_std','Cld',...
-                   'O3_std','N','AOD','AOD_std','Cld'};
-   fms = {'d','.2f','d','.4f','.5f','d','.2f','d','.4f','.5f','d'};
-   displaytable(aux_ampm(:,[2 3 5 7:8 11 4 6 9:10 12]), colhead, 8, fms, cellstr(datestr(fix(aux_ampm(:,1)))));
+   all_days.data  =aux_ampm(:,[1 2 3 5 7 9 10 13 4 6 8 11:12 14]);
+   all_days.labels={'Diaj','O3','O3_std','N','AOD','AOD_std','Cld',...
+                    'O3','O3_std','N','AOD','AOD_std','Cld'};
+%    fms = {'d','.1f','.2f','d','.4f','.5f','d','.1f','.2f','d','.4f','.5f','d'};
+%    displaytable(all_days.data(:,2:end), all_days.labels, 8, fms, cellstr(datestr(fix(aux_ampm(:,1)))));
 end
 
 %% Ploteo de días individuales. Con / Sin filtros

@@ -115,6 +115,7 @@ for dd=1:length(lgl_data{brw})
                    [c1_brw,ci,r,ri,st]=regress(P_brw(~idx),X);
                 end
                 resp_brw(dd,ampm+1,ncfg)            = c1_brw(1);    
+                resp_brw(dd,ampm+3,ncfg)            = c1_brw(2);    
                 stats_brw.ci(dd,ci_idx,ncfg)        = ci(1,:);
                 stats_brw.r{dd}(jk_idx,ampm+3,ncfg) = r; 
                 stats_brw.rs(dd,ampm+1,ncfg)        = st(1);
@@ -150,6 +151,7 @@ for dd=1:length(lgl_data{brw})
                    [c1_dbs,ci_dbs,r_dbs,ri,st_dbs]=regress(P_dbs(~idx),X);
                 end
                 resp_dbs(dd,ampm+1,ncfg)            = c1_dbs(2);
+                resp_dbs(dd,ampm+3,ncfg)            = c1_dbs(1);
                 stats_dbs.ci(dd,ci_idx,ncfg)        = ci_dbs(1,:);
                 stats_dbs.r{dd}(jk_idx,ampm+3,ncfg) = r_dbs; 
                 stats_dbs.rs(dd,ampm+1,ncfg)        = st_dbs(1);                
