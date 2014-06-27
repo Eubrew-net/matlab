@@ -237,9 +237,13 @@ ref=summary{n_ref}(jday,:);
          %%two point by filter
          try
           figure;
-          gscatter(ozone_slant(j),o3_c(j,21),o3_c(j,18));
-          hold on; plot(ozone_slant(j),o3_c(j,21),'kx'); [rk,l,lstats]=robust_line; l=round(l); l(2,:)=l(2,:)./10000;
-          title(num2str(l)); ylabel('MS9  corrected'); legend(num2str((unique(o3_c(j,18)))))
+          gscatter(ozone_slant(j),o3_c(j,21),o3_c(j,18),'','o',6);
+          hold on; plot(ozone_slant(j),o3_c(j,21),'kx');
+          [rk,l,lstats]=robust_line;
+          l=round(l);
+          l(2,:)=l(2,:)./10000;
+          title(num2str(l)); ylabel('MS9  corrected'); 
+          legend(num2str((unique(o3_c(j,18)))))
           
           figure; gscatter(ozone_slant(j),o3_c(j,22),o3_c(j,18));
           hold on; plot(ozone_slant(j),o3_c(j,22),'kx'); [rk,l1,l1stats]=robust_line;
@@ -262,7 +266,12 @@ ref=summary{n_ref}(jday,:);
          plot(1000./(m_inst.*o3ref),1000*ms9c./(m_inst.*o3ref),'x');
          y=ms9c./m_ref; x=[o3ref,1./m_ref];
         [b1,bi1,res,resi,st]=regress(y,x);
-        gscatter(1./(o3ref.*m_inst),res,o3_c(:,18)) 
+        gscatter(1./(o3ref.*m_inst),res,o3_c(:,18),'','o',7) ;
+        %%
+        figure;
+        grpstats(res,diaj(o3_c(:,1)),0.05);
+        rotateticklabel(gca);
+        
 %          %% depurar
 %          try
 %             filter=unique(o3_c(j,18));dummy_var=[];
