@@ -40,13 +40,13 @@ arg.parse(Cal, icf, varargin{:});
 
 %% Todos los datos
 config_temp.n_inst=Cal.n_inst;  config_temp.brw_name=Cal.brw_name{Cal.n_inst};        
-if ~exist('sl_rw.mat','var')
+% if ~exist('sl_rw.mat','file')
    sl_rw=readb_sl_rawl(fullfile(Cal.path_root,['bdata',Cal.brw_str{Cal.n_inst}],['B*.',Cal.brw_str{Cal.n_inst}]),...
                                             'date_range',Cal.Date.CALC_DAYS([1 end]));
-   save('sl_rw.mat','sl_rw');
-else
-   load('sl_rw.mat');
-end
+%    save('sl_rw.mat','sl_rw');
+% else
+%    load('sl_rw.mat');
+% end
 
 %% Determinamos los periodos de analisis + configs a aplicar
 % periodos
@@ -71,7 +71,7 @@ for pp=1:length(id_period)
      tabl_TC_std=[tabl_TC_std; cat(2,nanmean(Fraw(:,1)),ajuste{pp}.orig(7,3),ajuste{pp}.orig(7,4),ajuste{pp}.new(7,3),ajuste{pp}.new(7,4),...
                         sqrt(ajuste{pp}.cero(1:5,end).^2+ajuste{pp}.cero(1,end)^2)')];   
                     
-     figure; 
+     Fraw(isnan(Fraw(:,1)),:)=[]; figure; 
      [mn,sn]=grpstats(Forig(:,[2,end]),Forig(:,2),{'mean','sem'});
      [mt,st]=grpstats(Fnew(:,[2,end]),Fnew(:,2),{'mean','sem'});
               errorbar(mn(:,1),mn(:,2),sn(:,2),'Color','k','Marker','s');
