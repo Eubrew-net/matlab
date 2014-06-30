@@ -1,16 +1,17 @@
-function [n, m] = month(d)
+function [n, m] = month(d,f)
 %MONTH Month of date.
-%   Month returns the month in numeric and string form given a serial date
-%   number or a date string.
+%   [N,M] = MONTH(D) returns the month of a serial date number or a date string, D.
+%   N is the numeric representation of the month and M is the three letter
+%   abbreviation.
 %
-%   [N, M] = MONTH(D)
+%	[N,M] = MONTH(S,F) returns the year of one or more date strings S using 
+%   format string F. S can be a character array where each
+%	row corresponds to one date string, or one dimensional cell array of 
+%	strings.  
 %
-%   Inputs:
-%   D   - Serial date number(s) or a date string(s).
-%
-%   Outputs:
-%   N   - Numeric month representation.
-%   M   - String month representation.
+%	All of the date strings in S must have the same format F, which must be
+%	composed of date format symbols according to Table 2 in DATESTR help.
+%	Formats with 'Q' are not accepted.  
 %
 %   Example:
 %      19-Dec-1994 (728647)
@@ -30,18 +31,28 @@ function [n, m] = month(d)
 %   See also DATEVEC, DAY, YEAR.
 
 %   Copyright 1995-2006 The MathWorks, Inc.
-%   $Revision: 1.6.2.4 $   $Date: 2006/06/16 20:08:47 $
+%   $Revision: 1.6.2.6 $   $Date: 2009/03/09 19:12:18 $
 
 if nargin < 1
     error('Finance:month:missingInput', 'Please enter D.')
 end
 
+if nargin < 2
+  f = '';
+end
+
+tFlag = false;   %Keep track if input was character array 
 if ischar(d)
-    d = datenum(d);
+    d = datenum(d,f);
+    tFlag = true;
 end
 
 % Generate date vectors
-c = datevec(d(:));
+if nargin < 2  || tFlag
+  c = datevec(d(:));
+else
+  c = datevec(d(:),f);
+end
 
 % Monthly strings
 mths = ['NaN';'Jan';'Feb';'Mar';'Apr';'May';'Jun';'Jul'; ...

@@ -1,30 +1,63 @@
-function w = weeknum(daynums)
-% WEEKNUM returns vector W containg the weeknumber corresponding to the
-% dates in input vector DAYNUMS. Week 1 is the first 4-day week of the year
-% NB! Using Monday as first day of the week.
+function n = weeknum(d,w,e)
+%WEEKNUM Day of week.
+%   N = WEEKNUM(D) returns the week of the year given D, a serial date 
+%   number or a date string. 
+% 
+%   N = WEEKNUM(D,W) returns the week of the year given D, a serial date 
+%   number or a date string, and W, a numeric representation of the day a 
+%   week begins.  The week start values and their corresponding day are:
+%
+%                       1     Sun   (default)
+%                       2     Mon
+%                       3     Tue
+%                       4     Wed
+%                       5     Thu
+%                       6     Fri
+%                       7     Sat
 
-%% 
-daynums = daynums(:);
-dayvec = datevec(daynums);
-newyearvec = [dayvec(:,1) ones(size(dayvec,1),2) dayvec(:,4:6)];    % January 1st of same year
-newyearnums = datenum(newyearvec);
-newyeardays = rem(5 + weekday(newyearnums),7) + 1;  % Making Monday=1 (instead of Sunday=1 as returned by built-in function weekday). 
+%   See also DATENUM, DATEVEC, WEEKDAY.
+ 
+%   Copyright 1984-2008 The MathWorks, Inc.
+%   $Revision: 1.1.6.2 $  $Date: 2008/09/29 16:33:00 $
 
-aux = zeros(size(newyeardays));
-decind = find(newyeardays<5);                       % Week one starts in December (or Jan 1st)
-janind = find(newyeardays>4);                       % Week one starts in January
-aux(decind) = newyeardays(decind)-1;                % Week one starts in December: {0,1,2,3} days added to year
-aux(janind) = newyeardays(janind)-8;                % Week one starts in January: {1,2,3} days subtracted from year
+%Default input values
+%Do not use European standard
+if nargin < 3
+  e = 0;
+end
 
-w = floor((daynums-newyearnums+aux)/7)+1;           % Number of full weeks since monday of week one.
-%% Removing misclassified week 53
-ind53 = find(w==53);
-lastdec = [dayvec(ind53,1) repmat([12 31],size(ind53,1),1) dayvec(ind53,4:6)];
-wrong53 = find(ismember(weekday(datenum(lastdec)),[1:4 7]));    % Dec 31 classified as week 53 must be a Thursday or a Friday.
+%If not input or empty, week starts on Sunday
+if nargin < 2
+  w = 1;
+end
+if ~exist('w','var')
+  w = 1;
+end
 
-w(ind53(wrong53)) = 1;
-%% January days belonging to the last week of previous year.
-ind0 = find(w==0);
-if ~isempty(ind0)
-    w(ind0) = weeknum(daynums(ind0)-7) + 1;         % Adding 1 to weeknum of the previous week
+%Convert date to datenum if necessary
+if ~isnumeric(d)
+    try
+        d = datenum(d); 
+    catch exception
+       throw(MException('MATLAB:weeknum:ConvertDateString', '%s', exception.message));
+    end
+end
+
+%Get year value from each date
+yrs = year(d);
+
+%Get date number of first day of year
+dFirst = datenum(yrs,1,1);
+
+%Get weekday number of each date, offset by given week start day
+nDay = mod(fix(dFirst)-2,7)-(w-1);
+
+%Get date number relative to days in year of entered date
+n = fix((d - dFirst + nDay)./7)+1;
+
+%European standard considers first week of year to be first week longer
+%than 3 days, offset by given week start day
+if e
+  i = (nDay > 4 + w);
+  n(i) = n(i)-1;
 end
