@@ -32,7 +32,7 @@ for k = 1:length(lh)
         count = count + 1;
         [beta,stat] = robustfit(xdat(ok,:),ydat(ok,:));
         newline = refline(beta(2),beta(1));
-        set(newline,'Color',datacolor);
+        set(newline,'Color',datacolor,'Marker','None');
         x=get(newline,'XData');y=get(newline,'YData');
         leg{k}=sprintf('  y=%f + %f x +/- [%f %f]',[beta,stat.se]);
         t=text(x(1)+1,mean(y),...
