@@ -51,22 +51,22 @@ catch exception
   return
 end
 
-if ninst>length(ozone_ds) || isempty(ozone_ds{ninst})
-   cal=[]; summary=NaN*ones(1,13); summary_old=NaN*ones(1,13); 
-   summary(1)=nanmean(fecha_days); summary_old(1)=nanmean(fecha_days);   
-   fprintf('No data for Brewer %s\n',Cal.brw_name{ninst});
-   return
-end
+  if any(Cal.Date.CALC_DAYS>366) % fecha matlab
+     fecha_days=fix(Cal.Date.CALC_DAYS);                          % todos los días considerados     
+  else % dia juliano
+     fecha_days=Cal.Date.CALC_DAYS+datenum(Cal.Date.cal_year,1,0);% todos los días considerados
+  end
+  
+  if ninst>length(ozone_ds) || isempty(ozone_ds{ninst})
+    cal=[]; summary=NaN*ones(1,13); summary_old=NaN*ones(1,13); 
+    summary(1)=nanmean(fecha_days); summary_old(1)=nanmean(fecha_days);   
+    fprintf('No data for Brewer %s\n',Cal.brw_name{ninst});
+    return
+  end
   
   % Si hay dos fechas en el fichero B esto dará error. Manejarlo 
   fecha=cellfun(@(x) unique(fix(x(:,1))),ozone_ds{ninst},'UniformOutput',false);  
   fecha=unique(cat(1,fecha{:}));% ficheros cargados con éxito
-  if any(Cal.Date.CALC_DAYS>366) % fecha matlab
-     fecha_days=fix(Cal.Date.CALC_DAYS);                          % todos los días considerados
-     
-  else % dia juliano
-     fecha_days=Cal.Date.CALC_DAYS+datenum(Cal.Date.cal_year,1,0);% todos los días considerados
-  end
  
   % Rehacemos ozone_ds para que tenga igual dimensiones que SL_B, esto es, length(CALC_DAYS)
   % Es importante para garantizar que cada dia de SL_B (con dimensiones las de cALC_DAYS)  
