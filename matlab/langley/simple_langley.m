@@ -20,7 +20,6 @@ function [ resp,stats,data ] = simple_langley(lgl,brw,FC,fplot )
 %    5-6 -> residuals ci
 % TODO
 % revisar el problema con el numero pequeño de datos
-
 % TODO
 % revisar el problema con el numero pequeño de datos
 if nargin==1
@@ -35,7 +34,15 @@ if nargin==3
     fplot=0;
 end
 
+%parametres
+ndata_min=50               % minum data points por langey (10 summaries)
+nadat_min_filter=30        % minimin data per filter  (6 ds sumaries)
+BE=[5200,0,4870,4620,4410,4220,4040];    %raleyght coefficients default hard coded !!
+                                         % second is dark use cero !! 
+
 fecha=datestr(unique(fix(lgl(:,1))));
+
+
 o3.ozone_lgl_legend={'date'	'hg'    'idx'   'sza'	'm2'	'm3'	'sza'	'saz'	'tst'	'temp'  'flt'...  %1-11
     'f0'  'f1'	'f2'	'f3'	'f4'	'f5'	'f6'	...  % 12-18 c/c 1º
     'o3 cfg1'    'r1'    'r2'    'r3'    'r4'    'r5'    'r6'   ... % 19 25ratios (Rayleight corrected !!)                % 19-25
@@ -56,40 +63,39 @@ resp= NaN*zeros(2,2,5,7,3);
 data=cell(2,2,7);%test
 
 for ampm=1:2
-    if ampm==1 jk=jam; else jk=jpm; end
+  if ampm==1 jk=jam; else jk=jpm; end
     %t=tabulate(lgl(jk,10));
-    
-        
-    
     if sum(jk)>=50   %numero minimo de datos
-        for ncfg=1:2
+        
+    for ncfg=1:2
             
-            if ncfg==1
+            if ncfg==1       %first configuration 
                 jc=[12:18];  %columnas de regression
             else
-                jc=[26:32];  
+                jc=[26:32];  %second configuration
             end
             %% FIlTER regression
-            XF=[];
+            %  desing matrix 
+            %  XF are the dumy varibale for the categorical filter
+            %
+            XF=[];   
             for ff=1:length(FC)
                 XF=[XF,lgl(jk,10)==FC(ff)];
                 if(sum(lgl(jk,10)==FC(ff))<30)   %numero de datos para el filtro
-                 lgl(lgl(jk,10)==FC(ff),6)=NaN;  % si es menor se elimina
+                    lgl(lgl(jk,10)==FC(ff),6)=NaN;  % si es menor se elimina
                 end
                 
             end;
             X=[ones(size(lgl(jk,5))),lgl(jk,5),XF];  %matriz de diseño
             
-            BE=[5200,0,4870,4620,4410,4220,4040];    %raleyght 
+            BE=[5200,0,4870,4620,4410,4220,4040];    %raleyght hard coded !!
             
             for idx=1:length(jc)
                 try
+                    %Raleight corrected counts
                     RC=lgl(jk,jc(idx))+lgl(jk,6)*BE(idx)*770/1013;
                     %correccion de Rayleight las cuentas brutas no estan corregidas
                     % ojo R6 si pero BE=0 en el dark
-                                                                  
-                                                                  
-                    
                     %          %avoid warning only with high filter
                     %
                     %            for kkf=size(XF,2):-1:1
@@ -113,7 +119,7 @@ for ampm=1:2
     else
         % revisar el problema con el numero pequeño de datos
         data(ampm,:,:)=num2cell(NaN*zeros(2,6,7),2);
-    end    
+    end
 end
 
 if fplot

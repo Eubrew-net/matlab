@@ -1,4 +1,4 @@
-function [ozone_lgl,cfg,icf,ozone_lgl_legend ] = langley_data(ozone_raw,ozone_ds,config)
+function [lgl_data,cfg,ozone_lgl,config,icf,ozone_lgl_legend ] = lgl_data_cell(ozone_raw,ozone_ds,config)
 % function [ozone_lgl,cfg,icf,ozone_lgl_legend ] = langley_data(ozone_raw,ozone_ds,config);
 % 
 % Input : readb_ds_develop / readb_data output
@@ -23,22 +23,25 @@ function [ozone_lgl,cfg,icf,ozone_lgl_legend ] = langley_data(ozone_raw,ozone_ds
 % save(Cal.file_save,'-append','ozone_lgl','cfg','icf','ozone_lgl_legend');
 
 % cell outputs by juanjo
-% ozone_lgl_=cellfun(@(x,y) [x(:,1:11),x(:,19:25),y(:,8:14),x(:,26:32),y(:,15:21)], ...
-%                                      ozone_raw, ozone_ds,'UniformOutput',false);
-%                                  
-% %% Calibration constants
-% cfg_old=cell2mat(cellfun(@(x) cat(1,x(1,1),x(2:6,1),x(8,1),x(11,1),x(13,1),x(17:22,1)),config','UniformOutput',false)); 
-% [a,b]=unique(cfg_old(1,:));
-% cfg.old=cfg_old(:,b);
-% cfg_new=cell2mat(cellfun(@(x) cat(1,x(1,2),x(2:6,2),x(8,2),x(11,2),x(13,2),x(17:22,2)),config','UniformOutput',false)); 
-% [a,b]=unique(cfg_new(1,:)); 
-% cfg.new=cfg_new(:,b);                                     
-% lgl_leg.cfg={
-%     'Usage date','o3 Temp coef 1','o3 Temp coef 2','o3 Temp coef 3','o3 Temp coef 4','o3 Temp coef 5',...
-%     'O3 on O3 Ratio','ETC on O3 Ratio','Dead time (sec)',...
-%     'ND filter 0','ND filter 1','ND filter 2','ND filter 3','ND filter 4','ND filter 5'
-%             }; 
-%         
+lgl_data=cellfun(@(x,y) [x(:,1:11),x(:,19:25),y(:,8:14),x(:,26:32),y(:,15:21)], ...
+                                     ozone_raw, ozone_ds,'UniformOutput',false);
+                                 
+%% Calibration constants
+cfg_old=cell2mat(cellfun(@(x) cat(1,x(1,1),x(2:6,1),x(8,1),x(11,1),x(13,1),x(17:22,1)),config','UniformOutput',false)); 
+[a,b]=unique(cfg_old(1,:));
+cfg.old=cfg_old(:,b);
+cfg_new=cell2mat(cellfun(@(x) cat(1,x(1,2),x(2:6,2),x(8,2),x(11,2),x(13,2),x(17:22,2)),config','UniformOutput',false)); 
+[a,b]=unique(cfg_new(1,:)); 
+cfg.new=cfg_new(:,b);   
+
+
+cfg.leg={
+    'Usage date','o3 Temp coef 1','o3 Temp coef 2','o3 Temp coef 3','o3 Temp coef 4','o3 Temp coef 5',...
+    'O3 on O3 Ratio','ETC on O3 Ratio','Dead time (sec)',...
+    'ND filter 0','ND filter 1','ND filter 2','ND filter 3','ND filter 4','ND filter 5'
+            }; 
+        
+
 o3_raw=cell2mat(ozone_raw);
 o3_ds=cell2mat(ozone_ds);
 cfg_aux=cell2mat(config);
@@ -46,7 +49,7 @@ cfg_aux=cell2mat(config);
 ozone_lgl=[o3_raw(:,1:11),o3_raw(:,19:25),o3_ds(:,8:14),o3_raw(:,26:32),o3_ds(:,15:21)];
 icf=[cfg_aux(53:53:end,1),cfg_aux(1:53:end,1),cfg_aux(8:53:end,:),cfg_aux(11:53:end,:)];
 
-cfg=reshape(cfg_aux,53,[],3);
+config=reshape(cfg_aux,53,[],3);
 
 ozone_lgl_legend={
     'date'	'hg_id'  'nds'  'sza'  'm2'  'm3'  'sza'  'saz'  'tst'  'filt'  'temp'...% 1-11              
