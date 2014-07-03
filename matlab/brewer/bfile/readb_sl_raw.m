@@ -1,5 +1,5 @@
-function [sl_raw,TC]=readb_sl(bfile)
-%function [sl_raw,TC]=readb_sl(bfile)
+function [sl_raw,TC]=readb_sl_raw(bfile)
+%function [sl_raw,TC]=readb_sl_raw(bfile)
 %  Input :
 %    bfile: fichero B
 % output sl_raw, TC
@@ -16,9 +16,18 @@ function [sl_raw,TC]=readb_sl(bfile)
 % ms4	ms5	ms6	ms7	ms8	ms9	R1	R5
 % 25	26	27	28	29	30	31	32
 % Requiere mmstrtok
+% sl_legend ={'fexha' 'hg' 'idx'	'temp'...
+%                        'filter1','filter2','min','sli0','slit1','cy'...
+%                        'raw L0'	'rL1'	'rL2'	'rL3'	'rL4'	'rL5'	'rL6'...  
+%                        'counts/second TC=0 cL0'	'cL1'	'cL2'	'cL3'	'cL4'	'cL5'	'cL6'...
+%                        'ms4'	'ms5'	'ms6'	'ms7'	'ms8'	'ms9'	'R1'	'R5'};
+%                    
+% 
+% TC  Temperature coefficients as retuned by process_config
 %
 % Alberto Redondas 2010
-% 
+% Tested 2014 
+% Warning : Recalculation with TC=0 is done with the DT of the bifle
 
 
 O3W=[  0.00    0   0.00   -1.00    0.50    2.20   -1.70];
