@@ -63,20 +63,22 @@ end
                 FC=[192];
         end
         end
-        %% depuracion de michalsky
-        lgl_org=lgl;
-        try
+        
+        
+%% depuracion de michalsky
+lgl_org=lgl;
+  try
         if Dep==1    
          [lgl,idx_]=michalsky_filter_2(lgl,FC,fplot);
         end
         catch
             disp('error en michalsky')
-        end
-         
+  end
 
-        [resp,stats]=simple_langley(lgl,Cal.brw_str{nb},FC,fplot);
+
+[resp,stats]=simple_langley(lgl,Cal.brw_str{nb},FC,fplot);
         % individual vs R6
-         O3W=[  0.00    0   0.00   -1.00    0.50    2.20   -1.70];
+ O3W=[  0.00    0   0.00   -1.00    0.50    2.20   -1.70];
          %BE=[0,0,4870,4620,4410,4220,4040];
 
          

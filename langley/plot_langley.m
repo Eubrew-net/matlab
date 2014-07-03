@@ -1,4 +1,4 @@
-function [ resp,stats ] = plot_langley(lgl,brw )
+function [ resp,stats ] = plot_langley(lgl,brw,f_plot )
 %UNTITLED6 Summary of this function goes here
 %   resp four dim matrix(AM_PM,CFG,Parameter,Results);
 %          dim  (2,2,4,8);
@@ -47,7 +47,7 @@ fecha=datestr(unique(fix(lgl(:,1))));
         end
     end
     
-    
+   if f_plot 
     figure;
     mmplotyy_temp(lgl(:,9)/60,lgl(:,12:18),lgl(:,[19,33]),'.')
     %legend(o3.ozone_lgl_legend(12:18));
@@ -105,4 +105,5 @@ fecha=datestr(unique(fix(lgl(:,1))));
     catch
         title('NO_DATA')
     end
+   end
 end
