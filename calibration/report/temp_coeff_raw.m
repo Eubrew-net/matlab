@@ -226,10 +226,10 @@ if intensity_flag
     Fr=Fx;
 end
 
-    if outlier_flag
+if outlier_flag
        figure;
        for ii=0:6
-           [a,b,out]=boxparams(Fr(:,3+ii),1.5);
+           [a,b,out]=boxparams(Fr(:,3+ii),3);
            if ii==6
                subplot(4,2,7:8);
            else
@@ -243,7 +243,7 @@ end
        end
 %        [a_orig,b_orig,out_orig]=boxparams(F_orig(:,end),1.5);
 %         F_orig(out_orig,[1,end])=NaN;       
-    end
+end
 j=isnan(Fr);
 F_orig(j)=NaN;
 

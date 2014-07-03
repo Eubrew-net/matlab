@@ -1,5 +1,4 @@
-function [sl_raw,TC]=readb_sl_rawl(path,varargin)
-
+function [sl_raw,TC,slraw_c]=readb_sl_rawl(path,varargin)
 % MODIFICADO:
 %  Juanjo 21/01/2011: Redefino los inputs de la función (Chequeada con la sintaxis original)
 %                     Obligatorio; path a ficheros B (normalmente bfile)
@@ -78,7 +77,7 @@ if ~isempty(date_range)
             if isempty(regexp(pathstr, '\d{4}'))
                pathstr=fullfile('..',num2str(YEAR(i)),pathstring);
             end
-            Bfiles{i}=dir(sprintf('%s\%c%s',pathstr,filesep,f));
+            Bfiles{i}=dir(sprintf('%s%c%s',pathstr,filesep,f));
             dir_cell=struct2cell(Bfiles{i}); FilesB{i}=dir_cell(1,:);
             paths{i}=repmat({pathstr},length(Bfiles{i}),1);  
         end
@@ -122,8 +121,10 @@ end
 textprogressbar('processing sl files: ');
 
 [p n ext]=fileparts(path);
+slraw_c=cell(length(FilesB),1);
+TC_c=cell(length(FilesB),1);
 for i=1:length(FilesB)
-    slraw=[]; TC_=[];
+    %slraw=[]; TC_=[];
     textprogressbar(100*i/length(FilesB));
     try
       [path nam ext]=fileparts(FilesB{i});
@@ -133,13 +134,18 @@ for i=1:length(FilesB)
          file=fullfile(paths{i},FilesB{i});
       end      
       [slraw,TC_]=readb_sl_raw(file);
-      sl_raw=[sl_raw;slraw.sl];
-      TC=[TC,[slraw.sls_dep,TC_(3,:)]'];
+      %sl_raw=[sl_raw;slraw.sl];
+      %TC=[TC,[slraw.sls_dep,TC_(3,:)]'];
+      slraw_c{i}=slraw.sl;
+      TC_c{i}=[slraw.sls_dep,TC_(3,:)]';
+      
     catch exception
       fprintf('%s. File %s\n',exception.message, FilesB{i});  
       textprogressbar(i/length(FilesB));
     end
 end
+sl_raw=cell2mat(slraw_c);
+TC=cell2mat(TC_c);
 textprogressbar(' sl raw done');
 
 if f_plot
