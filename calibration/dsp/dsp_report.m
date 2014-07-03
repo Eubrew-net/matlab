@@ -1,4 +1,4 @@
-function [res,detail,DSP_QUAD,QUAD_SUM,QUAD_DETAIL,CUBIC_SUM,CUBIC_DETAIL,salida...
+function [res,detail,DSP_QUAD,QUAD_SUM,QUAD_DETAIL,CUBIC_SUM,CUBIC_DETAIL,SALIDA...
     ]=dsp_report(day,year,brewnb,path,cfg,comment,uvr)
 
 % Modificaciones:
@@ -346,4 +346,5 @@ legend('Quadratic','Cubic');
 % res=cat(3,res(jcal-2:jcal+2,:),res2(jcal-2:jcal+2,:));
 res=cat(3,[res(jcal-6:jcal+6,:);res(end-1:end,:)],[res2(jcal-6:jcal+6,:);res2(end-1:end,:)]);
 detail=cat(4,detail(:,:,[jcal-6:jcal+6,end-1:end]),detail2(:,:,[jcal-6:jcal+6,end-1:end]));
-salida.QUAD=salida([jcal-6:jcal+6,end-1:end]); salida.CUBIC=salida2([jcal-6:jcal+6,end-1:end]);
+SALIDA.QUAD=salida([jcal-6:jcal+6,end-1:end]); 
+SALIDA.CUBIC=salida2([jcal-6:jcal+6,end-1:end]);
