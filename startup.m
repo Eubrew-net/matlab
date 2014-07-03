@@ -1,5 +1,8 @@
 % check externals 
 % matlabpath(['c:\gordon\lib\matlab;' matlabpath]);
+% libary isuses in mac
+setenv('DYLD_LIBRARY_PATH','');
+
 global lotus_date
 global lat_izo
 global long_izo
@@ -33,17 +36,17 @@ set(0,'DefaultfigurePaperType','a4');
 set(0,'DefaultfigurePaperUnits','centimeters');
 set(0,'DefaultfigureColor',[1,1,1]);
 %portrait centered no  fill
-set(0,'DefaultfigurePaperOrientation','portrait');
-set(0,'DefaultfigurePaperPosition',[ 7.45 0.63 19.72 14.79]);
-set(0,'DefaultfigurePaperPosition',[ 0.63 7.45 19.72 14.79]);
+%set(0,'DefaultfigurePaperOrientation','portrait');
+%set(0,'DefaultfigurePaperPosition',[ 7.45 0.63 19.72 14.79]);
+%set(0,'DefaultfigurePaperPosition',[ 0.63 7.45 19.72 14.79]);
 
 %lanscape
-% set(0,'DefaultfigurePaperOrientation','landscape');
-% set(0,'DefaultfigurePaperPosition',[1.6954 0.63452 26.287 19.715]);
-% set(0,'DefaultaxesFontName','Arial');
-% set(0,'DefaultTextFontSize',10);
-% set(0,'DefaultaxesFontSize',12);
-% %set(0,'DefaultaxesColorOrder',[0,0,0;0,0,1;1,0,0;0,0,1;1,0.5,0.5;1,0,1]);
+ set(0,'DefaultfigurePaperOrientation','landscape');
+ set(0,'DefaultfigurePaperPosition',[1.6954 0.63452 26.287 19.715]);
+ set(0,'DefaultaxesFontName','Arial');
+ set(0,'DefaultTextFontSize',10);
+ set(0,'DefaultaxesFontSize',12);
+ %set(0,'DefaultaxesColorOrder',[0,0,0;0,0,1;1,0,0;0,0,1;1,0.5,0.5;1,0,1]);
 
 set(0,'DefaultaxesColorOrder',[0,0,0;0,0,1;1,0,0;0,1,0;1,0.5,1;0.5,0,0.5]);
 set(0,'DefaultaxesLineStyleOrder', '-o|:x|-|o:|.:|-x|+|:.|:+|:x'); 
