@@ -1,4 +1,7 @@
 function [config,TC,DT,extrat,absx,AT] = process_config( bfile,config_file)
+%%function [config,TC,DT,extrat,absx,AT] = process_config( bfile,config_file)
+%  output config (icf)
+%   (for compatibility from old versions) TC,DT,extrat,absx,AT
 %process configuration file
 % TODO : comprobar es innecesario el if(cfg), enviar siempre la fecha del
 % fichero
