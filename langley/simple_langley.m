@@ -19,9 +19,9 @@ function [ resp,stats,data ] = simple_langley(lgl,brw,FC,fplot )
 %    4-> residuals  y-
 %    5-6 -> residuals ci
 % TODO
-% revisar el problema con el numero pequeño de datos
+% revisar el problema con el numero peque?o de datos
 % TODO
-% revisar el problema con el numero pequeño de datos
+% revisar el problema con el numero peque?o de datos
 if nargin==1
     brw='XXX';
     fplot=0;
@@ -35,8 +35,8 @@ if nargin==3
 end
 
 %parametres
-ndata_min=50               % minum data points por langey (10 summaries)
-nadat_min_filter=30        % minimin data per filter  (6 ds sumaries)
+ndata_min=50;               % minum data points por langey (10 summaries)
+nadat_min_filter=30 ;       % minimin data per filter  (6 ds sumaries)
 BE=[5200,0,4870,4620,4410,4220,4040];    %raleyght coefficients default hard coded !!
                                          % second is dark use cero !! 
 
@@ -44,7 +44,7 @@ fecha=datestr(unique(fix(lgl(:,1))));
 
 
 o3.ozone_lgl_legend={'date'	'hg'    'idx'   'sza'	'm2'	'm3'	'sza'	'saz'	'tst'	'temp'  'flt'...  %1-11
-    'f0'  'f1'	'f2'	'f3'	'f4'	'f5'	'f6'	...  % 12-18 c/c 1º
+    'f0'  'f1'	'f2'	'f3'	'f4'	'f5'	'f6'	...  % 12-18 c/c 1?
     'o3 cfg1'    'r1'    'r2'    'r3'    'r4'    'r5'    'r6'   ... % 19 25ratios (Rayleight corrected !!)                % 19-25
     'F0'	'F1'	'F2'	'F3'	'F4'	'F5'	'F6'	...  %  % 26-32Segund configuracion
     'O3 cfg2'    'R1'    'R2'    'R3'    'R4'    'R5'    'R6'   ... %  % 33-39   ratios (Rayleight corrected !!)
@@ -56,7 +56,7 @@ lgl(:,27)=lgl(:,39);
 %%cortamos en airmass 6 y eliminamos el filtro 4  <-- en la entrada
 %  lgl=lgl(lgl(:,5)<5,:);
 %  lgl=lgl(lgl(:,10)<=192,:);                    %
-% separamos la mañana de la tarde (tst-> true solar time)
+% separamos la ma?ana de la tarde (tst-> true solar time)
 jpm=(lgl(:,9)/60>12) ; jam=~jpm;
 stats=NaN*zeros(2,2,7,4); %parametros de la regression
 resp= NaN*zeros(2,2,5,7,3); 
@@ -86,7 +86,7 @@ for ampm=1:2
                 end
                 
             end;
-            X=[ones(size(lgl(jk,5))),lgl(jk,5),XF];  %matriz de diseño
+            X=[ones(size(lgl(jk,5))),lgl(jk,5),XF];  %matriz de dise?o
             
             BE=[5200,0,4870,4620,4410,4220,4040];    %raleyght hard coded !!
             
@@ -117,7 +117,7 @@ for ampm=1:2
             end
         end
     else
-        % revisar el problema con el numero pequeño de datos
+        % revisar el problema con el numero peque?o de datos
         data(ampm,:,:)=num2cell(NaN*zeros(2,6,7),2);
     end
 end
