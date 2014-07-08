@@ -14,11 +14,10 @@ Cal.dir_figs=fullfile('latex',filesep(),Cal.brw_str{Cal.n_inst},...
 mkdir(Cal.dir_figs);
 
 try
- save(Cal.file_save,'-Append','Cal'); %sobreescribimos la configuracion guardada.
- load(Cal.file_save);
-catch
-    disp('clean');
-    save(Cal.file_save);
+      save(Cal.file_save,'-Append','Cal'); %sobreescribimos la configuracion guardada.
+catch exception
+      fprintf('Error: %s\n Initializing data for Brewer %s\n',exception.message,Cal.brw_name{Cal.n_inst});
+      save(Cal.file_save);
 end
 
 %% configuration files
@@ -34,7 +33,6 @@ config_temp.final_days=Cal.Date.FINAL_DAYS(1);
 NTC={}; tabla_regress={}; ajuste={}; Args={};
 
 %% Temperature dependence.  During campaign
-%[sl_rw,tc]=readb_sl_rawl(['.\bfiles','\B*.',Cal.brw_str{Cal.n_inst}]);% cambio nombres para poder seguir
 [sl_rw,tc]=readb_sl_rawl(fullfile('.','bfiles',['B*.',Cal.brw_str{Cal.n_inst}]));% cambio nombres para poder seguir
 [NTC{1},ajuste{1},Args{1},Fr]=temp_coeff_raw(config_temp,sl_rw,'outlier_flag',0,...
                                      'date_range',datenum(Cal.Date.cal_year,1,Cal.calibration_days{Cal.n_inst,1}([1 end])));
@@ -202,6 +200,9 @@ filter{Cal.n_inst}.ETC_FILTER_CORRECTION=ETC_FILTER_CORRECTION;
 filter{Cal.n_inst}.media_fi=media_fi;
 filter{Cal.n_inst}.fi=fi;
 filter{Cal.n_inst}.ETC_FILTER_COR=round(ETC_FILTER_CORRECTION(2,:).*(sign(ETC_FILTER_CORRECTION(3,:))==sign(ETC_FILTER_CORRECTION(4,:))));                       
+filter{Cal.n_inst}.fi_avg=fi_avg;
+
+    o3f=filters_data(filter,Cal);
 
 save(Cal.file_save,'-APPEND','filter');
 

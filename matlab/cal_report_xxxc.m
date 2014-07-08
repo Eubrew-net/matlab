@@ -105,21 +105,21 @@ for ii=[Cal.n_ref,Cal.n_inst]
     if ii==Cal.n_inst
 % old instrumental constants
       [sl_mov_o{ii},sl_median_o{ii},sl_out_o{ii},R6_o{ii}]=sl_report_jday(ii,sl,Cal.brw_str,...
-                               'date_range',datenum(Cal.Date.cal_year,3,1),...
+                               'date_range',datenum(Cal.Date.cal_year,1,Cal.calibration_days{Cal.n_inst,1}([1 end])),...
                                'outlier_flag',0,'hgflag',1,'fplot',1);
       fprintf('%s Old constants: %5.0f +/-%5.1f\n',Cal.brw_name{ii},...
                   nanmedian(R6_o{ii}(diajul(R6_o{ii}(:,1))>=Cal.calibration_days{ii,3}(1),2)),...
                   nanstd(   R6_o{ii}(diajul(R6_o{ii}(:,1))>=Cal.calibration_days{ii,3}(1),2)));
 % new instrumental constants
       [sl_mov_n{ii},sl_median_n{ii},sl_out_n{ii},R6_n{ii}]=sl_report_jday(ii,sl_cr,Cal.brw_str,...
-                               'date_range',datenum(Cal.Date.cal_year,3,1),...
+                               'date_range',datenum(Cal.Date.cal_year,1,Cal.calibration_days{Cal.n_inst,1}([1 end])),...
                                'outlier_flag',0,'hgflag',1,'fplot',0);
       fprintf('%s New constants: %5.0f +/-%5.1f\n',Cal.brw_name{ii},...
                   nanmedian(R6_n{ii}(diajul(R6_n{ii}(:,1))>=Cal.calibration_days{ii,3}(1),2)),...
                   nanstd(   R6_n{ii}(diajul(R6_n{ii}(:,1))>=Cal.calibration_days{ii,3}(1),2)));
     else
       [sl_mov_n{ii},sl_median_n{ii},sl_out_n{ii},R6_n{ii}]=sl_report_jday(ii,sl_cr,Cal.brw_str,...
-                               'date_range',datenum(Cal.Date.cal_year,3,1),...
+                               'date_range',datenum(Cal.Date.cal_year,1,Cal.calibration_days{Cal.n_inst,1}([1 end])),...
                                'outlier_flag',0,'fplot',0);
     end
     catch exception
@@ -202,7 +202,7 @@ printfiles_report(findobj('Tag','Ozone_diff_filter_rel'),Cal.dir_figs,'Width',13
 
 close all
 
-%% filter correction 185
+%% filter correction
 % Si queremos eliminar algun filtro CORREGIR a NaN
 for ii=[Cal.n_ref Cal.n_inst]
    [summary_old_corr summary_corr]=filter_corr(summary_orig,summary_orig_old,ii,A,F_corr{ii});
@@ -221,9 +221,9 @@ n_ref=Cal.n_ref; % Cuidado con cual referencia estamos asignando
 n_inst=Cal.n_inst;
 brw=Cal.brw; brw_str=Cal.brw_str;
 
-jday_ref=findm((diaj(summary{n_ref}(:,1))),Cal.calibration_days{n_ref,2},0.5);
+jday_ref=findm((diaj(summary{n_ref}(:,1))),Cal.calibration_days{n_inst,2},0.5);
 ref2_b=summary{n_ref}(jday_ref,:);
-jday_ref=findm((diaj(summary{n_ref}(:,1))),Cal.calibration_days{n_ref,3},0.5);
+jday_ref=findm((diaj(summary{n_ref}(:,1))),Cal.calibration_days{n_inst,3},0.5);
 ref2=summary{n_ref}(jday_ref,:);
 
 %% Change?
@@ -347,13 +347,14 @@ if isequal(blinddays,Cal.calibration_days{Cal.n_inst,3})
    [x,r,rp,ra,dat,ox,osc_smooth_inisl]=ratio_min_ozone(...
    inst1(:,[1,12,3,2,8,9,4,5]),ref2(:,[1,6,3,2,8,9,4,5]),...
    5,brw_str{n_inst},brw_str{n_ref},'plot_flag',0);
+   osc_smooth{Cal.n_inst}.ini=osc_smooth_ini;
    osc_smooth{Cal.n_inst}.ini_sl=osc_smooth_inisl;
 end
 
 %%
-A1=A.new(ismember(Cal.Date.CALC_DAYS,finaldays),Cal.n_inst+1); 
-A1_new=unique(A1(~isnan(A1))), osc_range=.8;
-[ETC_NEW,o3c_NEW,m_etc_NEW]=ETC_calibration_C(Cal,summary,A1_new,Cal.n_inst,n_ref,...
+A1=A.new(ismember(Cal.Date.CALC_DAYS,finaldays),Cal.n_inst+1); A1_new=unique(A1(~isnan(A1)))
+osc_range=.8;
+[ETC_NEW,o3c_NEW,m_etc_NEW]=ETC_calibration_C(Cal,summary,A1_new,n_inst,n_ref,...
                                                                 5,osc_range,0.03,finaldays);
 tableform({'ETCorig','ETCnew 1p','ETCnew 2p','O3Abs (ICF)','O3Abs 2p','O3Abs dsp'},...
           [round([ETC.old(n_inst),ETC_NEW(1).NEW,ETC_NEW(1).TP(1), 10000*A.old(n_inst),ETC_NEW(1).TP(2),10000*A.new(Cal.n_inst)])

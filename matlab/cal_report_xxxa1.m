@@ -12,10 +12,9 @@ Cal.dir_figs=fullfile('latex',filesep(),Cal.brw_str{Cal.n_inst},...
                               filesep(),[Cal.brw_str{Cal.n_inst},'_figures'],filesep());
 mkdir(Cal.dir_figs);
 try
- save(Cal.file_save,'-Append','Cal'); %sobreescribimos la configuracion guardada.
- load(Cal.file_save);
+      save(Cal.file_save,'-Append','Cal'); %sobreescribimos la configuracion guardada.
 catch exception
-      fprintf('Error: %s, brewer %s\n',exception.message,Cal.brw_name{Cal.n_inst});
+      fprintf('Error: %s\n Initializing data for Brewer %s\n',exception.message,Cal.brw_name{Cal.n_inst});
       save(Cal.file_save);
 end
 
@@ -26,20 +25,20 @@ Station.lat=67;
 Station.long=50;
 Station.meanozo=350;
 
-CALC_DAYS=Cal.calibration_days{Cal.n_inst,1};
+Date.CALC_DAYS=Cal.calibration_days{Cal.n_inst,1};
 if ~isempty(Cal.calibration_days{Cal.n_inst,2})
-   BLIND_DAYS=Cal.calibration_days{Cal.n_inst,2};
+   Date.BLIND_DAYS=Cal.calibration_days{Cal.n_inst,2};
 else
-   BLIND_DAYS=[NaN,NaN];
+   Date.BLIND_DAYS=[NaN,NaN];
 end
-FINAL_DAYS=Cal.calibration_days{Cal.n_inst,3};
+Date.FINAL_DAYS=Cal.calibration_days{Cal.n_inst,3};
 
 latexcmd(fullfile(Cal.file_latex,['cal_setup_',Cal.brw_str{Cal.n_inst}]),...
-                    '\CALINI',CALC_DAYS(1),'\CALEND',CALC_DAYS(end),...
+                    '\CALINI',Date.CALC_DAYS(1),'\CALEND',Date.CALC_DAYS(end),...
                     '\calyear',Date.cal_year,'\calyearold',Date.cal_year-2,...
                     '\slrefOLD',Cal.SL_OLD_REF(Cal.n_inst),'\slrefNEW',Cal.SL_NEW_REF(Cal.n_inst),...
-                    '\BLINDINI',BLIND_DAYS(1),'\BLINDEND',BLIND_DAYS(end),...
-                    '\FINALINI',FINAL_DAYS(1),'\FINALEND',FINAL_DAYS(end),...
+                    '\BLINDINI',Date.BLIND_DAYS(1),'\BLINDEND',Date.BLIND_DAYS(end),...
+                    '\FINALINI',Date.FINAL_DAYS(1),'\FINALEND',Date.FINAL_DAYS(end),...
                     '\caldays',length(Date.FINAL_DAYS),'\Tsync',Cal.Tsync,...
                     '\brwname',Cal.brw_name(Cal.n_inst),'\brwref',Cal.brw_name(Cal.n_ref(2)),...
                     '\BRWSTATION',Station.name,'\STATIONOSC',Station.OSC,...
@@ -168,6 +167,14 @@ try
 catch exception
       fprintf('Error: %s, brewer %s\n',exception.stack.name,Cal.brw_name{Cal.n_inst});
 end
+%%
+try
+    figure(max(findobj('tag','CZ_Report')));
+    printfiles_report(gcf,Cal.dir_figs,'aux_pattern',{'HL'});
+catch exception
+    fprintf('Error: %s, brewer %s\n',exception.message,Cal.brw_name{Cal.n_inst});
+end
+close all
 
 %% HS Report
 br=sprintf('%03d',Cal.brw(Cal.n_inst));
@@ -177,6 +184,15 @@ try
 catch exception
       fprintf('Error: %s, brewer %s\n',exception.stack.name,Cal.brw_name{Cal.n_inst});
 end
+
+%%
+try
+    figure(max(findobj('tag','CZ_Report')));
+    printfiles_report(gcf,Cal.dir_figs,'aux_pattern',{'HS'});
+catch exception
+    fprintf('Error: %s, brewer %s\n',exception.message,Cal.brw_name{Cal.n_inst});
+end
+close all
 
 %% CI REPORT
 close all; br=sprintf('%03d',Cal.brw(Cal.n_inst));
@@ -201,7 +217,7 @@ close all
 br=sprintf('%03d',Cal.brw(Cal.n_inst));
 try
     [azimut zenit]=analyze_FV(fullfile(Cal.path_root,['bdata',br],['FV*.',br]),...
-                         'date_range',datenum(Cal.Date.cal_year,1,[Cal.calibration_days{Cal.n_inst,1}(1) Cal.calibration_days{Cal.n_inst,1}(end)]),...
+                         'date_range',datenum(Cal.Date.cal_year,1,Cal.calibration_days{Cal.n_inst,1}([1 end])),...
                          'plot_flag',0);
 catch exception
       fprintf('Error: %s, brewer %s\n',exception.stack.name,Cal.brw_name{Cal.n_inst});
