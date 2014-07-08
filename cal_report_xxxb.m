@@ -13,11 +13,10 @@ Cal.dir_figs=fullfile('latex',filesep(),Cal.brw_str{Cal.n_inst},...
 mkdir(Cal.dir_figs);
 
 try
- save(Cal.file_save,'-Append','Cal'); %sobreescribimos la configuracion guardada.
- load(Cal.file_save);
-catch
-    disp('clean');
-    save(Cal.file_save);
+      save(Cal.file_save,'-Append','Cal'); %sobreescribimos la configuracion guardada.
+catch exception
+      fprintf('Error: %s\n Initializing data for Brewer %s\n',exception.message,Cal.brw_name{Cal.n_inst});
+      save(Cal.file_save);
 end
 
 %% configuration files
