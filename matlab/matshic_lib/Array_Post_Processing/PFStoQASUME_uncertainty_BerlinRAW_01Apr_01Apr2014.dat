@@ -1,0 +1,24 @@
+%Uncertainty of QASUME calibration factors for PFS from 01-Apr-2014 to 01-Apr-2014 at Berlin-RAW
+%SZA<75: u(300<wl<310)=592.749
+%SZA<50: u(300<wl<310)=  2.314
+%SZA<75: u(wl>=310)=  0.114
+%SZA<50: u(wl>=310)=  0.057
+%MINSZA: 47.9
+%MAXSZA:.83.4
+%MINDUV: 0.0
+%MAXDUV: 2.7
+%NumberSpecs: 43
+%Median(timesteps): 15
+%timesteps: 15  30
+     2.01400E+03
+     9.10000E+01
+     9.10000E+01
+     5.92749E+02
+     2.31356E+00
+     1.14087E-01
+     5.66198E-02
+     4.79027E+01
+     8.33528E+01
+     2.82534E-09
+     2.66792E+00
+     4.30000E+01

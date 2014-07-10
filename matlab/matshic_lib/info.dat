@@ -1,0 +1,12 @@
+27 2 2014 JG
+
+matshic v2
+
+example calls:
+
+matshic('16-jun-2013','16-jun-2013','davos','isq',2);
+
+or
+
+matshic('22-jan-2014','22-jan-2014','davos','psr001',2);
+
