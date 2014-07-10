@@ -1,6 +1,6 @@
 % lee los ficheros cz     function A=readcz(filename)
-function A=readcz(filename)
-ncol=5; % numero de columnas
+function A=readcz(filename,ncol)
+if nargin==1 ncol=5; end % numero de columnas
 fid=fopen(filename);
 i=1;
 if(fid==-1) disp('error de fichero')
@@ -12,7 +12,7 @@ else
       if feof(fid)==1 break
       else
           try
-           A(i)=read_cz_scan(fid);
+           A(i)=read_cz_scan(fid,ncol);
           catch   
            %A(i)=[];
            disp('skip scan')
@@ -35,8 +35,10 @@ function a=getstr(aux)
   a=str2num(r);
   
   
-function S=read_cz_scan(fid)
-  
+function S=read_cz_scan(fid,n_col)
+  if nargin==1
+      n_col=[];
+  end
     %fgets(fid) ********
    info.puerto=fgets(fid); % puerto
    fgets(fid); % *********
@@ -70,20 +72,23 @@ function S=read_cz_scan(fid)
    titulos=fgets(fid) %tiltulos
    fgets(fid); % 
    [a,count]=fscanf(fid,'%f'); %A es un vector
-   
-   if(mod(count,10)==0) 
-      a=reshape(a,10,count/10)';
-   elseif(mod(count,5)==0) 
-      a=reshape(a,5,count/5)';
+   if isempty(n_col)
+       if(mod(count,10)==0)
+           a=reshape(a,10,count/10)';
+       elseif(mod(count,5)==0)
+           a=reshape(a,5,count/5)';
+       else
+           cnt=count-mod(count,5);
+           a(cnt+1:count)
+           a(cnt+1:count)=[];
+           a=reshape(a,5,cnt/5)';
+           disp('warning cz scan no complete read ');
+           disp(sprintf(' line %d ',cnt/5))
+           fgets(fid)
+       end
    else
-      cnt=count-mod(count,5);
-      a(cnt+1:count)
-      a(cnt+1:count)=[];
-      a=reshape(a,5,cnt/5)';
-      disp('warning cz scan no complete read ');
-      disp(sprintf(' line %d ',cnt/5))
-      fgets(fid)
-   end   
+       a=reshape(a,n_col,count/n_col);
+   end
    info.time_end=fgets(fid) 
    S=struct('info',info,'scan',a);
    fgets(fid);% end
