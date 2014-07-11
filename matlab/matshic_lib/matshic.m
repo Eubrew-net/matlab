@@ -59,6 +59,9 @@ function [WL,DWLM,DWL]=matshic(datestart,dateend,site,inst,debu,pl)
 % 19 6 2014 JG, change matshic_shiftspec and convvarslit due to extrapolation problems
 % 8 7 2014 JG, make slit variables more tolerant for dimensions...
 % 9 7 2014 JG change falt_spec to remove nan values
+% 10 7 2014 JG, if ascii sli file, then take it
+% 11 7 2014 JG make time vector tolerant
+%11 7 2014, make single brewer compatible
 
 jump=1;  % use every 10 scans
 outcnt=0;
@@ -72,8 +75,8 @@ global MATSHIC
 
 MATSHIC.varslit=0;  % default is not variable slit
 
-VER=3.02;
-DATE='9 July 2014';
+VER=3.12;
+DATE='11 July 2014';
 HEADER={sprintf('%%Wavelength shift & Convolution algorithm matSHIC, Ver %.2f (%s)',VER,DATE)};
 HEADER{end+1}=sprintf('%%Processing %s',datestr(now));
 HEADER{end+1}=sprintf('%%Developed by Julian Gröbner and Luca Egli');
@@ -158,7 +161,7 @@ catch
    error(sprintf('Error with mat slit file %s.',slitfname));
 end
 else  % load default shicrivm slit file
-    slitfname2=sprintf('%s/uvanalys/%04d/%s.sli',ppin,yr,inst);
+    slitfname2=sprintf('%s/%s.sli',ppin,inst);
    slit = liesfile(slitfname2,1);
   if isempty(slit),
       error(sprintf('SHICRivm Slit Function file %s not found!',slitfname2));
@@ -239,6 +242,11 @@ for i=datea:dateb; % choose here the spectra to be calculated
               if debu,disp(sprintf('No Time Vector, using local noon: %s',datestr(fmat.tm)));end
             end
         end
+        if all(fmat.tm(:)<=24), %hour decimal, 11 7 2014 jg
+            fmat.tm=datenum(yr,1,doy,fmat.tm,0,0);
+        elseif all(fmat.tm(:)<=1440),  % min dec
+            fmat.tm=datenum(yr,1,doy,0,fmat.tm,0);
+        end    
         if size(fmat.tm,2)==1,  % vector
             fmat.tm=fmat.tm(:)';   % make row
         end
@@ -274,9 +282,9 @@ if  debu,disp(sprintf('Processing %s : %d spectra',datestr(i),Nfiles));end
             
        if MATSHIC.fileformatin,  % time is in matlab format
           tm=fmat.tm(1,j);
-          if max(tm)<24, % given in hour decimals,
+          if max(tm)<=24, % given in hour decimals,
             tm=datenum(yr,1,doy,tm,0,0);
-          elseif any(tm>24) & max(tm)<1440,
+          elseif max(tm)<=1440,
             tm=datenum(yr,1,doy,tm/60,0,0);
           end
        else
@@ -294,9 +302,9 @@ if  debu,disp(sprintf('Processing %s : %d spectra',datestr(i),Nfiles));end
         HEADER{end+1}=sprintf('%%Processing file %s',fname);
         spec=liesfile([fname],1,3);   % might need to be made more robust 
           tm=spec(:,3); % 2 5 2014 JG new
-          if max(tm)<24, % given in hour decimals,
+          if max(tm)<=24, % given in hour decimals,
             tm=datenum(yr,1,doy,tm,0,0);
-          elseif any(tm>24) & max(tm)<1440,
+          elseif max(tm)<=1440,
             tm=datenum(yr,1,doy,tm/60,0,0);
           end
         fmat.tm(:,j)=tm(:); % 2 5 2014 JG save third column as matlab time (default is in hours.
@@ -746,11 +754,13 @@ global MATSHIC
         o3=fminbnd('wlshiftm_geto3',0,2e3,[],spec(indwl,1),spec(indwl,2),etc(indwl),m,ozxsec(indwl));
         HEADER{end+1}=sprintf('%%Fitting ozone between 310 nm to 320 nm. O3=%5.f DU with SZA=%4.1f and m=%4.1f',o3,sza,m);
    mat.o3(j)=o3;    
-       if debu, disp(sprintf('%s o3=%4.0f DU  sza=%3.1f  m=%3.1f',datestr(tm),o3,sza,m));end
+       if debu, disp(sprintf('%s o3=%4.0f DU  sza=%3.1f  m=%3.1f',datestr(tm(1)),o3,sza,m));end % 10 7 2014 JG tm is a vector for scanning insts
         transo3=exp(-atmosatten(et_spec(:,1),o3,0,2)*m);
         
        rat=spec(:,2)./(etc.*exp(-ozxsec*o3/1e3*m));
-       ind=spec(:,1)>325 & ~isnan(rat);pp=polyfit(spec(ind,1),rat(ind),1);
+       ind=spec(:,1)>325 & ~isnan(rat);
+       if sum(ind)==0, ind=spec(:,1)>310 & ~isnan(rat);end   % 11 7 2014, for single brewer
+       pp=polyfit(spec(ind,1),rat(ind),1);
        fact=polyval(pp,spec(:,1)).*fact;
        if fact==0,fact=1;end
        
