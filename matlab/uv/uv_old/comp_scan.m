@@ -141,7 +141,7 @@ if ~isempty(uv1.time) && ~ isempty(uv2.time)
 
             set(h2,'linewidth',2);
         end
-        axis([3000,3650,-20,20]);
+        axis([2900,3650,-20,20]);
         set(gca,'YTick',[20,10,5,2.5,0,-2.5,-5,-10,-20]*-1);        
         ht=title(sprintf(' Intercomparison ratio %03s vs %03s %02d/%02d',...
             leg1,leg2,uv1.date(1,i),uv1.date(2,i)));
