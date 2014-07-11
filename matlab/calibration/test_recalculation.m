@@ -40,6 +40,7 @@ arg.addRequired('SL_B');
 arg.addParamValue('flag_sl', 0, @(x)(x==0 || x==1)); % por defecto no SL corr
 arg.addParamValue('FC', [0 0 0 0 0 0], @isfloat); % por defecto, [0 0 0 0 0 0]
 arg.addParamValue('plot_sl', 0, @(x)(x==0 || x==1)); % por defecto no plotea
+arg.addParamValue('O3_std', 2.5, @isfloat); % por defecto 2.5 O3 std. filter
 
 % validamos los argumentos definidos:
 try
@@ -114,7 +115,7 @@ if ~isempty(fecha)
     [m,s,n]=cellfun(@(a,b,c,d) grpstats([a(:,[1,4,5,6,7,2,15,21,8]),b,a(:,14),c],d,{'mean','std','numel'}),...
                                       ozone,ozo_c,ozo_o,idx,'UniformOutput',false);  
                                   
-    j=cellfun(@(a,b,c) (a(:,5+2)<=2.5 & b(:,5+2)>100 & b(:,5+2)<600 & b(:,5+1)>0 & c(:,5+1)==5),...
+    j=cellfun(@(a,b,c) (a(:,5+2)<=arg.Results.O3_std & b(:,5+2)>100 & b(:,5+2)<600 & b(:,5+1)>0 & c(:,5+1)==5),...
                         s,m,n,'UniformOutput',false);
                     
     summary    =cellfun(@(a,b,y) cat(2,a(y,1:5),a(y,5+2),b(y,5+2),a(y,5+3),b(y,5+3),...
