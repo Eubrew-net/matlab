@@ -165,8 +165,16 @@ end
      jhg_old=find(jhg<jhgscan(1)); % these are the old ones
      if ~isempty(jhg_old)
         idx_old=length(jhg_old);
+       try 
         hg(1:idx_old,1:end-1)=cell2mat(textscan(char(l(jhg(jhg_old)))','hg %f:%f:%f %f %f %f %f %f',...
                             'delimiter',char(13),'multipleDelimsAsOne',1));
+       catch
+           haux=strrep(l(jhg(jhg_old)),char(13),' ');
+           haux=sscanf(char(haux)','hg %f:%f:%f %f %f %f %f %f  \n ',[8,Inf]);
+          %haux=reshape(haux,9,[])';
+          hg(1:idx_old,1:end-1)=haux';
+       end
+                        
         jhg=setdiff(jhg(1+idx_old:end),jhgscan); % after hgscan follows hg
      else
         jhg=setdiff(jhg,jhgscan); % after hgscan follows hg
