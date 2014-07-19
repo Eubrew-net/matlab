@@ -1,3 +1,4 @@
+function [sc,sc_raw,co,o3]=readb_sc(bfile,config_file,varargin)
 %function [sc,sc_meas,co]=readb_sc(bfile,config_file)
 %  Input : fichero B, configuracion (ICF en formato ASCII)
 %  Output:
@@ -20,7 +21,7 @@
 %  Juanjo 08/02/2012: Añadido condicional para evitar problemas cuando se detiene el sc
 %                    (HOME key pressed) -> líneas 120:122
 % 
-function [sc,sc_raw,co,o3]=readb_sc(bfile,config_file,varargin)
+
 sc=[];
 fmtsc=' sc %c %d %f %d %d %d %d %d %d %d %d %d %d rat %f %f %f %f';
 fmt_head=' version=%f dh %f %f %f %s %f %f %f pr %f';
@@ -40,7 +41,9 @@ try
     datefich=datejul(fileinfo(3),fileinfo(2));
     l=mmstrtok(s,char(10));
 
-    jco=strmatch('co',l);  jsc=strmatch('sc',l);
+    jco=strmatch('co',l); 
+    %jsc=strmatch('sc',l);
+    jsc=find(strncmp(l,'sc',2));
     if isempty(jsc) || isempty(jco)
        o3.sc_avg=[];      o3.sc_raw=[];
        sc=[];    sc_raw=[];    co='No SC';
@@ -78,33 +81,12 @@ try
 
 % READ HG
 % filtro de hg
-  if isempty(jhgscan)% Con la version antigua nunca se escribe la diferencia de pasos??
-% Se asume como maximo 9 campos (version nueva)
-     hg=NaN*ones(length(jhg),9);
-%      hg(:,1:end-1)=cell2mat(textscan(char(l(jhg))','hg %f:%f:%f %f %f %f %f %f',...
-%                                 'delimiter',char(13),'multipleDelimsAsOne',1));  hg=hg';    
-     hg(:,1:end-1)=cell2mat(cellfun(@(x) cell2mat(textscan(strrep(x,char(13),' '),'hg %f:%f:%f %f %f %f %f %f',...
-                                'delimiter',char(13),'multipleDelimsAsOne',1)),cellstr(char(l(jhg))),...
-                                'UniformOutput' ,0));  hg=hg';
-  else
-% This only accounts for changing to new sofware after the old one
-     hg=NaN*ones(length(setdiff(jhg,jhgscan)),9);
-     jhg_old=find(jhg<jhgscan(1)); % these are the old ones
-     if ~isempty(jhg_old)
-        idx_old=length(jhg_old);
-%         hg(1:idx_old,1:end-1)=cell2mat(textscan(char(l(jhg(jhg_old)))','hg %f:%f:%f %f %f %f %f %f',...
-%                                  'delimiter',char(13),'multipleDelimsAsOne',1));
- hg(1:idx_old,1:end-1)=cell2mat(cellfun(@(x) cell2mat(textscan(strrep(x,char(13),' '),'hg %f:%f:%f %f %f %f %f %f',...
-                                'delimiter',char(13),'multipleDelimsAsOne',1)),cellstr(char(l(jhg(jhg_old)))),...
-                                'UniformOutput' ,0));                              
-        jhg=setdiff(jhg(1+idx_old:end),jhgscan); % after hgscan follows hg
-     else
-        idx_old=[];       
-        jhg=setdiff(jhg,jhgscan); % after hgscan follows hg
-     end
-   hg(length(jhg_old)+1:end,:)=cell2mat(textscan(char(strrep(l(jhg),char(13),' '))','hg %f:%f:%f %f %f %f %f %f %f',...
-                                 'delimiter',char(13),'multipleDelimsAsOne',1));  hg=hg';                                            
-  end
+if ~isempty(jhg)
+  hg=readb_hg_measures(l,jhgscan,jhg)';
+else
+  hg=NaN*ones(1,9)';
+end
+
 
     time_hg=sort(hg(1,:)*60+hg(2,:)+hg(3,:)/60); %a minutos. Lo de sort es un APAÑO
     flaghg=abs(hg(5,:)-config(14))<2; % more than 2 steps change
@@ -136,7 +118,8 @@ try
         jsc_aux=strfind(co,'sc:');
         jsc=find(~cellfun('isempty',jsc_aux)); 
         co_aux=find(~cellfun('isempty',strfind(co,'sc: Supressed'))); 
-        [a b]=intersect(jsc,co_aux); jsc(b)=[];
+        [a b]=intersect(jsc,co_aux); 
+        jsc(b)=[];
         c=find(cellfun(@(x) ~isempty(strfind(x,'Running')),co(jsc)));
         jsc(c)=[];
         
