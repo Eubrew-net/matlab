@@ -82,11 +82,12 @@ end
 
 % remove 2.5 sigma outlier
 if outlier_flag==1
-  [ax,bx,cx,dx]=outliers_bp(sls(:,22),4.5);
+  [ax,bx,cx,dx]=outliers_bp(sls(:,22),1.5);
 else 
    dx=[];
 end
-oulier{1,1}=datestr(sls(dx,1));  oulier{1,2}=sls(dx,:);
+oulier{1,1}=datestr(sls(dx,1)); 
+oulier{1,2}=sls(dx,:);
 sls(dx,[22,21,13,23,24])=NaN;
 
 %jok hg before and after
