@@ -189,7 +189,11 @@ end
         haux=strrep(l(jhg),char(13),' ');
         haux=sscanf(char(haux)','hg %f:%f:%f %f %f %f %f %f %f\n ',[9,Inf]);
         %haux=reshape(haux,9,[])';
-        hg(length(jhg_old)+1:end,:)=haux';
+        try
+         hg(length(jhg_old)+1:end,:)=haux';
+        catch
+         hg(1:size(haux',1),:)=haux';
+        end         
    end
    hg=hg';
   end
