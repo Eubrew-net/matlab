@@ -1,6 +1,6 @@
-function [ETC,o3_c,m_netc]=ETC_calibration_C(file_setup,summary,A,instrumento,referencia,tsync,oscmax,szasync,C_DAYS)
+function [ETC,o3_c,m_netc]=ETC_calibration_C(file_setup,summary,A,instrumento,referencia,tsync,oscmax,szasync,C_DAYS,varargin)
+
 %function [ETC_NEW,o3c,m_netc]=ETC_calibration_C(file_setup,summary,instrumento,refernecia,tsync,oscmax,szasync,C_DAYS)
-%% Calibration
 %% Parametros de configuracion de momeno harcoded
 % alberto: introducido oscmax para 2p y 1p calibration
 %INPUT
@@ -85,14 +85,9 @@ else
     T_SYNC=TIME_SYNC;
 end
 if ~isempty(oscmax)
-        if length(oscmax)==1;
-            OSC_MAX=[oscmax,oscmax];
-        else
-            OSC_MAX=oscmax;
-        end
-        
+   OSC_MAX=oscmax;        
 else
-        OSC_MAX=[2,2];
+   OSC_MAX=2;
 end
 
 if ~isempty(szasync)
@@ -120,7 +115,6 @@ end
 jday=findm(diaj(summary{n_ref}(:,1)),blinddays{n_ref},0.5);
 ref=summary{n_ref}(jday,:);
  %for i=1:length(brw)
- disp(n_ref);
 
      %n_inst;
          jday=findm(diaj(summary{n_inst}(:,1)),blinddays{n_inst},0.5);
@@ -174,14 +168,33 @@ ref=summary{n_ref}(jday,:);
 %         o3p_2=o3ref.*m_ref.*A*10;
 
          
-          % ozone slant path range
-         if OSC_MAX(1)>0 
-            j=find(ozone_scale<OSC_MAX(1));
+         % ozone slant path range 
+         if length(OSC_MAX)==2
+            j=find(ozone_scale>OSC_MAX(1) & ozone_scale<OSC_MAX(2));
          else
-            j=find(ozone_scale>abs(OSC_MAX(1)));
+            j=find(ozone_scale<OSC_MAX);             
+         end         
+         [ETC(2).TP(1,:),ETC(2).TP_STATS] = robustfit(ozone_slant,ms9);
+         
+         try
+            [ETC(1).TP(1,:),ETC(1).TP_STATS] = robustfit(ozone_slant(j),ms9(j));
+         catch
+            ETC(1).TP(1,:)=NaN*ETC(2).TP(1,:);
+            ETC(1).TP_STATS=NaN*ETC(1).TP_STATS;
          end
-          
 
+         % todo el rango
+         y=mean_smooth(ozone_slant,(ms9-o3p),0.12,0);
+         ETC_NEW_=nanmedian(y(:,1));
+         ETC_NEW_ERR_=nanstd(y(:,1))/sqrt(length(y(:,1)));         
+         ETC(2).NEW=ETC_NEW_;   ETC(2).NEW_ERR=ETC_NEW_ERR_;
+         
+         ETC_CALC=ms9(j)-o3p(j);
+         ETC_NEW=nanmedian(ETC_CALC);    ETC_NEW_ERR=nanmedian(abs(ETC_CALC-nanmedian(ETC_CALC)));
+%        ETC_NEW_ERR=nanstd(ETC_CALC)/sqrt(length(ETC_CALC));
+         ETC(1).NEW=ETC_NEW;         ETC(1).NEW_ERR=ETC_NEW_ERR;
+
+ if isempty(varargin)
          %% two point calibration
          % Metodo de calibracio clasico
          % TODO -----------> SEPARAR LAS FIGURAS DEL PROCESO
@@ -221,19 +234,10 @@ ref=summary{n_ref}(jday,:);
 %          plot(ozone_slant(ms9(j))*1000,aux,'k.',ozone_slant(ms9)*1000,aux2,'rx');
          hline([0,-50,50],'k-');
          
-         
-         [ETC(2).TP(1,:),ETC(2).TP_STATS] = robustfit(ozone_slant,ms9);
-         try
-          [ETC(1).TP(1,:),ETC(1).TP_STATS] = robustfit(ozone_slant(j),ms9(j));
-         catch
-           ETC(1).TP(1,:)=NaN*ETC(2).TP(1,:);
-           ETC(1).TP_STATS=NaN*ETC(1).TP_STATS;
-         end
          %% SALIDA
          %ETC.TP=(line);
          %ETC.TP_STATS=stats{n_inst};
-         
-         
+                  
          %%two point by filter
          try
           figure;
@@ -293,11 +297,6 @@ ref=summary{n_ref}(jday,:);
         
          
          %% one point calibration    todo el rango
-         if OSC_MAX(2)>0
-            j=find(ozone_scale<OSC_MAX(2));
-         else
-            j=find(ozone_scale>abs(OSC_MAX(2)));
-         end
          f=figure; set(f,'Tag','CAL_1P')
          plot(ozone_slant,(ms9-o3p),'+','MarkerSize',2);
          hold on;
@@ -314,14 +313,7 @@ ref=summary{n_ref}(jday,:);
          figure
          [mt,st,nd,nam]=grpstats((ms9-o3p),o3_c(:,17),0.5);
          plot(cellfun(@str2num,nam),mt,'x');
-         rline
-         %% todo el rango
-         ETC_NEW_=nanmedian(y(:,1));
-         ETC_NEW_ERR_=nanstd(y(:,1))/sqrt(length(y(:,1)));
-         
-         ETC(2).NEW=ETC_NEW_;
-         ETC(2).NEW_ERR=ETC_NEW_ERR_;
-                         
+         rline                         
               
          %% one point calibration  solo el rango seleccionado               
          ETC_CALC=ms9(j)-o3p(j);
@@ -344,11 +336,11 @@ ref=summary{n_ref}(jday,:);
          title(sprintf('%s ETC Transfer from RBCC-E reference %s',file_setup.brw_name{instrumento},file_setup.brw_name{referencia}))
          xlabel('ozone slant path','HandleVisibility','On');        
          ylabel('ETC =  MS9 - A1*{O_{3REF}}*M2','HandleVisibility','On'); 
+ end   
 
-        
-        %% evaluation with the new ETC
-         o3_new=(ms9-ETC_NEW)./(o3_c(:,16)*10*A);
-         o3_c=[o3_c,o3_new];
+% evaluation with the new ETC (sólo el rango seleccionado)
+         o3_new=(ms9(j)-ETC_NEW)./(o3_c(j,16)*10*A);
+         o3_c=[o3_c(j,:),o3_new];
          
 %   1-> date 
 %   2-> ref + SL correct
@@ -363,10 +355,5 @@ ref=summary{n_ref}(jday,:);
                        m(:,4),s(:,4),...% campo 10 de inst
                        m(:,5),s(:,5),...% campo 12 de inst
                        m(:,6),s(:,6)]*10)/10;% o3 recalculated with new ETC                  
-         o3_c=[o3_c,ozone_scale<OSC_MAX(2)];
+         o3_c=[o3_c,ozone_scale(j)];
 
-
-%jday=find( diaj(summary{n_ref}(:,1))==251 | diaj(summary{n_ref}(:,1))==253);
-%jday=find(  diaj(summary{n_ref}(:,1))>254 & %diaj(summary{n_ref}(:,1))<=260 );
-%jday=findm(diaj(diaj(summary{n_ref}(:,1))),blinddays{n_ref},0.5);
-%for n_ref=[n_ref]
