@@ -40,13 +40,13 @@ arg.addParamValue('plot_flag', 0, @(x)(x==0 || x==1));   % por defecto no plots
 arg.parse(lgl_data,brw,Cal,varargin{:});
 
 %% Inicializamos Variables
-resp_brw=NaN*ones(length(lgl_data{brw}),3,2); resp_brw(:,1,[1 2])=repmat(cellfun(@(x) unique(fix(x(:,1))),lgl_data{brw}),1,2); 
+resp_brw=NaN*ones(length(lgl_data{brw}),5,2); resp_brw(:,1,[1 2])=repmat(cellfun(@(x) unique(fix(x(:,1))),lgl_data{brw}),1,2); 
 stats_brw=struct('r',[],'ci',[]);
 stats_brw.ci=NaN*ones(length(lgl_data{brw}),5,2); stats_brw.ci(:,1,[1 2])=repmat(cellfun(@(x) unique(fix(x(:,1))),lgl_data{brw}),1,2); 
 stats_brw.r=cellfun(@(x) NaN*ones(x,5,2),cellfun(@(x) size(x,1),lgl_data{brw},'UniformOutput', 0),'UniformOutput', 0);
 stats_brw.rs=NaN*ones(length(lgl_data{brw}),3,2); stats_brw.rs(:,1,[1 2])=repmat(cellfun(@(x) unique(fix(x(:,1))),lgl_data{brw}),1,2); 
 
-resp_dbs=NaN*ones(length(lgl_data{brw}),3,2); resp_dbs(:,1,[1 2])=repmat(cellfun(@(x) unique(fix(x(:,1))),lgl_data{brw}),1,2); 
+resp_dbs=NaN*ones(length(lgl_data{brw}),5,2); resp_dbs(:,1,[1 2])=repmat(cellfun(@(x) unique(fix(x(:,1))),lgl_data{brw}),1,2); 
 stats_dbs=struct('r',[],'ci',[],'rs',[]);
 stats_dbs.ci=NaN*ones(length(lgl_data{brw}),5,2); stats_dbs.ci(:,1,[1 2])=repmat(cellfun(@(x) unique(fix(x(:,1))),lgl_data{brw}),1,2); 
 stats_dbs.r=cellfun(@(x) NaN*ones(x,5,2),cellfun(@(x) size(x,1),lgl_data{brw},'UniformOutput', 0),'UniformOutput', 0);
