@@ -46,7 +46,7 @@ arg.addRequired('name_a', @ischar);
 arg.addRequired('name_b', @ischar);
 
 arg.StructExpand = false;
-arg.addParamValue('OSC_lim', [250 1700], @isfloat); % Por defecto [300 1600]
+arg.addParamValue('OSC_lim', [250 1900], @isfloat); % Por defecto [300 1600]
 arg.addParamValue('plot_flag', 1, @(x)(x==1 || x==0)); % Por defecto 1 (ploteo de individuales)
 
    try
@@ -138,10 +138,8 @@ try
     y=mean_smooth(osc,rp(:,2),0.125);
     [m_,s_,outliers.r,outliers.idx]=outliers_bp(y(:,5)-rp(:,2));
     osc_smooth=sortrows([osc,y(:,1:end)],1);
- 
     
-    
-if plot_flag    
+     
 if  nargin~=3 && ~strcmp(name_a,name_b)
     f=figure;
     set(f,'Tag','RATIOo_1');
@@ -279,11 +277,7 @@ if  nargin~=3 && ~strcmp(name_a,name_b)
     interactivelegend(P,cellstr(num2str(unique(diaj(data(:,1))))),opts);
        xlabel('Ozone slant path (DU)'); ylabel('Ozone Relative Difference (%)');
        title(sprintf('(%s - %s) / %s . Temperature',name_a,name_b,name_b));
-       hold on;
-     figure  
-     mtaux=grpstats([osc,rp(:,2),data(:,8)],data(:,8));
-     gscatter(mtaux(:,1),mtaux(:,2),mtaux(:,3),'','',20);
-    %% temperature    
+        
     f=figure;   set(f,'Tag','RATIO_FILTER_REF');    
     try
      gscatter(osc,rp(:,2),data(:,end),'','o',5); 
@@ -329,7 +323,7 @@ if  nargin~=3 && ~strcmp(name_a,name_b)
     end
     
     %figure by day
-       
+  if plot_flag     
     f=figure;
     set(f,'Tag','RATIO_DAY');
     

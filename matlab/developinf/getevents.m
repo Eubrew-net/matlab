@@ -35,13 +35,13 @@ arg = inputParser;   % Create an instance of the inputParser class
 arg.FunctionName='getevents';
 
 arg.addRequired('Cal', @isstruct);
-arg.addParamValue('grp', 'month', @(x)any(strcmpi(x,{'events','month','week','month+events'}))); 
-% por defecto eventos
+arg.addParamValue('grp', 'month', @(x)any(strcmpi(x,{'events','month','week','month+events'}))); % por defecto eventos
+arg.addParamValue('period', Cal.Date.CALC_DAYS, @isfloat);    
 
 arg.parse(Cal, varargin{:});
 
 %%
-period=Cal.Date.CALC_DAYS;
+period=arg.Results.period;
 % group_time(data,periods)-> si en data hay fechas inferiores a periods(1) tendremos el 0
 switch arg.Results.grp
     

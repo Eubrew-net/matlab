@@ -41,6 +41,10 @@ if isempty(data)
 end
 
 a=group_time(data(:,1),event.dates);
+if any(a==0)
+   fprintf('Removing data before 1st event as input.\n');
+   data(a==0,:)=[]; a(a==0)=[]; 
+end
 [m std N]=grpstats(data,a,{@(x) nanmean(x,1),@(x) nanstd(x,1,1),'numel'});
 
 %% Structure: init
