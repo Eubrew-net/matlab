@@ -155,8 +155,9 @@ p=pie(t(:,2)); title('Num. summaries / per day')
 legend(cellstr(num2str(t(t(:,2)~=0,1))));
 
 % SL summary from bfiles ] temperature
+TC_plot=reshape(TC,16,size(TC,1)/16);
 figure; set(gcf,'Tag','DailySL');
-hl1=ploterr(TC(1,:),TC(2,:),[],TC(3,:),'*k'); set(gca,'YLim',[min(TC(2,:)-10) max(TC(2,:)+10)]); 
+hl1=ploterr(TC_plot(1,:),TC_plot(2,:),[],TC_plot(3,:),'*k'); set(gca,'YLim',[min(TC_plot(2,:)-10) max(TC_plot(2,:)+10)]); 
 set(hl1,'LineWidth',2); 
 ylabel('SL double ratio MS9');
 title(sprintf('Daily means for sl ozone ratio & temperature. Brewer%s\r\n (from bfile sl summaries)',ext(2:end)));
@@ -169,7 +170,7 @@ ax(2)=axes('Position',get(ax(1),'Position'),...
    'YAxisLocation','right',...
    'Color','none','FontSize',10,...
    'XColor','k','YColor','b'); set(ax,'box','off');
-hold on; hl2=ploterr(TC(1,:),TC(7,:),[],TC(8,:),'*b');  
+hold on; hl2=ploterr(TC_plot(1,:),TC_plot(7,:),[],TC_plot(8,:),'*b');  
 set(hl2,'LineWidth',2);  set(gca,'XTicklabels',[],'YLim',[0 40]); 
 ylb=ylabel('Temperature','Rotation',-90); pos=get(ylb,'Position'); pos(1)=pos(1)+3;
 set(ylb,'Position',pos); 
