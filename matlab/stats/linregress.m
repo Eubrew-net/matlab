@@ -4,7 +4,7 @@
 
 function [b,bint,r,rint,stats] = linregress(y,x,alpha)
 if nargin==2
-    alpha=0.05
+    alpha=0.05;
 end
 %añandimos el termino independiente
 X=[x,ones(size(x))];
