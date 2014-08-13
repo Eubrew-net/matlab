@@ -77,13 +77,24 @@ else
 end
 
 % Por si queremos cambiar los valores por defecto
-if ~isempty(instrumento) n_inst=instrumento; else n_inst=file_setup.n_inst; end
-if ~isempty(referencia) n_ref=referencia; else n_ref=file_setup.n_ref(1);end
+if ~isempty(instrumento) 
+   n_inst=instrumento;
+else
+   n_inst=file_setup.n_inst;
+end
+
+if ~isempty(referencia) 
+   n_ref=referencia;
+else
+   n_ref=file_setup.n_ref(1);
+end
+
 if ~isempty(tsync)      
     T_SYNC=tsync;
 else
     T_SYNC=TIME_SYNC;
 end
+
 if ~isempty(oscmax)
    OSC_MAX=oscmax;        
 else
@@ -91,25 +102,21 @@ else
 end
 
 if ~isempty(szasync)
-        SZA_SYNC=szasync;
+   SZA_SYNC=szasync;
 else
-        SZA_SYNC=0.03;
+   SZA_SYNC=0.03;
 end
 
 blinddays={};
-
 if ~isempty(C_DAYS)
-        blinddays{n_ref}=C_DAYS;
-        blinddays{n_inst}=C_DAYS;
+    blinddays{n_ref}=C_DAYS;
+    blinddays{n_inst}=C_DAYS;
 else
-        blinddays{n_ref}=CALC_DAYS;
-        blinddays{n_inst}=CALC_DAYS;
+    blinddays{n_ref}=CALC_DAYS;
+    blinddays{n_inst}=CALC_DAYS;
 end
 
-%
-
 % los dias que se procesan son los cosiderados dias finales
-
 % Buscamos los datos  comunes
 % realizqamos la calibracion con los datos de los sumarios
 jday=findm(diaj(summary{n_ref}(:,1)),blinddays{n_ref},0.5);
@@ -151,22 +158,14 @@ ref=summary{n_ref}(jday,:);
          o3ref=o3_c(:,7);   % usually not SL corrected: o3_c(:,7), SL corrected o3_c(:,13)
          m_inst=o3_c(:,16); % ozone airmass from inst.
          m_ref =o3_c(:,4);  % ozone airmass from ref.
-           
-%        
+                   
          ozone_slant=o3ref.*m_ref/1000;  % ozone and airmass from reference
-%         ozone_slant=o3_c(:,11).*o3_c(:,16)/1000; %air mass from instrument
-       %ozone scale, group ozone slant values in 0.05 intervals  
-          ozone_scale=fix(ozone_slant/.05)*.05;
+%        ozone_slant=o3_c(:,11).*o3_c(:,16)/1000; %air mass from instrument
+%        ozone scale, group ozone slant values in 0.05 intervals  
+         ozone_scale=fix(ozone_slant/.05)*.05;
          
-% 
-%         % airm * ozo *10*A1ins
-%         % ETC determination
-         o3p=o3ref.*o3_c(:,4)*10*A; %airmas from reference
-         
-         o3p=o3ref.*m_inst.*A*10;
-% must be the same
-%         o3p_2=o3ref.*m_ref.*A*10;
-
+         o3p=o3ref.*m_inst.*A*10;   % airmas from instrument
+%        o3p=o3ref.*m_ref.*A*10 ;   % airmas from reference (must be the same)
          
          % ozone slant path range 
          if length(OSC_MAX)==2
@@ -178,7 +177,8 @@ ref=summary{n_ref}(jday,:);
          
          try
             [ETC(1).TP(1,:),ETC(1).TP_STATS] = robustfit(ozone_slant(j),ms9(j));
-         catch
+         catch exception
+            fprintf('%s, brewer: %s\n',exception.message,Cal.brw_str{n_inst});
             ETC(1).TP(1,:)=NaN*ETC(2).TP(1,:);
             ETC(1).TP_STATS=NaN*ETC(1).TP_STATS;
          end
@@ -313,7 +313,7 @@ ref=summary{n_ref}(jday,:);
          figure
          [mt,st,nd,nam]=grpstats((ms9-o3p),o3_c(:,17),0.5);
          plot(cellfun(@str2num,nam),mt,'x');
-         rline                         
+         [h,Lr] = rline;                      
               
          %% one point calibration  solo el rango seleccionado               
          ETC_CALC=ms9(j)-o3p(j);
