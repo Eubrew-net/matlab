@@ -1,15 +1,25 @@
 function [tabla_dsp,dsp_quad,dsp_cubic]=report_dispersion(Cal,varargin)
 
-% function [tabla_dsp]=b3(Cal,varargin)
+% function [tabla_dsp]=report_dispersion(Cal,varargin)
 %
-% Analisis de los dsp's (funci?n read_dsp). Promedios por eventos
+% Analisis de los dsp's (funcion read_dsp). Promedios por eventos
 %
 % INPUT
-% - Cal       : variable de definiciones (setup)
-% - grp       : Opcional (string). Por defecto promedios mensuales
-%               Valores implementados: 'events','month','week','month+events' (see getevents function)
-% - fpath     : 
-% - dte_range :
+% - Cal        : variable de definiciones (setup)
+% 
+% Opcionales
+% - grp        : (String). Por defecto promedios mensuales
+%                 Valores implementados: 'events','month','week','month+events' (see getevents function)
+% 
+% - grp_custom  : (Struct). Eventos personalizados 
+%                  Estructura con los campos siguientes (see getevents function)
+%                  1) dates  : Fechas asociadas a los eventos definidos
+%                  2) labels : Etiquetas asociadas a los eventos definidos
+% 
+% - fpath      : (String). Path a los ficheros dsp. Por defecto, Cal.path_root\DSP 
+% 
+% - date_range : (Float). Periodo de analisis. Por defecto, Cal.Date.CALC_DAYS 
+% 
 %
 % OUTPUT
 % - tabla_dsp: Estructura con los siguientes campos:
@@ -33,7 +43,9 @@ arg = inputParser;   % Create an instance of the inputParser class
 arg.FunctionName='report_dispersion';
 
 arg.addRequired('Cal', @isstruct);
-arg.addParamValue('grp', 'events', @(x)any(strcmpi(x,{'events','month','week','month+events'}))); % por defecto
+
+arg.addParamValue('grp', '', @(x)any(strcmpi(x,{'events','month','week','month+events'})));
+arg.addParamValue('grp_custom', [], @isstruct);    
 arg.addParamValue('fpath', fullfile(Cal.path_root,'DSP'), @ischar);    
 arg.addParamValue('date_range', Cal.Date.CALC_DAYS, @isfloat);    
 
@@ -54,7 +66,16 @@ aux(:,15:16)=cat(1,-O3W*abs(dsp_quad(:,18:23))',-O3W*abs(dsp_cubic(:,18:23))')';
  lbl_dsp={'CSN','wl_0','wl_2','wl_3','wl_4','wl_5','wl_6',...
                 'fwhm_0','fwhm_2','fwhm_3','fwhm_4','fwhm_5','fwhm_6',...
                 'A1 quad.','std','A1 cubic','std','N'};
- event_info=getevents(Cal,'grp',arg.Results.grp,'period',arg.Results.date_range);
+ if isempty(arg.Results.grp)
+    event_info=arg.Results.grp_custom;
+ else
+    event_info=getevents(Cal,'grp',arg.Results.grp,'period',arg.Results.date_range);      
+ end
+ if isempty(event_info)
+    fprintf('\rDebes definir una variable de eventos valida (help report_dispersion)\n');
+    tabla_dsp=NaN;
+    return
+ end
  data_tab=meanperiods(aux, event_info);
 
  tabla_dsp.data=cat(2,data_tab.m(:,1:14),data_tab.m(:,15),data_tab.std(:,15),...
