@@ -32,8 +32,7 @@ function [osc_table,osc_matrix,stats]=osc_table(Cal,ratio_ref,osc_interval)
  osc_table.row_header=header_;
  osc_table.col_header={Cal.brw_name{analyzed_brewer},'mean osc'};
  
- %displaytable(table_oscs,{Cal.brw_name{[reference_brw,5]},'mean osc'},11,'.2f',{'All osc','osc<700','700<osc<1000','osc>1000'}');
- fprintf('RBCC-E statistics, grouped by osc''s (N simultaneous:)\n\n',sum(~isnan(ratio_ref(:,analyzed_brewer+1))));
+ fprintf('\rRBCC-E statistics, grouped by osc''s (N simultaneous: %d, %d, %d)\n',sum(~isnan(ratio_ref(:,analyzed_brewer+1))));
  displaytable(table_oscs,{Cal.brw_name{analyzed_brewer},'mean osc'},11,'.2f',header_);
 
 % if nargin==2
