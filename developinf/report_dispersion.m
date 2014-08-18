@@ -18,7 +18,8 @@ function [tabla_dsp,dsp_quad,dsp_cubic]=report_dispersion(Cal,varargin)
 % 
 % - fpath      : (String). Path a los ficheros dsp. Por defecto, Cal.path_root\DSP 
 % 
-% - date_range : (Float). Periodo de analisis. Por defecto, Cal.Date.CALC_DAYS 
+% - date_range  : (Float). PERIODO de analisis. Por defecto, Cal.Date.CALC_DAYS 
+%                 (notar que date_range, al contrario de lo usual, se trata de un periodo, no de sus  extremos)
 % 
 %
 % OUTPUT
