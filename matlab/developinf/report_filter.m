@@ -18,7 +18,8 @@ function tabla_fi=report_filter(Cal,varargin)
 % 
 % - fpath      : (String). Path al fichero FIOAVG. Por defecto, Cal.path_root
 % 
-% - date_range : (Float). Periodo de analisis. Por defecto, Cal.Date.CALC_DAYS 
+% - date_range  : (Float). PERIODO de analisis. Por defecto, Cal.Date.CALC_DAYS 
+%                 (notar que date_range, al contrario de lo usual, se trata de un periodo, no de sus  extremos)
 % 
 % OUTPUT
 % - tabla_fi: Estructura con los siguientes campos:

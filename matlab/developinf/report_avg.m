@@ -21,7 +21,8 @@ function [tabla_avg sl_data,dt_data,rs_data,ap_data]=report_avg(Cal,varargin)
 %                  7 elementos posibles: sl, dt, rs, ap, hg, h2o, op
 % - fpath       : (String). Path a los ficheros AVG. Por defecto, Cal.path_root
 % 
-% - date_range  : (Float). Periodo de analisis. Por defecto, Cal.Date.CALC_DAYS 
+% - date_range  : (Float). PERIODO de analisis. Por defecto, Cal.Date.CALC_DAYS 
+%                 (notar que date_range, al contrario de lo usual, se trata de un periodo, no de sus  extremos)
 % 
 % OUTPUT
 % - tabla_avg: Estructura con los siguientes campos:
