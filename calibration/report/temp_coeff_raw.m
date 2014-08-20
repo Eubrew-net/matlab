@@ -227,17 +227,18 @@ if intensity_flag
 end
 
 if outlier_flag
-       figure;
        for ii=0:6
            [a,b,out]=boxparams(Fr(:,3+ii),3);
-           if ii==6
-               subplot(4,2,7:8);
-           else
-               subplot(4,2,ii+1);
+           if plots
+              figure;
+              if ii==6
+                 subplot(4,2,7:8);
+              else
+                 subplot(4,2,ii+1);
+              end
+                 hold on; plot(Fr(:,2),Fr(:,3+ii),'.','MarkerSize',2);
+                          plot(Fr(out,2),Fr(out,3+ii),'rx','MarkerSize',20);
            end
-           plot(Fr(:,2),Fr(:,3+ii),'.','MarkerSize',2);
-           hold on;
-           plot(Fr(out,2),Fr(out,3+ii),'rx','MarkerSize',20);
            Fr_dep=Fr(out,:) ;
            Fr(out,[1,3+ii])=NaN;
        end

@@ -16,7 +16,7 @@ function [tabla_HS tabla_HL]=report_wavelength(Cal,varargin)
 %                  1) dates  : Fechas asociadas a los eventos definidos
 %                  2) labels : Etiquetas asociadas a los eventos definidos
 % 
-% - fpath       : (String). Path a los directorio bdata (con ficheros CZ). Por defecto, Cal.path_root
+% - fpath      : (String). Path a la raiz de los bdata. Por defecto, Cal.path_root
 % 
 % - date_range  : (Float). Periodo de analisis. Por defecto, Cal.Date.CALC_DAYS 
 %  
@@ -51,7 +51,7 @@ arg.parse(Cal, varargin{:});
 %%
 wl_={}; fwhm_={};
 try
-   [wl fwhm]=analyzeCZ(fullfile(Cal.path_root,['bdata',Cal.brw_str{Cal.n_inst}],['HS*.',Cal.brw_str{Cal.n_inst}]),...
+   [wl fwhm]=analyzeCZ(fullfile(arg.Results.fpath,['bdata',Cal.brw_str{Cal.n_inst}],['HS*.',Cal.brw_str{Cal.n_inst}]),...
              'date_range',arg.Results.date_range([1 end]),'plot_flag',1); wl_{1}=wl{1}; fwhm_{1}=fwhm{1};             
 catch exception
    fprintf('Brewer %s, no HS files (%s)\n',Cal.brw_str{Cal.n_inst},exception.identifier);
@@ -60,7 +60,7 @@ catch exception
 end
 
 try
-   [wl fwhm]=analyzeCZ(fullfile(Cal.path_root,['bdata',Cal.brw_str{Cal.n_inst}],['HL*.',Cal.brw_str{Cal.n_inst}]),...
+   [wl fwhm]=analyzeCZ(fullfile(arg.Results.fpath,['bdata',Cal.brw_str{Cal.n_inst}],['HL*.',Cal.brw_str{Cal.n_inst}]),...
              'date_range',arg.Results.date_range([1 end]),'plot_flag',1); wl_{2}=wl{3}; fwhm_{2}=fwhm{3};             
 catch exception
    fprintf('Brewer %s, no HL files (%s)\n',Cal.brw_str{Cal.n_inst},exception.identifier);

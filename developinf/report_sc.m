@@ -17,7 +17,7 @@ function tabla_sc=report_sc(Cal,icf,varargin)
 %                  1) dates  : Fechas asociadas a los eventos definidos
 %                  2) labels : Etiquetas asociadas a los eventos definidos
 % 
-% - fpath       : (String). Path a los directorio bdata. Por defecto, Cal.path_root
+% - fpath      : (String). Path a la raiz de los bdata. Por defecto, Cal.path_root
 % 
 % - date_range  : (Float). PERIODO de analisis. Por defecto, Cal.Date.CALC_DAYS 
 %                 (notar que date_range, al contrario de lo usual, se trata de un periodo, no de sus  extremos)
@@ -34,8 +34,8 @@ function tabla_sc=report_sc(Cal,icf,varargin)
 % 
 % EXAMPLE:
 % 
-%           grp_custom=struct('dates',datenum(2014,1,[1 100 150 210]),'labels',{{'q','s','s','f'}});
-%           tabla_sc=report_sc(Cal,icf_n{Cal.n_inst},'grp_custom',grp_custom,'date_range',datenum(2014,1,1:50)); 
+%    grp_custom=struct('dates',datenum(2014,1,[1 100 150 210]),'labels',{{'q','s','s','f'}});
+%    tabla_sc=report_sc(Cal,Cal.brw_config_files{Cal.n_inst,2},'grp_custom',grp_custom,'date_range',datenum(2014,1,1:50)); 
 
 %% Validacion de input's
 arg = inputParser;   % Create an instance of the inputParser class
@@ -67,6 +67,7 @@ end
 
 % configuraciones (necesitamos tantas como eventos)
 icf_=getcfgs(arg.Results.date_range,icf,'events',event_info.dates);    
+
 
 %% Procesamos los periods determinados
 CSN.cal_step={}; 

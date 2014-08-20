@@ -111,7 +111,7 @@ try
               naux=naux+1;   
            end
         elseif iscell(aux_pattern)
-            figura=[brw{1},'_',label,'_',aux_pattern{naux}];
+            figura=[brw{1},'_',label,'_',aux_pattern{naux+1}];
             naux=naux+1;            
         end
      else
@@ -137,8 +137,8 @@ try
      else
         exportfig(h,strtok(figura,'.'),Options);
      end
-     %saveas(h,figura,'fig');
-     saveas(h,figura,'png');
+     saveas(h,figura,'fig');
+%      saveas(h,figura,'png');
      figuras{naux}=[figura,'.eps'];
 end
 cd(cwd);
