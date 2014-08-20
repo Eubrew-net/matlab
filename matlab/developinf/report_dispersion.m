@@ -36,8 +36,12 @@ function [tabla_dsp,dsp_quad,dsp_cubic]=report_dispersion(Cal,varargin)
 %
 %                           Los campos wl_# y fwhm_# se refieren a las diffs. quad-cubic
 % EXAMPLE:
-%        tabla_dsp=b3(Cal,'grp','month+events');
+%  Eventos predefinidos  : 
+%        tabla_dsp=report_dispersion(Cal,'grp','month+events');
 %
+%  Eventos personalizados: 
+%                  events=struct('dates',datenum(2014,1,[1 200]),'labels',{{'uno','dos'}}); 
+%                  tabla_dsp=report_dispersion(Cal,'grp_custom',events);
 
 %% Validacion de input's
 arg = inputParser;   % Create an instance of the inputParser class

@@ -1,6 +1,6 @@
-function tabla_tc=a2(Cal,icf,varargin)
+function tabla_tc=report_temperature(Cal,icf,varargin)
 
-% function tabla_tc=a2(Cal,icf,varargin)
+% function tabla_tc=report_temperature(Cal,icf,varargin)
 %  
 % Analisis de la dependencia con la temperatura a partir de SL individual 
 % (funcion temp_coef_raw). Promedios por eventos
@@ -9,8 +9,20 @@ function tabla_tc=a2(Cal,icf,varargin)
 % - Cal   : variable de definiciones (setup)
 % - icf   : Configuraciones a emplear. Por ahora unicamente esta permitida
 %           una matriz de configuraciones
-% - grp   : Opcional (string). Por defecto promedios mensuales
-%           Valores implementados: 'events','month','week','month+events' (see getevents function)
+% 
+% Opcionales
+% - grp        : (String). Por defecto promedios mensuales
+%                 Valores implementados: 'events','month','week','month+events' (see getevents function)
+% 
+% - grp_custom  : (Struct). Eventos personalizados 
+%                  Estructura con los campos siguientes (see getevents function)
+%                  1) dates  : Fechas asociadas a los eventos definidos
+%                  2) labels : Etiquetas asociadas a los eventos definidos
+% 
+% - fpath      : (String). Path a la raiz de los bdata. Por defecto, Cal.path_root
+% 
+% - date_range  : (Float). PERIODO de analisis. Por defecto, Cal.Date.CALC_DAYS 
+%                 (notar que date_range, al contrario de lo usual, se trata de un periodo, no de sus  extremos)
 % 
 % OUTPUT
 % - tabla_tc: Estructura con los siguientes campos:
@@ -25,42 +37,62 @@ function tabla_tc=a2(Cal,icf,varargin)
 %                          'coeff#1','coeff#2','coeff#3','coeff#4','coeff#5'
 % 
 % EXAMPLE:
-%          tabla_tc=a2(Cal,icf_n{Cal.n_inst},'grp','month+events');
+% 
+%        tabla_tc=report_temperature(Cal,Cal.brw_config_files{Cal.n_inst,2},'grp','month+events');
 % 
 
 %% Validacion de input's
 arg = inputParser;   % Create an instance of the inputParser class
-arg.FunctionName='a2';
+arg.FunctionName='report_temperature';
 
 arg.addRequired('Cal', @isstruct);
-arg.addRequired('icf', @isfloat);
-arg.addParamValue('grp', 'events', @(x)any(strcmpi(x,{'events','month','week','month+events'}))); % por defecto
+arg.addRequired('icf', @(x)isfloat(x) || ischar(x));
+
+arg.addParamValue('grp', '', @(x)any(strcmpi(x,{'events','month','week','month+events'}))); 
+arg.addParamValue('grp_custom', [], @isstruct);    
+arg.addParamValue('fpath', Cal.path_root, @ischar);    
+arg.addParamValue('date_range', Cal.Date.CALC_DAYS, @isfloat);    
 
 arg.parse(Cal, icf, varargin{:});
 
-%% Todos los datos
+%% Todos los datos en date_range
 config_temp.n_inst=Cal.n_inst;  config_temp.brw_name=Cal.brw_name{Cal.n_inst};        
 % if ~exist('sl_rw.mat','file')
-   sl_rw=readb_sl_rawl(fullfile(Cal.path_root,['bdata',Cal.brw_str{Cal.n_inst}],['B*.',Cal.brw_str{Cal.n_inst}]),...
-                                            'date_range',Cal.Date.CALC_DAYS([1 end]));
-%    save('sl_rw.mat','sl_rw');
+   sl_rw=readb_sl_rawl(fullfile(arg.Results.fpath,['bdata',Cal.brw_str{Cal.n_inst}],['B*.',Cal.brw_str{Cal.n_inst}]),...
+                                                   'date_range',arg.Results.date_range([1 end]),'f_plot',1);
+%     save('sl_rw.mat','sl_rw');
 % else
-%    load('sl_rw.mat');
+%      load('sl_rw.mat');
 % end
 
 %% Determinamos los periodos de analisis + configs a aplicar
 % periodos
-event_info=getevents(Cal,'grp',arg.Results.grp);
+ if isempty(arg.Results.grp)
+    event_info=arg.Results.grp_custom;
+ else
+    event_info=getevents(Cal,'grp',arg.Results.grp,'period',arg.Results.date_range);      
+ end
+ if isempty(event_info)
+    fprintf('\rDebes definir una variable de eventos valida (help report_avg)\n');
+    tabla_tc=NaN;
+    return
+ end
 
 % configuraciones (necesitamos tantas como eventos)
-icf_=getcfgs(Cal.Date.CALC_DAYS,icf,'events',event_info.dates);    
+icf_=getcfgs(arg.Results.date_range,icf,'events',event_info.dates);    
                                         
 %% Table, por periodos 
 tabl_TC=[]; tabl_TC_std=[]; NTC={}; ajuste={}; 
-y=group_time(Cal.Date.CALC_DAYS',event_info.dates); id_period=unique(y);
+y=group_time(arg.Results.date_range',event_info.dates); id_period=unique(y);
+if any(id_period==0)
+   fprintf('\rRemoving data before 1st event as input.\n');
+   date_range=arg.Results.date_range(y~=0); y(y==0)=[]; id_period(id_period==0)=[]; 
+else
+   date_range=arg.Results.date_range; 
+end
 for pp=1:length(id_period)        
     try
-     periods_=Cal.Date.CALC_DAYS(y==id_period(pp));
+     periods_=date_range(y==id_period(pp));
      [NTC{pp},ajuste{pp},Args,Fraw,Fnew]=temp_coeff_raw(config_temp,sl_rw,'outlier_flag',1,...
                                          'date_range',periods_([1,end]),'plots',0);
      [NTCx,ajustex,Argsx,Fraw,Forig]    =temp_coeff_raw(config_temp,sl_rw,'outlier_flag',1,'N_TC',icf_.data(2:6,pp)',...

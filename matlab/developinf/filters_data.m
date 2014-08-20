@@ -47,14 +47,14 @@ figure; set(gcf,'tag','FI_TIME_atts');
 ha=tight_subplot(2,1,.07,[.1 0.1],[.1 .1]);    
 % slit#3
 axes(ha(1)); sampl1=cell2mat(cellfun(@(x) x(:,5),att,'UniformOutput',0));
-ploty([att{1}(:,1),100*matdiv(matadd(sampl1(:,2:end),-nanmean(sampl1(:,2:end))),nanmean(sampl1(:,2:end)))],'-'); 
+ploty([att{1}(:,1),100*matdiv(matadd(sampl1(:,2:end),-nanmean(sampl1(:,2:end))),nanmean(sampl1(:,2:end)))],'*-'); 
 set(gca,'XTicklabel',[],'YTickLabelMode','auto','box','on'); grid;
 title(sprintf('%s\r\nND attenuations vs. time (sample slits #3, top, and #5, bottom)',Cal.brw_name{Cal.n_inst}));
 legendflex(label_filter(2:end),'ref', ha(1),'anchor', {'sw','sw'},'buffer',[6 0],...
                          'nrow',1,'fontsize',8,'box','off','xscale',.5);                   
 % slit#5
 axes(ha(2)); sampl1=cell2mat(cellfun(@(x) x(:,7),att,'UniformOutput',0));
-ploty([att{1}(:,1),100*matdiv(matadd(sampl1(:,2:end),-nanmean(sampl1(:,2:end))),nanmean(sampl1(:,2:end)))],'-'); 
+ploty([att{1}(:,1),100*matdiv(matadd(sampl1(:,2:end),-nanmean(sampl1(:,2:end))),nanmean(sampl1(:,2:end)))],'*-'); 
 set(gca,'YTickLabelMode','auto','box','on'); grid;
 datetick('x','mmmyy','keeplimits','keepticks');
 
@@ -77,11 +77,11 @@ legend(label_filter(2:end),'Location','North','orientation','horizontal');
 datetick('x','mmmyy','keeplimits','keepticks'); grid;
 
 %% Tabla
-fprintf('\r\nETC corr Monthly means: %s\r\n', Cal.brw_name{Cal.n_inst});
-tabla_data=cat(2,cellfun(@(x,y) strcat(num2str(x),' +/- ',num2str(y)),...
-                 num2cell(round(a(:,3:end))),num2cell(round(b(:,3:end))),'UniformOutput',0),...
-                 cellstr(num2str(c(:,1))));
-displaytable(tabla_data,{'ETC corr(FW#21)','ETC corr(FW#22)','ETC corr(FW#23)','ETC corr(FW#24)','ETC corr(FW#25)','N'},...
-             15,'.0f',cellstr(datestr(a(:,1),1)));
+% fprintf('\r\nETC corr Monthly means: %s\r\n', Cal.brw_name{Cal.n_inst});
+% tabla_data=cat(2,cellfun(@(x,y) strcat(num2str(x),' +/- ',num2str(y)),...
+%                  num2cell(round(a(:,3:end))),num2cell(round(b(:,3:end))),'UniformOutput',0),...
+%                  cellstr(num2str(c(:,1))));
+% displaytable(tabla_data,{'ETC corr(FW#21)','ETC corr(FW#22)','ETC corr(FW#23)','ETC corr(FW#24)','ETC corr(FW#25)','N'},...
+%              15,'.0f',cellstr(datestr(a(:,1),1)));
 %% Output
 o3f=[fech,temp(:,1),o3f];

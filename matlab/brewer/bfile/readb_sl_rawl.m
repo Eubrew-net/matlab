@@ -150,12 +150,12 @@ textprogressbar(' sl raw done');
 
 if f_plot
 % quesito de frecuencia de SL summaries
-figure; t=tabulate(TC(6,:));
+TC_plot=reshape(TC,16,size(TC,1)/16);
+figure; t=tabulate(TC_plot(6,:));
 p=pie(t(:,2)); title('Num. summaries / per day')
 legend(cellstr(num2str(t(t(:,2)~=0,1))));
 
 % SL summary from bfiles ] temperature
-TC_plot=reshape(TC,16,size(TC,1)/16);
 figure; set(gcf,'Tag','DailySL');
 hl1=ploterr(TC_plot(1,:),TC_plot(2,:),[],TC_plot(3,:),'*k'); set(gca,'YLim',[min(TC_plot(2,:)-10) max(TC_plot(2,:)+10)]); 
 set(hl1,'LineWidth',2); 

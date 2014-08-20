@@ -19,7 +19,8 @@ function [tabla_avg sl_data,dt_data,rs_data,ap_data]=report_avg(Cal,varargin)
 % 
 % - outlier_flag: (Cellstring con flags de depuracion). Por defecto no depuracion
 %                  7 elementos posibles: sl, dt, rs, ap, hg, h2o, op
-% - fpath       : (String). Path a los ficheros AVG. Por defecto, Cal.path_root
+% 
+% - fpath      : (String). Path a la raiz de los bdata. Por defecto, Cal.path_root
 % 
 % - date_range  : (Float). PERIODO de analisis. Por defecto, Cal.Date.CALC_DAYS 
 %                 (notar que date_range, al contrario de lo usual, se trata de un periodo, no de sus  extremos)
@@ -41,7 +42,7 @@ function [tabla_avg sl_data,dt_data,rs_data,ap_data]=report_avg(Cal,varargin)
 %                  report_avg(Cal,'grp','events','outlier_flag',{'','dt','','','','',''});
 % 
 %  Eventos personalizados: 
-%                  events=struct('dates',datenum(2014,1,[1 200]),'labels',{'Bef.  ND change','After. ND change'}); 
+%                  events=struct('dates',datenum(2014,1,[1 200]),'labels',{{'Bef.  ND change','After. ND change'}}); 
 %                  report_avg(Cal,'grp_custom',events,'outlier_flag',{'','dt','','','','',''});
 % 
 

@@ -16,7 +16,7 @@ function tabla_fi=report_filter(Cal,varargin)
 %                 1) dates  : Fechas asociadas a los eventos definidos
 %                 2) labels : Etiquetas asociadas a los eventos definidos
 % 
-% - fpath      : (String). Path al fichero FIOAVG. Por defecto, Cal.path_root
+% - fpath      : (String). Path a la raiz de los bdata. Por defecto, Cal.path_root
 % 
 % - date_range  : (Float). PERIODO de analisis. Por defecto, Cal.Date.CALC_DAYS 
 %                 (notar que date_range, al contrario de lo usual, se trata de un periodo, no de sus  extremos)
@@ -33,7 +33,13 @@ function tabla_fi=report_filter(Cal,varargin)
 %                       'ETC corr (FW#24)','std','ETC corr (FW#25)','std','N'
 % 
 % EXAMPLE
+%  Eventos predefinidos  : 
 %            tabla_fi=report_filter(Cal,'grp','month+events'); 
+% 
+%  Eventos personalizados: 
+%                  events=struct('dates',datenum(2014,1,[1 200]),'labels',{{'Bef.  ND change','After. ND change'}}); 
+%                  report_filter(Cal,'grp_custom',events);
+% 
 
 %% Validacion de input's
 arg = inputParser;   % Create an instance of the inputParser class
@@ -52,7 +58,7 @@ config_orig=read_icf(Cal.brw_config_files{Cal.n_inst,1},mean(arg.Results.date_ra
          
 %  All data
 filter{Cal.n_inst}={}; 
-[ETC_FILTER_CORRECTION,media_fi,fi,fi_avg]=filter_rep(Cal.brw_str{Cal.n_inst},'path_to_file',Cal.path_root,...
+[ETC_FILTER_CORRECTION,media_fi,fi,fi_avg]=filter_rep(Cal.brw_str{Cal.n_inst},'path_to_file',arg.Results.fpath,...
                         'outlier_flag',0,'plot_flag',0,'config',config_orig(17:22),...
                         'date_range',arg.Results.date_range([1 end]));
 filter{Cal.n_inst}.ETC_FILTER_CORRECTION=ETC_FILTER_CORRECTION;

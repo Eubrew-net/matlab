@@ -34,6 +34,9 @@ function cfg=getcfgs(period,config,varargin)
 % Podemos calcular vector de eventos como
 %     event_info=getevents(Cal,'grp',arg.Results.grp);
 % 
+% o bien definirlo
+%     events_cfg=struct('dates',datenum(2014,1,[1 14]),'labels',{{'uno','dos'}});
+% 
 % y usarlo como entrada de getevents
 %     events_cfg=getcfgs(Cal,icf,'events',event_info.dates);    
 % 
@@ -55,17 +58,39 @@ cfg.legend={
     'O3 on O3 Ratio','ETC on O3 Ratio','Dead time (sec)','csn',...
     'ND filter 0','ND filter 1','ND filter 2','ND filter 3','ND filter 4','ND filter 5',...
     'R6','R5','F#2_C','F#3_C','F#4_C'
-                  };                          
-%%
-if ischar(config)      % Path a icf
-   cal=read_icf(config); cal_id=[1 2:6 8 11 13 14 17:22 27:28 29:31];
-   if ~isempty(arg.Results.events)% Configuraciones asociadas a los eventos
-      cfg.data=repmat(cal(cal_id),1,length(arg.Results.events));
-
-   else                           % Configuraciones asociadas al periodo de analisis (solo 1)
-      cfg.data=cal(cal_id);
-   end
+           };      
        
+%%
+if ischar(config)                 % Path a fichero de configuracion
+   [fpath,ffile,fext]=fileparts(config);
+   if ~strcmpi(fext,'.cfg')
+      cal=read_icf(config); cal_id=[1 2:6 8 11 13 14 17:22 27:28 29:31];
+      if ~isempty(arg.Results.events) % Configuraciones asociadas a los eventos
+         cfg.data=repmat(cal(cal_id),1,length(arg.Results.events));          
+      else                            % Configuraciones asociadas al periodo de analisis (solo 1)
+         cfg.data=NaN*ones(length(cfg.legend),length(arg.Results.events));
+         icf_id=group_time(arg.Results.events,config(2,3:end));
+         cfg.data(:,icf_id~=0)=config(cal_id,icf_id(icf_id~=0)+2);
+
+         cfg.data=cal(cal_id,:);
+      end
+   else
+      cal=load(config);     cal_id=[1 2:6 8 11 13 14 17:22 27:28 29:31];
+      if ~isempty(arg.Results.events) % Configuraciones asociadas a los eventos
+         cfg.data=NaN*ones(length(cfg.legend),length(arg.Results.events));
+         icf_id=group_time(arg.Results.events,cal(1,:));
+         cfg.data(:,icf_id~=0)=cal(cal_id,icf_id(icf_id~=0));     
+      else                            % Configuraciones asociadas al periodo de analisis 
+         icf_id=unique(group_time(period',cal(1,:)));
+         if any(icf_id==0)  
+            cfg.data=NaN*ones(length(cfg.legend),length(icf_id));
+            cfg.data(:,icf_id~=0)=cal(cal_id,icf_id(icf_id~=0));  cfg.data(1,1)=period(1);          
+         else
+            cfg.data=cal(cal_id,icf_id);
+         end                    
+      end   
+   end
+         
 elseif isfloat(config) % Matriz de calibracion (una sola calibracion!!-> la pasada)
      cal_id=[2 3:7 9 12 14 15 18:23 28:32];    
      if ~isempty(arg.Results.events)% Configuraciones asociadas a los eventos
