@@ -227,10 +227,10 @@ if intensity_flag
 end
 
 if outlier_flag
+   if plots, figure; end
        for ii=0:6
            [a,b,out]=boxparams(Fr(:,3+ii),3);
            if plots
-              figure;
               if ii==6
                  subplot(4,2,7:8);
               else
