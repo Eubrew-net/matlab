@@ -78,7 +78,7 @@ if ischar(config)                 % Path a fichero de configuracion
       cal=load(config);     cal_id=[1 2:6 8 11 13 14 17:22 27:28 29:31];
       if ~isempty(arg.Results.events) % Configuraciones asociadas a los eventos
          cfg.data=NaN*ones(length(cfg.legend),length(arg.Results.events));
-         icf_id=group_time(arg.Results.events,cal(1,:));
+         icf_id=group_time(arg.Results.events',cal(1,:));
          cfg.data(:,icf_id~=0)=cal(cal_id,icf_id(icf_id~=0));     
       else                            % Configuraciones asociadas al periodo de analisis 
          icf_id=unique(group_time(period',cal(1,:)));

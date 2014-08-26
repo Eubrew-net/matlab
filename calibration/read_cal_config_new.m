@@ -5,14 +5,14 @@ function  [A,ETC,SL_B,SL_R,F_corr,cfg]=read_cal_config_new(config,file_setup,sl_
 %   - 27/11/2012 (Juanjo): Now it gives filter correction as output
 % 
 % INPUT:
-%   - config: columna 1 % 1? configuracion (cuando 2 configs.) o la del fichero B
-%             columna 2 % 2? configuracion (o ?nica configuraci?n)
+%   - config: columna 1 % 1º configuracion (cuando 2 configs.) o la del fichero B
+%             columna 2 % 2º configuracion (o única configuración)
 %             columna 3 % configuracion del fichero B
 %   - file_setup
 %   - sl_s  : daily values: 'time','R6','R5','T','F1','F5' (median,std)
 %             Puede ser una celda de dos elementos, para 1 & 2 configs. respectivamente
 %             (en el caso de cambios instrumentales puede ser importante)
-%             En el caso de dar una s?la sl_s, se asume que ser? con la 2 config
+%             En el caso de dar una sóla sl_s, se asume que será con la 2 config
 % 
 % OUTPUT:
 %   - A    : three fields struct: new (2nd config), old (1st config) & b (B config).
@@ -45,19 +45,19 @@ end
 cfg={};
 
 if any(Cal.Date.CALC_DAYS>366) % fecha matlab
-   fecha_days=fix(Cal.Date.CALC_DAYS);                          % todos los d?as considerados
+   fecha_days=fix(Cal.Date.CALC_DAYS);                          % todos los días considerados
    
 else                           % dia juliano
-   fecha_days=Cal.Date.CALC_DAYS+datenum(Cal.Date.cal_year,1,0);% todos los d?as considerados
+   fecha_days=Cal.Date.CALC_DAYS+datenum(Cal.Date.cal_year,1,0);% todos los días considerados
 end
 
 for i=1:Cal.n_brw
     try
         a=cell2mat(config{i}');
-        fecha=a(end,2:3:end)';% ficheros cargados con ?xito
+        fecha=a(end,2:3:end)';% ficheros cargados con éxito
         
         [idx loc]=ismember(fecha_days,fecha); % EN ESTE ORDEN !!!!
-        if ~any(idx) % Alg?n brewer no tiene datos en el rango CALC_DAYS. Skipped
+        if ~any(idx) % Algún brewer no tiene datos en el rango CALC_DAYS. Skipped
            fprintf('Brewer %s data is out of CALC DAYS range. Skipped (clean var.)\n',Cal.brw_name{i});
            continue
         end
@@ -69,8 +69,8 @@ for i=1:Cal.n_brw
     
     if ~isempty(a)               
        [xx,bb,ext]=fileparts(Cal.brw_config_files{i,2});
-       if isempty(ext)% trabajamos con una ?nica config. -> first = bfile
-          fprintf('Brewer %s:  1? config -> Bfiles\t\t\t',Cal.brw_name{i}); 
+       if isempty(ext)% trabajamos con una única config. -> first = bfile
+          fprintf('Brewer %s:  1ª config -> Bfiles\t\t\t',Cal.brw_name{i}); 
           a_old=a(:,3:3:end)';
           if any(isnan(a_old(:)))
             a_old(isnan(a_old))=0;
@@ -90,7 +90,7 @@ for i=1:Cal.n_brw
        else% dos configuraciones           
           % Primera configuracion
           [xx,bb,ext]=fileparts(Cal.brw_config_files{i,1});% to check config style                   
-          fprintf('Brewer %s:  1? config -> %s\t\t\t',Cal.brw_name{i},[bb,ext]);
+          fprintf('Brewer %s:  1ª config -> %s\t\t\t',Cal.brw_name{i},[bb,ext]);
           a_old=a(1:end-2,1:3:end)';
           if any(isnan(a_old(:)))
             a_old(isnan(a_old))=0;
@@ -124,11 +124,11 @@ for i=1:Cal.n_brw
        % Segunda configuracion
        [xx,bb,ext]=fileparts(Cal.brw_config_files{i,2});% to check config style
        if ~isempty(ext)             
-          fprintf('2? config -> %s\n',[bb,ext]);
+          fprintf('2ª config -> %s\n',[bb,ext]);
           a_new=a(1:end-2,2:3:end)';
-       else % si s?lo hemos pasado una configuraci?n, la primera ser? Bfiles y la 2? ?sta
+       else % si sólo hemos pasado una configuración, la primera será Bfiles y la 2ª ésta
           [xx,bb,ext]=fileparts(Cal.brw_config_files{i,1});% to check config style              
-          fprintf('2? config -> %s\n',[bb,ext]);
+          fprintf('2ª config -> %s\n',[bb,ext]);
           a_new=a(1:end-2,1:3:end)';              
        end
        if any(isnan(a_new(:)))
@@ -178,10 +178,10 @@ for i=1:Cal.n_brw
             switch i<=length(sl_s{1})
               case 1 
                    if isempty(sl_s{1}{i}) && ~isempty(sl_s{2}{i})
-                      fprintf('%s: est?s corrigiendo SIEMPRE con las R6 -> 2? config\n',Cal.brw_name{i});                         
+                      fprintf('%s: estás corrigiendo SIEMPRE con las R6 -> 2º config\n',Cal.brw_name{i});                         
                       sl_s_o=sl_s{2}{i}; sl_s_n=sl_s{2}{i}; 
                    elseif isempty(sl_s{2}{i}) && ~isempty(sl_s{1}{i})
-                      fprintf('%s: est?s corrigiendo SIEMPRE con las R6 -> 1? config\n',Cal.brw_name{i});                         
+                      fprintf('%s: estás corrigiendo SIEMPRE con las R6 -> 1ª config\n',Cal.brw_name{i});                         
                       sl_s_o=sl_s{1}{i}; sl_s_n=sl_s{1}{i}; 
                    elseif isempty(sl_s{1}{i}) && isempty(sl_s{2}{i})
                       continue;
@@ -196,10 +196,10 @@ for i=1:Cal.n_brw
                continue
            end
           else
-             fprintf('%s: est?s corrigiendo SIEMPRE con las R6 -> 2? config\n',Cal.brw_name{i});                         
+             fprintf('%s: estás corrigiendo SIEMPRE con las R6 -> 2º config\n',Cal.brw_name{i});                         
              sl_s_o=sl_s{i}; sl_s_n=sl_s{i};               
           end          
-          sidx=group_time(fix(sl_s_n(:,1)),fecha_days); % se supone que tienen iguales d?as sl_s_n y sl_s_o 
+          sidx=group_time(fix(sl_s_n(:,1)),fecha_days); % se supone que tienen iguales días sl_s_n y sl_s_o 
           sl_s_n(sidx==0,:)=[]; sl_s_o(sidx==0,:)=[];
           SL_B.new(sidx(sidx~=0),i+1)=sl_s_n(:,2); 
           try

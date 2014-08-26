@@ -51,7 +51,7 @@ function [osc_table,osc_matrix,stats]=osc_table(Cal,ratio_ref,osc_interval)
     figure
     [stats,hp,hb]=box_plot(dat_osc(:,2:size(ratio_ref,2)-1,:),'Limit','3IQR');
     %set(gca,'Ylim',[-2,2]);
-    set(gca,'XtickLabel', Cal.brw_str([1:3,5]));   
+    set(gca,'XtickLabel', Cal.brw_str);   
     legend(squeeze(hp(:,1,:)),header_);
     box('on');
     arrayfun(@(x,y) set(y,'FaceColor',get(x,'Color')),hp,hb)

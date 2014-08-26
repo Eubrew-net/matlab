@@ -56,13 +56,13 @@ if length(Cal.analyzed_brewer)+2 ==size(ratio_ref,2)
            });
           
     legend(h,Cal.brw_str(Cal.analyzed_brewer));
-    set(f_smooth,'Tag','Triad_osc_smooth_alt');
+    set(f_smooth,'Tag','Triad_osc_smooth');
    
  catch
     disp('check plot_smooth function');
  end
     
-    
+%    f_smooth=1; 
 
 else
     disp(' ErrorDimensions of ratio_ref are not agree with analyzed brewer');
