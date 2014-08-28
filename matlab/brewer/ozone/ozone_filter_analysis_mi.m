@@ -31,16 +31,9 @@ aux=sortrows(summary,1); freq_filter=tabulate(aux(:,5));
 % Nos quedamos con medidas que no difieran en más de 1/2 hora entre si
  chg_filter=chg_filter(chg_filter(:,end)<=30,:);
  
- chg_rel={NaN*ones(fix(size(summary,1)/2),3),NaN*ones(fix(size(summary,1)/2),3),...
-          NaN*ones(fix(size(summary,1)/2),3),NaN*ones(fix(size(summary,1)/2),3),...
-          NaN*ones(fix(size(summary,1)/2),3),NaN*ones(fix(size(summary,1)/2),3),...
-          NaN*ones(fix(size(summary,1)/2),3),NaN*ones(fix(size(summary,1)/2),3)};
-
- chg_abs={NaN*ones(fix(size(summary,1)/2),3),NaN*ones(fix(size(summary,1)/2),3),...
-          NaN*ones(fix(size(summary,1)/2),3),NaN*ones(fix(size(summary,1)/2),3),...
-          NaN*ones(fix(size(summary,1)/2),3),NaN*ones(fix(size(summary,1)/2),3),...
-          NaN*ones(fix(size(summary,1)/2),3),NaN*ones(fix(size(summary,1)/2),3)};
-      
+ chg_rel=repmat({NaN*ones(fix(size(summary,1)/2),2)},1,8);
+ chg_abs=repmat({NaN*ones(fix(size(summary,1)/2),2)},1,8);
+ 
 % DEFINICIONES DE CAMBIO. No considero cambios de más de un filtro 
 % #0 -> #1 (#1 -> #0), #1 -> #2 (#2 -> #1), #2 -> #3 (#3 -> #2), #3 -> #4 (#4 -> #3) 
 
@@ -50,21 +43,21 @@ for filt=1:4
     idx=chg_filter(chg_filter(:,2)==(filt-1)*64 & chg_filter(:,3)==filt*64,1); idx=sort([idx-1;idx]);
     g=aux(idx,:); primero=g(1:2:end,:);  segundo=g(2:2:end,:); 
     % diff. relativa
-    dif_rel=(segundo-primero)*100./primero;
-    chg_rel{id}(1:size(dif_rel,1),:)=dif_rel(:,[6 10 12]);
+    dif_rel=(segundo-primero)*100./primero; dif_rel(:,1)=nanmean([primero(:,1),segundo(:,1)],2);
+    chg_rel{id}(1:size(dif_rel,1),:)=dif_rel(:,[1 6]);
     % diff. absoluta
-    dif_=segundo-primero;
-    chg_abs{id}(1:size(dif_,1),:)=dif_(:,[6 10 12]);
+    dif_=segundo-primero; dif_(:,1)=nanmean([primero(:,1),segundo(:,1)],2);
+    chg_abs{id}(1:size(dif_,1),:)=dif_(:,[1 6]);
 
     % ATRAS 
     idx=chg_filter(chg_filter(:,2)==filt*64 & chg_filter(:,3)==(filt-1)*64,1); idx=sort([idx-1;idx]);
     g=aux(idx,:); primero=g(1:2:end,:);  segundo=g(2:2:end,:); 
     % diff. relativa
-    dif_rel=(primero-segundo)*100./segundo; 
-    chg_rel{id+1}(1:size(dif_rel,1),:)=dif_rel(:,[6 10 12]); 
+    dif_rel=(primero-segundo)*100./segundo; dif_rel(:,1)=nanmean([primero(:,1),segundo(:,1)],2);
+    chg_rel{id+1}(1:size(dif_rel,1),:)=dif_rel(:,[1 6]); 
     % diff. absoluta    
-    dif_=primero-segundo; 
-    chg_abs{id+1}(1:size(dif_,1),:)=dif_(:,[6 10 12]);
+    dif_=primero-segundo; dif_(:,1)=nanmean([primero(:,1),segundo(:,1)],2); 
+    chg_abs{id+1}(1:size(dif_,1),:)=dif_(:,[1 6]);
     
     id=id+2;
 end
@@ -96,13 +89,13 @@ end
 if fplot
    f=figure;  set(f,'Tag','Ozone_diff_filter_rel');
    rectangle('Position',[.5,-0.5,8,1],'FaceColor',[.95 .95 .95]); hold on; 
-   boxplot(results_rel(:,1:3:end),'notch','on',...% ploteamos campo 6
+   boxplot(results_rel(:,2:2:end),'notch','on',...% ploteamos campo 6
                     'labels',{'0-64','64-0','64-128','128-64','128-192','192-128','192-256','256-192'}); 
    set(gca,'YLim',[-2 2]); ylabel('Relative Difference (%)');  hline(0,'-.k');  grid;
    title(sprintf('Ozone difference by filter chg. %s\r\n Referenced always to lower filter for each group',Cal.brw_name{Cal.n_inst}));
 
    f=figure;  set(f,'Tag','Ozone_diff_filter');   hold on; 
-   boxplot(results_abs(:,1:3:end),'notch','on',...% ploteamos campo 6
+   boxplot(results_abs(:,2:2:end),'notch','on',...% ploteamos campo 6
                      'labels',{'0-64','64-0','64-128','128-64','128-192','192-128','192-256','256-192'}); 
    ylabel('Absolute Difference');  hline(0,'-.k');  grid;
    title(sprintf('Ozone difference by filter chg. %s',Cal.brw_name{Cal.n_inst})); 
