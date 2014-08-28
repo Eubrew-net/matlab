@@ -142,7 +142,7 @@ function matrix2latex_ctable(matrix, filename, varargin)
         if(~isempty(rowLabels))
             fprintf(fid, '&');
         end
-        for w=1:width-1
+        for w=1:width
            if isstr(colLabels{w})
               colLabels{w}=strrep(colLabels{w},'#','\#');
               colLabels{w}=strrep(colLabels{w},'_',' ');
@@ -151,9 +151,12 @@ function matrix2latex_ctable(matrix, filename, varargin)
               colLabels{w}=strrep(colLabels{w},'<','$<$');
               colLabels{w}=strrep(colLabels{w},'>','$>$');
            end
-           fprintf(fid, '\\textbf{%s}&', colLabels{w});
+           if w<width
+              fprintf(fid, '\\textbf{%s}&', colLabels{w});
+           else
+              fprintf(fid, '\\textbf{%s}\\\\\\midrule\r\n', colLabels{width});
+           end
         end
-        fprintf(fid, '\\textbf{%s}\\\\\\midrule\r\n', colLabels{width});
     end
     
     for h=1:height
@@ -172,9 +175,9 @@ function matrix2latex_ctable(matrix, filename, varargin)
             fprintf(fid, '%s&', matrix{h, w});
         end
         if h~=height
-        fprintf(fid, '%s\\\\\\midrule\r\n', matrix{h, width});
+           fprintf(fid, '%s\\\\\\midrule\r\n', matrix{h, width});
         else
-        fprintf(fid, '%s\\\\\r\n\\bottomrule\r\n', matrix{h, width});
+           fprintf(fid, '%s\\\\\r\n\\bottomrule\r\n', matrix{h, width});
         end
     end
 
