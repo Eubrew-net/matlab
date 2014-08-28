@@ -21,8 +21,12 @@ function [ grp,g ] = group_time( data,periods )
 % vline(periods,'k',temp_events{Cal.n_inst});
 % 
 
-g=NaN*ones( size(data,1) ,length(periods)+1);
-if ~issorted(periods)  
+if isvector(data)
+    g=NaN*ones(length(data), length(periods)+1);
+else
+    g=NaN*ones(size(data,1), length(periods)+1);
+end
+if ~issorted(periods)
   warning('Periods is not sorted !! , is automatically sorted');  
   periods=sort(periods);
 end
