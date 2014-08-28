@@ -1,4 +1,4 @@
-function tabla_fi=report_filter(Cal,varargin)
+function [tabla_fi filter]=report_filter(Cal,varargin)
 
 % function tabla_fi=report_filter(Cal,varargin)
 % 
@@ -57,14 +57,14 @@ arg.parse(Cal, varargin{:});
 config_orig=read_icf(Cal.brw_config_files{Cal.n_inst,1},mean(arg.Results.date_range([1 end])));      
          
 %  All data
-filter{Cal.n_inst}={}; 
 [ETC_FILTER_CORRECTION,media_fi,fi,fi_avg]=filter_rep(Cal.brw_str{Cal.n_inst},'path_to_file',arg.Results.fpath,...
                         'outlier_flag',0,'plot_flag',0,'config',config_orig(17:22),...
                         'date_range',arg.Results.date_range([1 end]));
-filter{Cal.n_inst}.ETC_FILTER_CORRECTION=ETC_FILTER_CORRECTION;
-filter{Cal.n_inst}.media_fi=media_fi;  filter{Cal.n_inst}.fi=fi; filter{Cal.n_inst}.fi_avg=fi_avg;
+                    
+filter.ETC_FILTER_CORRECTION=ETC_FILTER_CORRECTION;
+filter.media_fi=media_fi;  filter.fi=fi; filter.fi_avg=fi_avg;
 
-o3f=filters_data(filter,Cal);
+filt{Cal.n_inst}=filter; o3f=filters_data(filt,Cal);
 
 %% Table, por periodos 
 lbl_fi={'FW#21 corr','std','FW#22 corr','std','FW#23 corr','std',...
