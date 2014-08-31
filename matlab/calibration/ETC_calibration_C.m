@@ -272,10 +272,10 @@ ref=summary{n_ref}(jday,:);
         [b1,bi1,res,resi,st]=regress(y,x);
         gscatter(1./(o3ref.*m_inst),res,o3_c(:,18),'','o',7) ;
         %%
-        figure;
-        grpstats(res,diaj(o3_c(:,1)),0.05);
-        rotateticklabel(gca);
-        
+%         figure;
+%         grpstats(res,diaj(o3_c(:,1)),0.05);
+%         rotateticklabel(gca);
+%         
 %          %% depurar
 %          try
 %             filter=unique(o3_c(j,18));dummy_var=[];
@@ -337,9 +337,9 @@ ref=summary{n_ref}(jday,:);
          xlabel('ozone slant path','HandleVisibility','On');        
          ylabel('ETC =  MS9 - A1*{O_{3REF}}*M2','HandleVisibility','On'); 
 
-         f=figure;    set(f,'Tag','2P_Time');
+         f=figure;    set(f,'Tag','1P_Time');
          ETC_time=cat(2,o3_c(j,1),ms9(j)-o3p(j));
-         [m,s,cx,dx]=outliers_bp(ETC_time(:,2),1); ETC_time(dx,:)=[]; 
+         [m,s,cx,dx]=outliers_bp(ETC_time(:,2),3.5); ETC_time(dx,:)=[]; 
          [mn err]=grpstats(ETC_time,diaj(ETC_time(:,1)),{@(x)nanmean(x,1),'sem'});        
          errorbar(diaj(mn(:,1)),mn(:,2),err(:,2),'s'); grid;
          set(gca,'Ylim',[m-10 m+10]);  hline(m,'b-',sprintf('%d \\pm %d',round(m),round(s)));

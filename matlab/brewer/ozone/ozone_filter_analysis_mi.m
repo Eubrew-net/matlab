@@ -29,7 +29,7 @@ aux=sortrows(summary,1); freq_filter=tabulate(aux(:,5));
 %                 indx     primer F#     segundo F#
  chg_filter=[cf_idx,aux(cf_idx-1,5),aux(cf_idx,5),(aux(cf_idx,1)-aux(cf_idx-1,1))*24*60];
 % Nos quedamos con medidas que no difieran en más de 1/2 hora entre si
- chg_filter=chg_filter(chg_filter(:,end)<=30,:);
+ chg_filter=chg_filter(chg_filter(:,end)<=15,:);
  
  chg_rel=repmat({NaN*ones(fix(size(summary,1)/2),2)},1,8);
  chg_abs=repmat({NaN*ones(fix(size(summary,1)/2),2)},1,8);
