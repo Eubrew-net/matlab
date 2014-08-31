@@ -73,7 +73,7 @@ for pp=1:size(ETC_op,3)
                                    ETC_op{inst,ref,pp}(1).TP(1),...
                                    ETC_op{inst,ref,pp}(1).TP(2)/10000);
         else
-           ETC_Op(idx,[2 3])=cat(2,Cal.brw(inst),Cal.brw(ref));  
+           ETC_Op(idx,2:5)=cat(2,Cal.brw(inst),Cal.brw(ref),[A2 A1]);  
            idx=idx+1;
            continue
         end
@@ -121,7 +121,7 @@ for pp=1:size(ETC_chk,3)
                                     ETC_chk{inst,ref,pp}(1).TP(1),...
                                     ETC_chk{inst,ref,pp}(1).TP(2)/10000);  
         else
-           ETC_Chk(idx,[2 3])=cat(2,Cal.brw(inst),Cal.brw(ref));  
+           ETC_Chk(idx,2:5)=cat(2,Cal.brw(inst),Cal.brw(ref),[A2 A1]);  
            idx=idx+1;
            continue
         end
