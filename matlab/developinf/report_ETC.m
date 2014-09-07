@@ -39,6 +39,20 @@ else
    date_range=arg.Results.date_range; 
 end
 
+summary_old=arg.Results.summary_old; summary=arg.Results.summary;
+if ~isempty(date_range)
+   for i=arg.Results.analyzed_brw
+       summary_old{i}(summary_old{i}(:,1)<date_range(1),:)=[];
+       summary{i}(summary{i}(:,1)<date_range(1),:)=[];
+   end
+   if length(date_range)>1
+      for i=arg.Results.analyzed_brw
+          summary_old{i}(summary_old{i}(:,1)>date_range(end),:)=[];
+          summary{i}(summary{i}(:,1)>date_range(end),:)=[];
+      end
+   end
+end
+
 %% Operative (old)
 ETC_op=cell(max(arg.Results.analyzed_brw),max(arg.Results.reference_brw),length(id_period));
 for pp=1:length(id_period)
@@ -48,7 +62,7 @@ for pp=1:length(id_period)
         ETC_op{inst,ref,pp}=[];    
         try
            A_s=A.old(ismember(A.old(:,1),fix(periods_)),inst+1); A_s=unique(A_s(~isnan(A_s)));
-           ETC_op{inst,ref,pp}=ETC_calibration_C(Cal,arg.Results.summary_old,A_s,inst,ref,...
+           ETC_op{inst,ref,pp}=ETC_calibration_C(Cal,summary_old,A_s,inst,ref,...
                                                  tsync,1.8,0.01,diaj(periods_),0); 
         catch exception
            fprintf('%s, brewer: %s\n',exception.message,Cal.brw_name{inst});
@@ -96,7 +110,7 @@ for pp=1:length(id_period)
         ETC_chk{inst,ref,pp}=[];    
         try
            A_s=A.new(ismember(A.new(:,1),fix(periods_)),inst+1); A_s=unique(A_s(~isnan(A_s)));
-           ETC_chk{inst,ref,pp}=ETC_calibration_C(Cal,arg.Results.summary,A_s,inst,ref,...
+           ETC_chk{inst,ref,pp}=ETC_calibration_C(Cal,summary,A_s,inst,ref,...
                                                   tsync,1.8,0.01,diaj(periods_),0); 
         catch exception
            fprintf('%s, brewer: %s\n',exception.message,Cal.brw_name{inst});

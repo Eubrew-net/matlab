@@ -40,7 +40,7 @@ ref=fix(summary{idx}(:,1)*24*60/TSYNC)/24/60*TSYNC; ref_std=ref;
 ref_sza=ref;  ref_flt=ref;
 ref_airm=ref; ref_temp=ref;
 for ii=1:length(Cal.brw)
-    if ii<=length(summary)         
+    if ~isempty(summary{ii}) && ii<=length(summary) 
        med_sza=summary{ii}(:,[1,2]);
        med_flt=summary{ii}(:,[1,5])/64;
        med_airm=summary{ii}(:,[1,3]);

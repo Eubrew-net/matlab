@@ -4,7 +4,7 @@ if length(Cal.analyzed_brewer)+2 ==size(ratio_ref,2)
 
 %% hist
     f_hist=figure;
-    [a,b]=hist(ratio_ref(:,2:end-1),[-2,-1.5,-1,-.75,-.5,-.25,0,.25,.5,.75,1,1.5,2]);
+    [a,b]=hist(ratio_ref(:,2:end-1),-3.5:.25:3.5);
     bar(b,matdiv(100*a,sum(a)));
     title('Relative differences to mean. Percentage');
     legend(Cal.brw_name{Cal.analyzed_brewer});

@@ -33,7 +33,7 @@ function [osc_table,osc_matrix,stats]=osc_table(Cal,ratio_ref,osc_interval)
  osc_table.col_header={Cal.brw_name{analyzed_brewer},'mean osc'};
  
  fprintf(strcat('\nRBCC-E statistics, grouped by osc''s (N simultaneous: ',repmat(' %d ',1,length(analyzed_brewer)),')\n'),...
-                           sum(~isnan(ratio_ref(:,analyzed_brewer+1))));
+                           sum(~isnan(ratio_ref(:,2:end-1))));
  displaytable(table_oscs,{Cal.brw_name{analyzed_brewer},'mean osc'},11,'.2f',header_);
 
 % if nargin==2
@@ -49,10 +49,10 @@ function [osc_table,osc_matrix,stats]=osc_table(Cal,ratio_ref,osc_interval)
  %end
  
  if nargout==3
-    figure
+    figure; 
     [stats,hp,hb]=box_plot(dat_osc(:,2:size(ratio_ref,2)-1,:),'Limit','3IQR');
-    %set(gca,'Ylim',[-2,2]);
     set(gca,'XtickLabel', Cal.brw_str);   
+    title('Box-Plot Ozone Deviation to reference by Ozone Slant Column');
     legend(squeeze(hp(:,1,:)),header_);
     box('on');
     arrayfun(@(x,y) set(y,'FaceColor',get(x,'Color')),hp,hb)
