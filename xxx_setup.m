@@ -1,10 +1,4 @@
 %% BREWER CALIBRATION
-%% SETUP
-% Definimos la variable de configuracion por defecto para todos los brewer
-%Cal.Station % parametros de la estacion
-%Cal.FCal    % parametros de ficheros
-%Cal.Date    % parametros de fecha
-%Cal.        % parametros que afectan a la calibrabicon ver detalles
 
 %% General
 % Habrá que modificar a mano el directorio final: CODE, Are2011, SDK11 ...
@@ -26,6 +20,12 @@ Station.long=[];
 Station.meanozo=[];
 
 Cal.Station=Station;
+
+%% Finalcalibration
+Cal.FCal.ICF_FILE_INI='ICFXXXYY';
+Cal.FCal.ICF_FILE_FIN='ICFXXXYY';
+Cal.FCal.DCFFILE='DCFXXXYY';
+Cal.FCal.LFFILE='LFXXXYY';
 
 %%  configuration  date---> Default values
 day0=202; dayend=212;
@@ -58,6 +58,7 @@ Cal.calibration_days={
 
 Cal.blind_days=Cal.calibration_days(:,2);
 Cal.final_days=Cal.calibration_days(:,3);
+Cal.no_maint=[1 1 0 1 1 1 1];
 
 %% CALIBRATION INFO
 Cal.Tsync=3.5;
@@ -70,7 +71,6 @@ Cal.brw_str=mmcellstr(sprintf('%03d|',Cal.brw));
 
 Cal.brewer_ref=[1,7]; % can be several []       
 Cal.n_ref=[1,7];
-Cal.no_maint=[1,6,7];
 
 Cal.sl_c_blind=[0, 0, 0, 0, 0, 0, 0];
 Cal.sl_c      =[0, 0, 0, 0, 0, 0, 0];
@@ -105,27 +105,74 @@ Cal.ETC_C={
           [0,0,0,0,0,0]         %158
           };
 
-%% eventos y periodos
-% events=cell(Cal.n_brw,1);events_n=events;events_text=events;events_raw=events;
-% for inst=1:9
-%     % file_cfg=fullfile(pwd,'..\configs',['icf',Cal.brw_str{inst},'.xls']);
-%     file_cfg=fullfile(Cal.path_root,'bfiles',Cal.brw_str{inst},['icf',Cal.brw_str{inst},'.xls']);
-%    if exist(file_cfg) 
-%        [events_n{inst},events_text{inst},events_raw{inst}]=...
-%         xlsread(file_cfg,['Eventos.',Cal.brw_str{inst}],'','basic');
-%        events_n{inst}=events_n{inst}(:,2:end); %new matlab excel reads date strings 
-%    else
-%        events_n{inst}=[NaN,NaN,NaN,NaN];
-%        events_text{inst}='';
-%        events_raw{inst}='';
-%        disp(Cal.brw_str(inst));
-%        disp('-> no events');
-%    end
-% end
-% 
-% Cal.events=events_n;
-% Cal.events_text=events_text;
-% Cal.events_raw=events_raw;
+%% Brewer configuration files. Eventos e Incidencias
+icf_op=cell(1,length(Cal.n_brw));  %old, operative
+icf_a=cell(1,length(Cal.n_brw));   %new, alternative
+
+events_n=cell(1,length(Cal.n_brw)); events_raw=cell(1,length(Cal.n_brw));
+events_text=cell(1,length(Cal.n_brw)); incidences_text=cell(1,length(Cal.n_brw));
+warning('off', 'MATLAB:xlsread:Mode');
+for iz=1:Cal.n_brw
+ try   
+    if iz==find(Cal.brw==185) %reference
+       icf_op{iz}=xlsread(fullfile(Cal.path_root,'configs',['icf',Cal.brw_str{iz},'.xls']),...
+                         ['icf.',Cal.brw_str{iz}],'','basic');      
+       icf_a{iz}=xlsread(fullfile(Cal.path_root,'configs',['icf',Cal.brw_str{iz},'.xls']),...
+                         ['icf_a.',Cal.brw_str{iz}],'','basic');                     
+       [events_n{iz},events_text{iz},events_raw{iz}]=xlsread(fullfile(Cal.path_root,'configs',['icf',Cal.brw_str{iz},'.xls']),...
+                                                             ['Eventos.',Cal.brw_str{iz}],'','basic');
+       [inc_n{iz},incidences_text{iz},incidences_raw{iz}]=xlsread(fullfile(Cal.path_root,'configs',['icf',Cal.brw_str{iz},'.xls']),...
+                                                             ['Incidencias.',Cal.brw_str{iz}],'','basic');
+    else % not reference. Go to bfiles
+      if exist(fullfile(Cal.path_root,'bfiles',Cal.brw_str{iz},['icf',Cal.brw_str{iz},'.xls']),'file')
+         icf_op{iz}=xlsread(fullfile(Cal.path_root,'bfiles',Cal.brw_str{iz},['icf',Cal.brw_str{iz},'.xls']),...
+                           ['icf.',Cal.brw_str{iz}],'','basic');
+         [events_n{iz},events_text{iz},events_raw{iz}]=xlsread(fullfile(Cal.path_root,'bfiles',Cal.brw_str{iz},['icf',Cal.brw_str{iz},'.xls']),...
+                                                               ['Eventos.',Cal.brw_str{iz}],'','basic');
+%          icf_a{iz}=xlsread(fullfile(Cal.path_root,'bfiles',Cal.brw_str{iz},['icf',Cal.brw_str{iz},'.xls']),...
+%                            ['icf_a.',Cal.brw_str{iz}],'','basic');                               
+         [inc_n{iz},incidences_text{iz}]=xlsread(fullfile(Cal.path_root,'bfiles',Cal.brw_str{iz},['icf',Cal.brw_str{iz},'.xls']),...
+                                                 ['Incidencias.',Cal.brw_str{iz}],'','basic');         
+      else
+          continue
+      end
+    end   
+    
+    if size(icf_op{iz},1)==54  % ??
+       cfg=icf_op{iz}(2:end-1,3:end); 
+       save('config.cfg', 'cfg', '-ASCII','-double');
+    else
+       cfg=icf_op{iz}(1:end-1,3:end); 
+       save('config.cfg', 'cfg', '-ASCII','-double');
+    end
+    tmp_file=sprintf('config%s.cfg',Cal.brw_str{iz});       
+    copyfile('config.cfg',fullfile(Cal.path_root,'bfiles',Cal.brw_str{iz},tmp_file));
+    delete('config.cfg');
+  
+  if iz==find(Cal.brw==185) %reference  
+     if size(icf_a{iz},1)==54 %??
+        cfg=icf_a{iz}(2:end-1,3:end);
+        save('config_a.cfg', 'cfg', '-ASCII','-double');
+     else
+        cfg=icf_a{iz}(1:end-1,3:end);
+        save('config_a.cfg', 'cfg', '-ASCII','-double');
+     end             
+     tmp_file=sprintf('config%s_a.cfg',Cal.brw_str{iz});
+     copyfile('config_a.cfg',fullfile(Cal.path_root,'bfiles',Cal.brw_str{iz},tmp_file));
+     delete('config_a.cfg');
+   end
+ 
+  catch exception
+        fprintf('%s Brewer%s\n',exception.message,Cal.brw_name{iz}); 
+        icf_op{iz}=[]; icf_a{iz}=[]; events_n{iz}=[]; events_raw{iz}=[];
+        events_text{iz}=[]; incidences_text{iz}=[];
+  end
+  Cal.events{iz}=events_n{iz}(:,2:end);
+  Cal.events_n{iz}=events_n{iz};
+  Cal.events_text{iz}=events_text{iz};
+  Cal.events_raw{iz}=events_raw{iz};
+  Cal.incidences_text{iz}=incidences_text{iz};
+end
 
 %% Calibration instrument
 % Brewer configuration files  
@@ -136,20 +183,12 @@ if isunix
    brw_config_files=strrep(brw_config_files,'\',filesep());
    brw_config_files=cellfun(@upper,brw_config_files,'UniformOutput',0);
 end
-
-
 Cal.brw_config_files=brw_config_files;
 Cal.brw_config_files_old=brw_config_files(:,1);
 Cal.brw_config_files_new=brw_config_files(:,2);
 Cal.SL_OLD_REF=cellfun(@(x) str2double(x), brw_config_files(:,3));
 Cal.SL_NEW_REF=cellfun(@(x) str2double(x), brw_config_files(:,4));
 
-
-%% Finalcalibration
-Cal.FCal.ICF_FILE_INI='ICFXXXYY';
-Cal.FCal.ICF_FILE_FIN='ICFXXXYY';
-Cal.FCal.DCFFILE='DCFXXXYY';
-Cal.FCal.LFFILE='LFXXXYY';
 
 %% Latex directories
 

@@ -15,6 +15,7 @@ mkdir(Cal.dir_figs);
 
 try
       save(Cal.file_save,'-Append','Cal'); %sobreescribimos la configuracion guardada.
+      load(Cal.file_save);
 catch exception
       fprintf('Error: %s\n Initializing data for Brewer %s\n',exception.message,Cal.brw_name{Cal.n_inst});
       save(Cal.file_save);
@@ -168,7 +169,7 @@ tc_table={};
        matrix2latex_ctable(tc_table{indx},...
                      fullfile(Cal.file_latex,['table_TC',num2str(t),'_',Cal.brw_str{Cal.n_inst},'.tex']),...
                     'RowLabels',{'Current','Calculated','Final'},...
-                    'ColumnLabels',{'slit\#2','slit\#3','slit\#4','slit\#5','slit\#6'},...
+                    'ColumnLabels',{'slit#2','slit#3','slit#4','slit#5','slit#6'},...
                     'alignment', 'c','resize',0.8,'format','%7.4f','size','footnotesize');
  end
 
@@ -232,6 +233,14 @@ matrix2latex_ctable([num2cell(media_fi);num2cell(fix(mean(media_fi)))],fullfile(
                      'alignment', 'c','resize',0.72);
                  
 %%
+fprintf('\nFI''s analyzed: %d\n',NFI);
+displaytable([fix(media_fi);fix(mean(media_fi))],label_2,10,'.5g',label_1);
+
+%%
+fprintf('\nFI''s analyzed: %d\n',NFI);
+displaytable(ETC_FILTER_CORRECTION,label_2,10,'.5g',{'ETC Filt. Corr. (median)','ETC Filt. Corr. (mean)','ETC Filt. Corr. (CI) ','ETC Filt. Corr.(CI)'});
+
+%%
  figure(max(findobj('tag','FI_wavelength')));
  printfiles_report(gcf,Cal.dir_figs,'Width',13.5);
     
@@ -244,9 +253,3 @@ matrix2latex_ctable([num2cell(media_fi);num2cell(fix(mean(media_fi)))],fullfile(
  end
 
 close all
-
-%%
-makeHtmlTable([fix(media_fi);fix(mean(media_fi))],[],label_1,label_2 );
-
-%%
-makeHtmlTable(ETC_FILTER_CORRECTION,[],{'ETC Filt. Corr. (median)','ETC Filt. Corr. (mean)','ETC Filt. Corr. (CI) ','ETC Filt. Corr.(CI)'},label_2 );
