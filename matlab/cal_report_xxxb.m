@@ -97,11 +97,10 @@ for jj=1:length(ldsp)  %% ojo solo funciona si config es igual para todos
     try
       [res{jj},detail{jj},DSP_QUAD{jj},QUAD_SUM{jj},QUAD_DETAIL{jj},...
        CUBIC_SUM{jj},CUBIC_DETAIL{jj},salida{jj},CSN_icf{jj},...
-       ]=dspreport(Cal,'dsp_dir',ldsp{jj},'config_n',1);%
+       ]=dspreport(Cal,'dsp_dir',fullfile('DSP',ldsp{jj}),'config_n',1);%
     catch
        warning(sprintf('Error en %s. DSP: %s',Cal.brw_name{Cal.n_inst},ldsp{jj}));
        res{jj}=NaN*ones(9,7,2); detail{jj}=NaN*ones(6,6,9,2); QUAD_DETAIL{jj}=NaN;
-       cd ..
     end
 end
 % Para salvar los datos de cada brewer

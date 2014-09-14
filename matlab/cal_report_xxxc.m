@@ -1,5 +1,5 @@
 % options_pub.outputDir=fullfile(pwd,'latex','xxx','html'); options_pub.showCode=true;
-% publish(fullfile(pwd,'cal_report_xxxc.m'),options_pub);
+% Close all; publish(fullfile(pwd,'cal_report_xxxc.m'),options_pub);
 
 %% Brewer Evaluation
 clear all;
@@ -22,7 +22,7 @@ end
 
 %% Brewer setup
 Cal.Date.CALC_DAYS=Cal.calibration_days{Cal.n_inst,1};
-Cal.n_ref=15;
+Cal.n_ref=find(Cal.brw==185);
 
 %% READ Brewer Summaries
  for i=[Cal.n_ref,Cal.n_inst]
@@ -153,6 +153,17 @@ printfiles_report(gcf,Cal.dir_figs,'LockAxes',0,'no_export');
 close all
 
 %% Hg Report
+% Hg failure 
+hg_fail=read_custom(fullfile(Cal.path_root,sprintf('bdata%s',Cal.brw_str{Cal.n_inst})),sprintf('B*.%s',Cal.brw_str{Cal.n_inst}),...
+                              'hg: lamp not detected','printfile',0,...
+                              'date_range',datenum(Cal.Date.cal_year,1,1));
+if ~isempty(hg_fail)
+    [mean_hg_fail N_hg_fail] = grpstats(fix(hg_fail),fix(hg_fail),{'nanmean','numel'}); 
+    displaytable( N_hg_fail,{'N(Hg failure)'},13,'d',cellstr(datestr(mean_hg_fail(:,1),1)))
+else
+    fprintf('Ho Hg failures recorded for Brewer %s\r\n',Cal.brw_name{Cal.n_inst});
+end
+% Hg during campaign
 hg_report(Cal.n_inst,hg,Cal,'outlier_flag',1,'date_range',[]);
 
 %% READ Configuration
@@ -168,12 +179,6 @@ catch
   disp('tabla de configuracion posiblemente incompleta')
 end
 
-%matrix2latex(round(10000*[Cal.brw(:)';ETC.old;ETC.new;A.old;A.new;Cal.SL_OLD_REF';Cal.SL_NEW_REF';fix(SL_B)']')/10000,...
-%    fullfile(Cal.file_latex,['table_SL_',Cal.brw_str{Cal.n_inst},'.tex']));
-
-%%
-%makeHtmlTable(round(10000*[Cal.brw;ETC.old;ETC.new;A.old;A.new;SL_OLD_REF';SL_NEW_REF';fix(SL_B)']')/10000);
-
 %% Data recalculation for summaries  and individual observations
 for i=[Cal.n_inst Cal.n_ref]
     cal{i}={}; summary{i}={}; summary_old{i}={};
@@ -188,8 +193,7 @@ end
 %disp(unique(diaj(summary{Cal.n_inst}(id_out,1))));
 %summary{Cal.n_inst}(id_out,:)=[];
 
-summary_orig=summary;
-summary_orig_old=summary_old;
+summary_orig=summary; summary_orig_old=summary_old;
 save(Cal.file_save,'-APPEND','summary_old','summary_orig_old','summary','summary_orig');
 
 %% Filter distribution
@@ -221,35 +225,34 @@ n_ref=Cal.n_ref; % Cuidado con cual referencia estamos asignando
 n_inst=Cal.n_inst;
 brw=Cal.brw; brw_str=Cal.brw_str;
 
-jday_ref=findm((diaj(summary{n_ref}(:,1))),Cal.calibration_days{n_inst,2},0.5);
-ref2_b=summary{n_ref}(jday_ref,:);
-jday_ref=findm((diaj(summary{n_ref}(:,1))),Cal.calibration_days{n_inst,3},0.5);
-ref2=summary{n_ref}(jday_ref,:);
+jday_ref=findm((diaj(summary{n_ref}(:,1))),Cal.calibration_days{n_inst,1},0.5);
+ref=summary{n_ref}(jday_ref,:);
 
 %% Change?
 alldays=Cal.calibration_days{Cal.n_inst,1};
 
-jday=findm(diaj(summary_old{Cal.n_inst}(:,1)),alldays,0.5);% quiero mostrar la primera config. con sl
-inst1=summary_old{Cal.n_inst}(jday,:);
+jday=findm(diaj(summary_orig_old{Cal.n_inst}(:,1)),alldays,0.5);% quiero mostrar la primera config. con sl
+inst1=summary_orig_old{Cal.n_inst}(jday,:);
 
    [x,r,rp,ra,dat,ox,osc_smooth_ini]=ratio_min_ozone(...
-      inst1(:,[1,6,3,2,8,9,4,5]),ref2(:,[1,6,3,2,8,9,4,5]),...
+      inst1(:,[1,6,3,2,8,9,4,5]),ref(:,[1,6,3,2,8,9,4,5]),...
       5,brw_str{n_inst},brw_str{n_ref},'plot_flag',0);% original config
 
 %% Blind Period
 % etiquetamos con _b, porque eso sera lo que usamos para plotear los individuales, con la configuración sugerida
+close all
 blinddays=Cal.calibration_days{Cal.n_inst,2};
 
-if ~isequal(blinddays,Cal.calibration_days{Cal.n_inst,3})
+jday=findm(diaj(summary_orig_old{Cal.n_inst}(:,1)),blinddays,0.5);
+inst1_b=summary_orig_old{Cal.n_inst}(jday,:);
 
-   jday=findm(diaj(summary_orig_old{Cal.n_inst}(:,1)),blinddays,0.5);
-   inst1_b=summary_orig_old{Cal.n_inst}(jday,:);
+if ~Cal.no_maint(Cal.n_inst)     % if the instrument has changed due to maintenance
 
     [x,r,rp,ra,dat,ox,osc_smooth_ini]=ratio_min_ozone(...
-       inst1_b(:,[1,6,3,2,8,9,4,5]),ref2_b(:,[1,6,3,2,8,9,4,5]),...
+       inst1_b(:,[1,6,3,2,8,9,4,5]),ref(:,[1,6,3,2,8,9,4,5]),...
        5,brw_str{n_inst},brw_str{n_ref},'plot_flag',1);% original config
     [x,r,rp,ra,dat,ox,osc_smooth_inisl]=ratio_min_ozone(...
-       inst1_b(:,[1,12,3,2,8,9,4,5]),ref2_b(:,[1,6,3,2,8,9,4,5]),...
+       inst1_b(:,[1,12,3,2,8,9,4,5]),ref(:,[1,6,3,2,8,9,4,5]),...
        5,brw_str{n_inst},brw_str{n_ref},'plot_flag',0);% original config , sl corrected
 
 %% Sugerido con los blind_days
@@ -271,7 +274,7 @@ displaytable(data_tabl,{'ETCorig','ETCnew 1p','ETCnew 2p','O3Abs (ICF)','O3Abs 2
 o3r= (inst1_b(:,8)-ETC_SUG(1).NEW)./(A1_old*inst1_b(:,3)*10);
 inst1_b(:,10)=o3r;
     [x,r,rp,ra,dat,ox,osc_smooth_sug]=ratio_min_ozone(...
-       inst1_b(:,[1,10,3,2,8,9,4,5]),ref2_b(:,[1,6,3,2,8,9,4,5]),...
+       inst1_b(:,[1,10,3,2,8,9,4,5]),ref(:,[1,6,3,2,8,9,4,5]),...
        5,brw_str{n_inst},brw_str{n_ref},'plot_flag',0);
 % si es suficiente la correccion por sl
 % osc_smooth_sug=osc_smooth_inisl;
@@ -317,7 +320,16 @@ matrix2latex_ctable(M(2:end,2:end),fullfile(Cal.file_latex,['table_ETCdatasug_',
                                    'columnlabels',label(2:end),'alignment','c','resize',0.9);
 else
     ETC_SUG(1).NEW=NaN; o3c_SUG=NaN;  osc_smooth_sug=NaN*ones(1,7);
-    osc_smooth_ini=NaN*ones(1,7);     osc_smooth_inisl=NaN*ones(1,7);
+
+    [x,r,rp,ra,dat,ox,osc_smooth_ini]=ratio_min_ozone(...
+       inst1_b(:,[1,6,3,2,8,9,4,5]),ref(:,[1,6,3,2,8,9,4,5]),...
+       5,brw_str{n_ref},brw_str{n_ref},'plot_flag',0);% original config
+    [x,r,rp,ra,dat,ox,osc_smooth_inisl]=ratio_min_ozone(...
+       inst1_b(:,[1,12,3,2,8,9,4,5]),ref(:,[1,6,3,2,8,9,4,5]),...
+       5,brw_str{n_ref},brw_str{n_ref},'plot_flag',0);
+    
+    osc_smooth{Cal.n_inst}.ini=osc_smooth_ini;  osc_smooth{Cal.n_inst}.ini_sl=osc_smooth_inisl;
+    A1=A.old(ismember(Cal.Date.CALC_DAYS,blinddays),Cal.n_inst+1); A1_old=unique(A1(~isnan(A1)));    
 end
 
 latexcmd(fullfile(Cal.file_latex,['cal_etc_',brw_str{n_inst}]),'\ETCblind',num2str(round(ETC_SUG(1).NEW)),...
@@ -334,22 +346,10 @@ save(Cal.file_save,'-APPEND','etc');
 close all
 finaldays=Cal.calibration_days{Cal.n_inst,3};
 
-jday=findm(diaj(summary_orig_old{Cal.n_inst}(:,1)),finaldays,0.5);% quiero mostrar la primera config. con sl
-inst1=summary_orig_old{Cal.n_inst}(jday,:);
-jday=findm(diaj(summary{Cal.n_inst}(:,1)),finaldays,0.5);% quiero mostrar la primera config. con sl
-inst2=summary{Cal.n_inst}(jday,:);
-
-if isequal(blinddays,Cal.calibration_days{Cal.n_inst,3})
-    [x,r,rp,ra,dat,ox,osc_smooth_ini]=ratio_min_ozone(...
-       inst1(:,[1,6,3,2,8,9,4,5]),ref2(:,[1,6,3,2,8,9,4,5]),...
-       5,brw_str{n_inst},brw_str{n_ref},'plot_flag',1);% original config
-   osc_smooth{Cal.n_inst}.ini=osc_smooth_ini;
-   [x,r,rp,ra,dat,ox,osc_smooth_inisl]=ratio_min_ozone(...
-   inst1(:,[1,12,3,2,8,9,4,5]),ref2(:,[1,6,3,2,8,9,4,5]),...
-   5,brw_str{n_inst},brw_str{n_ref},'plot_flag',0);
-   osc_smooth{Cal.n_inst}.ini=osc_smooth_ini;
-   osc_smooth{Cal.n_inst}.ini_sl=osc_smooth_inisl;
-end
+jday=ismember(diaj(summary{Cal.n_inst}(:,1)),fix(finaldays));
+jlim=(diaj2(summary{Cal.n_inst}(:,1))>finaldays(1) & ...    % 2st set the limits
+      diaj2(summary{Cal.n_inst}(:,1))<finaldays(end)); 
+inst2=summary{Cal.n_inst}(jday & jlim ,:);
 
 %%
 A1=A.new(ismember(Cal.Date.CALC_DAYS,finaldays),Cal.n_inst+1); A1_new=unique(A1(~isnan(A1)))
@@ -361,20 +361,26 @@ tableform({'ETCorig','ETCnew 1p','ETCnew 2p','O3Abs (ICF)','O3Abs 2p','O3Abs dsp
 %         solo el rango seleccionado
            round([ETC.old(n_inst),ETC_NEW(2).NEW,ETC_NEW(2).TP(1), 10000*A.old(n_inst),ETC_NEW(2).TP(2),10000*A.new(Cal.n_inst)])]);
 %         todo el rango
+
 latexcmd(fullfile(['>',Cal.file_latex],['cal_etc_',brw_str{n_inst}]),'\ETCfin',num2str(round(ETC_NEW(1).NEW)),...
     '\ETCSOfin',config_def(12),'\SOABSfin',config_def(10),'\OtresSOABSfin',config_def(9),...
     '\NobsCalfin',size(o3c_NEW,1));
 etc{Cal.n_inst}.new=ETC_NEW;
 save(Cal.file_save,'-APPEND','etc');
+
 %%
 o3r= (inst2(:,8)-ETC_NEW(1).NEW)./(A1_new*inst2(:,3)*10);
 inst2(:,10)=o3r;
     [x,r,rp,ra,dat,ox,osc_smooth_fin]=ratio_min_ozone(...
-       inst2(:,[1,10,3,2,8,9,4,5]),ref2(:,[1,6,3,2,8,9,4,5]),...
+       inst2(:,[1,10,3,2,8,9,4,5]),ref(:,[1,6,3,2,8,9,4,5]),...
        5,brw_str{n_inst},brw_str{n_ref},'plot_flag',0);
 %     [x,r,rp,ra,dat,ox,osc_smooth_fin]=ratio_min_ozone(...
-%        inst2(:,[1,6,3,2,8,9,4,5]),ref2(:,[1,6,3,2,8,9,4,5]),...
-%        5,brw_str{Cal.n_inst},brw_str{n_ref},'plot_flag',0);
+%        inst2(:,[1,6,3,2,8,9,4,5]),ref(:,[1,6,3,2,8,9,4,5]),...
+%        5,brw_str{n_inst},brw_str{n_ref},'plot_flag',0);
+figure; set(gcf,'tag','RATIO_ERRORBAR_all');
+h=plot_smooth(osc_smooth_ini,osc_smooth_inisl,osc_smooth_fin);
+legend(h,'Config. orig','Config. orig, SL corrected','Suggested'); set(gca,'YLim',[-4 2]);
+title([ brw_str{n_inst},' - ',brw_str{n_ref},' / ',brw_str{n_ref}]);
 
 %%
 % o3r= (inst2(:,8)-ETC_NEW(1).TP(1))./(ETC_NEW(1).TP(2)/10000*inst2(:,3)*10);
@@ -396,6 +402,9 @@ printfiles_report(gcf,Cal.dir_figs,'aux_pattern',{'fin'},'Width',14,'Height',8);
 figure(max(findobj('tag','RATIO_ERRORBAR')));
 printfiles_report(gcf,Cal.dir_figs,'aux_pattern',{'fin'});
 
+figure(findobj('tag','RATIO_ERRORBAR_all'));
+printfiles_report(gcf,Cal.dir_figs);
+
 close all
 
 %% Final days table
@@ -409,11 +418,11 @@ m_etc(:,10)=100*(m_etc(:,8)-m_etc(:,2))./m_etc(:,2);
 
 %m_etc(:,[end-1,end])=[];
 M=cell(size(m_etc,1)+1,size(m_etc,2)+1);
-label={'Date','Day',['O3\#',brw_str{n_ref}],'O3std','N',...
-         ['O3\#',brw_str{n_inst}],'O3 std',...
-         ['\%(',brw_str{n_inst},'-',brw_str{n_ref},')/',brw_str{n_ref}]...
-         ['O3(*)\#',brw_str{n_inst}],'O3std',...
-         ['(*)\%(',brw_str{n_inst},'-',brw_str{n_ref},')/',brw_str{n_ref}]};
+label={'Date','Day',['O3#',brw_str{n_ref}],'O3std','N',...
+         ['O3#',brw_str{n_inst}],'O3 std',...
+         ['%(',brw_str{n_inst},'-',brw_str{n_ref},')/',brw_str{n_ref}]...
+         ['O3(*)#',brw_str{n_inst}],'O3std',...
+         ['(*)%(',brw_str{n_inst},'-',brw_str{n_ref},')/',brw_str{n_ref}]};
 M(1,:)=label;
 M(2:end,1)=cellstr(datestr(fix(m_etc(:,1))));
 m_etc(:,1)=diaj(m_etc(:,1));
@@ -433,9 +442,9 @@ TIME_SYNC=5;
 caption=strcat('Ozone Summary Report. Mean daily ozone, grouped by ozone slant path ranges,',...
                ' with original and final configuration (with an asterisk)');
 tags_={'osc$>$1500' '1500$>$osc$>$1000' '1000$>$osc$>$700' '700$>$osc$>$400' 'osc$<$400'};
-label_={'Day','osc range',['O3\#',brw_str{n_ref}],'O3std','N',...
-                          ['O3\#',brw_str{n_inst}],'O3 std','\%diff',...
-                          ['(*)O3\#',brw_str{n_inst}],'O3 std','(*)\%diff'};
+label_={'Day','osc range',['O3#',brw_str{n_ref}],'O3std','N',...
+                          ['O3#',brw_str{n_inst}],'O3 std','%diff',...
+                          ['(*)O3#',brw_str{n_inst}],'O3 std','(*)%diff'};
 
 ozone_osc_sum=o3_daily_osc(Cal,TIME_SYNC,n_ref,summary_orig_old,summary_old,summary);
 dat=cat(2,num2cell(ozone_osc_sum(:,1)),tags_(ozone_osc_sum(:,end))',num2cell(ozone_osc_sum(:,2:end-1)));
@@ -466,15 +475,15 @@ title(Cal.campaign);
 datetick('x',6,'keepLimits','KeepTicks');
 
 % blind days: suggested config.
-if ~isequal(blinddays,Cal.calibration_days{Cal.n_inst,3})
+if ~Cal.no_maint(Cal.n_inst)     % if the instrument has changed due to maintenance
    inst1_b      =summary_old{Cal.n_inst}(findm(diaj(summary_old{Cal.n_inst}(:,1)),blinddays,0.5),:);
    inst1_b(:,10)=(inst1_b(:,8)-ETC_SUG(1).NEW)./(A1_old*inst1_b(:,3)*10);     
    for dd=1:length(blinddays)
       j=find(diajul(floor(inst1_b(:,1)))==blinddays(dd));
-      j_=find(diajul(floor(ref2_b(:,1)))==blinddays(dd));
+      j_=find(diajul(floor(ref(:,1)))==blinddays(dd));
       if (isempty(j) || length(j)<4), continue; end
          f=figure; set(f,'Tag',sprintf('%s%s','DayPlot_',num2str(blinddays(dd))));
-         plot(ref2_b(j_,1),ref2_b(j_,6),'g-s','MarkerSize',6,'MarkerFaceColor','g');
+         plot(ref(j_,1),ref(j_,6),'g-s','MarkerSize',6,'MarkerFaceColor','g');
          hold on; plot(inst1_b(j,1),inst1_b(j,10),'b-d','MarkerSize',7,'MarkerFaceColor','b');
          plot(inst1_b(j,1),inst1_b(j,6),'r:.','MarkerSize',9);
          title(sprintf('Suggested configuration \n  Blind day %d%d',blinddays(dd), Cal.Date.cal_year-2000))
@@ -491,10 +500,10 @@ jday=findm(diaj(summary{Cal.n_inst}(:,1)),finaldays,0.5);% quiero mostrar la pri
 inst2=summary{Cal.n_inst}(jday,:);
 for dd=1:length(finaldays)
 j=find(diajul(floor(inst2(:,1)))==finaldays(dd));
-j_=find(diajul(floor(ref2(:,1)))==finaldays(dd));
+j_=find(diajul(floor(ref(:,1)))==finaldays(dd));
 if (isempty(j) || length(j)<4), continue; end
 f=figure; set(f,'Tag',sprintf('%s%s','DayPlot_',num2str(finaldays(dd))));
-plot(ref2(j_,1),ref2(j_,6),'g-s','MarkerSize',6,'MarkerFaceColor','g');
+plot(ref(j_,1),ref(j_,6),'g-s','MarkerSize',6,'MarkerFaceColor','g');
 hold on; plot(inst2(j,1),inst2(j,6),'b--d','MarkerSize',7,'MarkerFaceColor','b');
          plot(inst2(j,1),inst2(j,10),'r:.','MarkerSize',9);
 title(sprintf('Final configuration \nFinal day %d%02d',finaldays(dd), Cal.Date.cal_year-2000))
