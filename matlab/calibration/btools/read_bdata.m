@@ -52,8 +52,13 @@ end
 
 dsum={};    ozone_sum={};  ozone_ds={}; ozone_raw0={};
 ozone_raw={}; ozone_ratios={};
+
 config={};  sl={};     sl_cr={};     hg={};     bhg={};
 missing=NaN;
+
+ozone_dzsum={};
+ozone_dzraw0={};
+
 ozone=[];
 
 if nargin<=2
@@ -170,6 +175,11 @@ for dd=CALC_DAYS
       ozone_sum=[ozone_sum;o3.ozone_s];
       ozone_ds=[ozone_ds;o3.ozone_ds];
       ozone_raw=[ozone_raw;o3.ozone_raw];
+      
+      ozone_dzsum=[ozone_dzsum;o3.dzsum];
+      ozone_dzraw0=[ozone_dzraw0;o3.dz_raw0];
+      
+      
       config=[config;config_];
       sl=[sl;sl_.sls_c];        % first calibration (or bfile)
       sl_cr=[sl_cr;sl_.sls_cr]; % recalculated/second calibration
@@ -216,3 +226,6 @@ ozone.sl_cr=sl_cr;
 ozone.hg=hg;
 ozone.bhg=bhg;
 ozone.ratios=ozone_ratios;
+ozone.dzsum=ozone_dzsum;
+ozone.dzraw0=ozone_dzraw0;
+
