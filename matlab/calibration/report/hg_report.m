@@ -87,43 +87,25 @@ end
 % col_p=[1,5,6,7,8,9,10];
 
 figure; 
-ha=tight_subplot(3,1,.075,[.1 .085],[.1 .1]); 
-
-axes(ha(1));
 p=plot(hg1(:,1),hg1(:,6),'*r',hg1(:,1),hg1(:,7),'ko'); 
 set(p,'MarkerSize',4); set(gca,'FontSize',10);
 hline(config(14),'-k');  hline(config(14)+[-1 0 1] ,'--k');  
 grid; t=title(sprintf('%s: %s (CSN = %d)',Cal.brw_name{n_inst},hg_leg{6},config(14))); 
 set(t,'FontWeight','Bold','FontSize',12);
+datetick(gca,'x',6,'KeepLimits','KeepTicks'); % mm/dd
       
-axes(ha(2)); 
-p=patch([min(hg1(:,9)) max(hg1(:,9)) max(hg1(:,9)) min(hg1(:,9))],...
-        [config(14)-1 config(14)-1 config(14)+1 config(14)+1],[.93 .93 .93]);
+figure; 
+p=patch([min(diff(hg1(:,9))) max(diff(hg1(:,9))) max(diff(hg1(:,9))) min(diff(hg1(:,9)))],...
+        [-1 -1 +1 +1],[.93 .93 .93]);
 set(p,'LineStyle','None','HandleVisibility','Off');    
-hold on; g=gscatter(hg1(:,9),hg1(:,6),hg1(:,9),'','',10,'off',''); 
+hold on; plot(diff(hg1(:,9)),diff(hg1(:,6)),'*k'); grid;  
 set(gca,'YTickLabel',get(gca,'YTick'),'XTickLabel',get(gca,'XTick'),'layer','top');
-grid; box On; set(gca,'HandleVisibility','Off');
-[legend_h,object_h]=legendflex(g(1),{'Temperature'},'anchor', {'n','n'}, 'buffer',[-30 10],...
-                                     'fontsize',10,'box','off');
-set(object_h(1),'BackgroundColor','w'); set(object_h(end),'Visible','off'); set(legend_h,'HandleVisibility','Off');
+t=title(sprintf('%s: CSN diff. vs Temperature',Cal.brw_name{n_inst})); 
+set(t,'FontWeight','Bold','FontSize',12);
 
-axes(ha(3));
+figure; 
 m=mmplotyy(hg1(:,1),hg1(:,8),'k.',hg1(:,9),'.r',[5 40]);
 set(m,'MarkerSize',8); ylabel('Int. (\times10^5)'); grid; 
-[legend_h,object_h]=legendflex(m,{'Intensity','Temperature'},'anchor', {'n','n'}, 'buffer',[0 8],...
-                                  'nrow',1,'xscale',0.5,'fontsize',10,'box','off');
-set(object_h(1:2),'BackgroundColor','w'); set(legend_h,'HandleVisibility','Off');
-
-set(ha(1),'XtickLabel',''); linkprop(ha([1 3]),'XLim');
-datetick(ha(3),'x',6,'KeepLimits','KeepTicks'); % mm/dd
-
-% axes(ha(2));
-% plot(hg1(:,1),hg1(:,5),'.');
-% if ~isempty(params)
-%    set(gca,'Ylim',[params(1) params(end)+0.0000001]);%  params=[lowerAdjacentValue lowerQuartile med upperQuartile upperAdjacentValue]
-%    t=title(sprintf('%s (%f)',hg_leg{5},interquartileRange));
-% end
-% set(gca,'FontSize',10); grid;  
-% set(t,'FontWeight','Bold','FontSize',12);
-% l=legend(gca,Cal.brw_name{n_inst},'Location','Best');
-% set(l,'TextColor','m','FontSize',12,'FontWeight','Demi');  
+t=title(sprintf('%s: Hg Intensity vs Temperature',Cal.brw_name{n_inst})); 
+set(t,'FontWeight','Bold','FontSize',12);
+datetick('x',6,'KeepLimits','KeepTicks'); mmplotyy('Temperature');

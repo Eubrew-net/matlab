@@ -52,15 +52,18 @@ disp(sprintf('  NEW MS9: %5.0f +/-%2.0f  %3.1f +/- %3.2f  ',ajuste{1}.new(7,[1 3
 if exist('sl_raw','var')
     if iscell(sl_raw) && size(sl_raw,2)>=Cal.n_inst
         if isempty(sl_raw{Cal.n_inst})
-           [sl_raw{Cal.n_inst},TC{Cal.n_inst}]=readb_sl_rawl(fullfile('.',['bdata',Cal.brw_str{Cal.n_inst}],['B*.',Cal.brw_str{Cal.n_inst}]),'f_plot',1);
+           [sl_raw{Cal.n_inst},TC{Cal.n_inst}]=readb_sl_rawl(fullfile(['bdata',Cal.brw_str{Cal.n_inst}],...
+                                                             ['B*.',Cal.brw_str{Cal.n_inst}]),'f_plot',1);
            save(Cal.file_save,'-APPEND','sl_raw','TC');
         end
     else
-        [sl_raw{Cal.n_inst},TC{Cal.n_inst}]=readb_sl_rawl(fullfile('.',['bdata',Cal.brw_str{Cal.n_inst}],['B*.',Cal.brw_str{Cal.n_inst}]),'f_plot',1);
+        [sl_raw{Cal.n_inst},TC{Cal.n_inst}]=readb_sl_rawl(fullfile(['bdata',Cal.brw_str{Cal.n_inst}],...
+                                                          ['B*.',Cal.brw_str{Cal.n_inst}]),'f_plot',1);
         save(Cal.file_save,'-APPEND','sl_raw','TC');
     end
 else
-    [sl_raw{Cal.n_inst},TC{Cal.n_inst}]=readb_sl_rawl(fullfile('.',['bdata',Cal.brw_str{Cal.n_inst}],['B*.',Cal.brw_str{Cal.n_inst}]),'f_plot',1);
+    [sl_raw{Cal.n_inst},TC{Cal.n_inst}]=readb_sl_rawl(fullfile(['bdata',Cal.brw_str{Cal.n_inst}],...
+                                                      ['B*.',Cal.brw_str{Cal.n_inst}]),'f_plot',1);
     save(Cal.file_save,'-APPEND','sl_raw','TC');
 end
 
@@ -102,25 +105,31 @@ disp(sprintf('  NEW MS9: %5.0f +/-%2.0f  %3.1f +/- %3.2f  ',ajuste{2}.new(7,[1 3
                                 'N_TC',TCorig(1:5)','date_range',datenum(Cal.Date.cal_year,1,[1,Cal.calibration_days{Cal.n_inst,1}(1)]));
 
 Forigx=Forig; Fn=Fnew;
-figure; set(gcf,'Tag','TEMP_COMP_DATE')
-[mn,sn]=grpstats(Forigx(:,[1,end]),{year(Forigx(:,1)),fix(Forigx(:,1))},{'mean','sem'});
-[mt,st]=grpstats(Fn(:,[1,end]),{year(Fn(:,1)),fix(Fn(:,1))},{'mean','sem'});
-errorbar(mn(:,1),mn(:,2),sn(:,2),'Color','k','Marker','s');
-hold on
+
+figure;  set(gcf,'Tag','TEMP_COMP_DATE');
+plot(Forigx(:,1),Forigx(:,2),'b.','MarkerSize',6); 
+ylabel('Temperature','Color','b'); ax(1)=gca; set(ax(1),'YAxisLocation','right','XTicklabels',{' '}); 
+[mn,sn]=grpstats(Forigx(:,[1,end,2]),{year(Forigx(:,1)),fix(Forigx(:,1))},{'mean','sem'});
+[mt,st]=grpstats(Fn(:,[1,end]),{year(Fn(:,1)),fix(Fn(:,1))},{'mean','sem'}); 
+ax(2) = axes('YAxisLocation','left','Color','none'); 
+hold all; errorbar(mn(:,1),mn(:,2),sn(:,2),'Color','k','Marker','s');
 errorbar(mt(:,1),mt(:,2),st(:,2),'Color','g','Marker','s');
-datetick('x','KeepTicks','KeepLimits'); grid on; ylabel('Standard Lamp R6 ratio');
-legend('Old temperature coeff','New temperature coeff');
-title(['R6 Temperature dependence Brewer#', Cal.brw_str{Cal.n_inst}]);
+errorbar(mt(:,1),mt(:,2),st(:,2),'Color','g','Marker','s');
+title(['R6 Temperature dependence Brewer#', Cal.brw_str{Cal.n_inst}]); ylabel('Standard Lamp R6 ratio');
+datetick('x',6,'KeepTicks','KeepLimits'); grid on; 
+lg=legend(ax(2),'Old temperature coeff','New temperature coeff','Location','best'); 
+set(lg,'HandleVisibility','Off');  set(findobj(lg,'Type','text'),'FontSize',7,'HandleVisibility','Off');    
+linkprop(ax,{'Position','XTick'}); 
 
 figure; set(gcf,'Tag','TEMP_COMP_TEMP')
 [mn,sn]=grpstats(Forigx(:,[2,end]),Forigx(:,2),{'mean','sem'});
 [mt,st]=grpstats(Fn(:,[2,end]),Fn(:,2),{'mean','sem'});
-errorbar(mn(:,1),mn(:,2),sn(:,2),'Color','k','Marker','s');
-hold on
+hold on; errorbar(mn(:,1),mn(:,2),sn(:,2),'Color','k','Marker','s');
 errorbar(mt(:,1),mt(:,2),st(:,2),'Color','g','Marker','s'); grid;
-legend('Old temperature coeff','New temperature coeff');
+lg=legend('Old temperature coeff','New temperature coeff','Location','best');
+set(lg,'HandleVisibility','Off'); set(findobj(lg,'Type','text'),'FontSize',7,'HandleVisibility','Off');    
 title(['R6 Temperature dependence Brewer#', Cal.brw_str{Cal.n_inst}]);
-ylabel('Standard Lamp R6 ratio'); xlabel('Temperature');
+ylabel('Standard Lamp R6 ratio'); xlabel('Temperature'); set(gca,'Box','On');
 
 %%
 % ix=sort(findobj('tag','TEMP_COEF_DESC'));
@@ -133,7 +142,7 @@ ix=sort(findobj('tag','TEMP_OLD_VS_NEW'));
 printfiles_report(ix',Cal.dir_figs,'aux_pattern',ix,'Width',12.5,'Height',6.5);
 
 ix=sort(findobj('tag','TEMP_COMP_DATE'));
-printfiles_report(ix',Cal.dir_figs,'aux_pattern',ix,'Width',12.5,'Height',6.5);
+printfiles_report(ix',Cal.dir_figs,'aux_pattern',ix,'Width',12.5,'Height',7,'FontMode','fixed','FontSize',9,'axes',1);
 
 ix=sort(findobj('tag','TEMP_COMP_TEMP'));
 printfiles_report(ix',Cal.dir_figs,'aux_pattern',ix,'Width',12.5,'Height',6.5);
