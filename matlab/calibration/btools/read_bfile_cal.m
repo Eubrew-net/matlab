@@ -1,5 +1,30 @@
 %% read bfile data according to CAL
-% test routine 
+% Read all files from Calibration setup (Cal)
+% 
+%  [ bfile_data]=read_bfile_cal(Cal,analyzed_brewer)
+% 
+% bfile_data is a struct with fields defined by readb_bdata
+% 
+%     bfile_data.dsum=dsum;
+%     bfile_data.ozone_sum=ozone_sum;
+%     bfile_data.config=config;
+%     bfile_data.ozone_ds=ozone_ds;
+%     bfile_data.ozone_raw=ozone_raw;
+%     bfile_data.ozone_raw0=ozone_raw0;
+%     
+%     bfile_data.ozone_dzraw0=ozone_dzraw0;
+%     bfile_data.ozone_dzsum=ozone_dzsum;
+%     
+%     bfile_data.sl=sl; %first calibration/ bfiles
+%     bfile_data.sl_cr=sl_cr; %recalculated with 2? configuration
+%     bfile_data.hg=hg;
+%     bfile_data.bhg=bhg;
+%     bfile_data.log=log;
+%     bfile_data.missing=missing;
+%     bfile_data.Cal=Cal;
+%  
+%  
+% 
     function [ bfile_data]=read_bfile_cal(Cal,analyzed_brewer)
     if nargin==1
      if isfield(Cal,'analyzed_brw')
