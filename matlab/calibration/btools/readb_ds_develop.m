@@ -599,7 +599,9 @@ else
 end
 %% DZ
 if ~isempty(jdz)
-dss=[];dsum=[];ndzs=0;
+dzs=[];dsum=[];ndzs=0;
+jdzsum=[];timedz=[];
+
    for i=1:length(jsum)
       dsum=sscanf(l{jsum(i)},fmtsum);
       type=char(dsum(12:13)');
@@ -632,7 +634,7 @@ dss=[];dsum=[];ndzs=0;
       end
   end
   % ---------------------- Start DZ output ------------------------------------
-  %fi ~isempty(dzs)
+  if ~isempty(dzs)
     % Time calculation: hora a formato matlab -> sumarios
     hora=dzs(1,:)*60+dzs(2,:)+dzs(3,:)/60;
     % idx_dz indice de la medida dz
@@ -695,7 +697,11 @@ dss=[];dsum=[];ndzs=0;
     %                        'iS0'  'iS1'	'iS2'	'iS3'	'iS4'	'iS5'	'iS6' 	 ...  % count-rates recalculadas 1 (Rayleight uncorrected !!)
     %                        'fs0'	'fs1'	'fs2'	'fs3'	'fs4'	'fs5'	'fs6'	...  % count-rates recalculadas 2 (Rayleight uncorrected !!)
     %                        };
-
+  else
+    disp('(error in dz measurements)');
+    o3.dzsum=[]; o3.dzsum_legend=[];
+    o3.dz_raw0=[]; o3.dz_raw0_legend=[];
+   end
 else
     %disp('(no dz measurements)');
     o3.dzsum=[]; o3.dzsum_legend=[];

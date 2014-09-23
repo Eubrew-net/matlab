@@ -25,7 +25,7 @@
 %  
 %  
 % 
-    function [ bfile_data]=read_bfile_cal(Cal,analyzed_brewer)
+    function [ bfile_data]=read_bfile_cal(Cal,analyzed_brw)
     if nargin==1
      if isfield(Cal,'analyzed_brw')
          analyzed_brw=Cal.analyzed_brw;
