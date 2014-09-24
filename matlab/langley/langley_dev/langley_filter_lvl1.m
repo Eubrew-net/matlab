@@ -75,10 +75,10 @@ arg.addParamValue('summ', 0, @(x)(x==0 || x==1));         % por defecto no sumar
 
 arg.addParamValue('airmass'   , []     , @isfloat);       % default all airmasses
 arg.addParamValue('N_flt'     , 5      , @isfloat);       % default 5 meas. / filter (NOT implemented)
-arg.addParamValue('N_hday'    , 20     , @isfloat);       % default 25 o3 summaries / hday
+arg.addParamValue('N_hday'    , 20     , @isfloat);       % default 20 o3 summaries / hday
 arg.addParamValue('O3_hday'   , NaN    , @isfloat);       % default NaN O3 std / hday
 arg.addParamValue('F_corr'    , []     , @(x)iscell(x) || isvector(x)); % default no filter corr
-arg.addParamValue('date_range', []     , @isfloat);       % default all airmasses
+arg.addParamValue('date_range', []     , @isfloat);       % default no date_range filter
 arg.addParamValue('AOD'       , ''     , @(x)ischar(x));  % default no AoD filtering
 arg.addParamValue('Cloud'     , ''     , @(x)ischar(x));  % default no cloud-screening
 arg.addParamValue('plots'     , 0      , @(x)(x==0 || x==1));  % default no individual plots
