@@ -64,7 +64,7 @@ try
        c=[NaN;c];
        %c=textscan(strrep(strrep(strtrim(l{jloc(1)}),' ','_'),char(13),' '),fmt_head);
     elseif ispc
-       c=textscan(l{jloc(1)},fmt_head,'delimiter',char(13));
+       c=textscan(l{jloc(1)},fmt_head,'delimiter',char(10));
        loc=c{5};
        c(5)=[];
        c=cell2num(c);
