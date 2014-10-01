@@ -38,7 +38,7 @@ arg.addParamValue('date_range', [], @isfloat); % por defecto, no control de fech
 arg.addParamValue('fplot',0, @isfloat); % por defecto, no plot
 arg.addParamValue('hgflag',1, @isfloat); % por defecto, depurando
 arg.addParamValue('diaj_flag',1, @(x)(x==0 || x==1)); % por defecto, dia juliano
-arg.addParamValue('events_raw','', @iscell); % por defecto, no events
+arg.addParamValue('events_raw',{[]}, @iscell); % por defecto, no events
 
 % validamos los argumentos definidos:
 try
@@ -199,7 +199,7 @@ sl_median(:,2)=[]; sl_median=sortrows(sl_median,1);
         end
         datetick('x','mm/dd/yy','keeplimits','keepticks');
     else
-        if ~isempty(events_raw)
+        if ~isempty(cell2mat(events_raw(:,1)))
            dates=cell2mat(events_raw(:,2)); indx=dates>=sl_median(1,1) & dates<=sl_median(end,1); 
            if any(indx)
               h=vline_v(diaj(dates(indx)),'-k',events_raw(indx,3)); set(h,'LineWidth',1);
@@ -240,23 +240,23 @@ sl_median(:,2)=[]; sl_median=sortrows(sl_median,1);
     grid;    xlabel('Date');    ylabel('SL I_5  ratios');
     set(gca,'LineWidth',1); % ,'XTick',diaj(sl_medianplot(:,1)))%,'XTickLabel',diaj(sl_medianplot(:,1))
 
-    % Temperature
-    f=figure;    set(f,'tag','SL_TEMP_report');
+    % Temperature        
+    f=figure; set(f,'tag','SL_TEMP_report');
     ha=tight_subplot(2,1,.05,[.1 .1],[.1,.1]);   
 
-    axes(ha(1)); plot(sls(:,13),sls(:,22),'.'); hold on; 
+    axes(ha(1)); gs=gscatter(sls(:,13),sls(:,22),5*fix(diaj(sls(:,1))/5),'','.',10,'off');
+    set(gs,'HandleVisibility','Off'); hold on; plot(sls(:,13),sls(:,22),'.');
     rl=rline; set(rl,'LineWidth',2);
-    set(findobj(gca,'Type','Text'),'BackgroundColor','w','Color','r','FontSize',10,'FontWeight','Bold');
     set(findobj(gca,'Marker','.'),'Marker','None');
-    gscatter(sls(:,13),sls(:,22),5*fix(diaj(sls(:,1))/5),'','.',10,'off');
     set(gca,'XtickLabel',[]); xlabel(' '); ylabel('SL R6 ratios'); grid;
     title(['Standard Lamp ratios vs temperature: Brw id. ',brw_name{idx_inst}]); 
-    
-    axes(ha(2)); plot(sls(:,13),sls(:,21),'.'); hold on; 
+    set(findobj(gca,'Type','Text'),'BackgroundColor','w','Color','r','FontSize',10,'FontWeight','Bold');
+
+    axes(ha(2)); gs=gscatter(sls(:,13),sls(:,21),5*fix(diaj(sls(:,1))/5),'','.',10,'on');
+    set(gs,'HandleVisibility','Off'); hold on; plot(sls(:,13),sls(:,21),'.'); 
     rl=rline; set(rl,'LineWidth',2);
     set(findobj(gca,'Type','Text'),'BackgroundColor','w','Color','r','FontSize',10,'FontWeight','Bold');
     set(findobj(gca,'Marker','.'),'Marker','None');
-    gscatter(sls(:,13),sls(:,21),5*fix(diaj(sls(:,1))/5),'','.',10,'on');
     xlabel('PMT Temperature (C\circ)'); ylabel('SL R5 ratios'); grid;
     set(findobj(gcf,'Tag','legend'),'FontSize',7); linkprop(ha,'XLim');
     
