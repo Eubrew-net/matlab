@@ -1,5 +1,7 @@
 function [Options,figuras]=printfiles_report(n0,patern,varargin)
-% function Options=printfiles_report(n0,patern,varargin)
+% function [Options,figuras]=printfiles_report(n0,patern,varargin)
+% okargs = {'Format','Color','Width','Height','LineWidth','DefaultFixedFontSize',...
+%          'LockAxes','FontSize','FontMode','aux_pattern','LineMode','Reference','axes'};
 % print eps files acording with format
 % 30/04/2010 Juanjo: para el caso de m?ltiples figuras habr?n varias
 %                    posibilidades: 
@@ -139,7 +141,14 @@ try
      end
      saveas(h,figura,'fig');
 %      saveas(h,figura,'png');
-     figuras{naux}=[figura,'.eps'];
+    try
+     system(['pstopdf ',figura,'.eps']);
+     %figuras{naux}=fullfile('figures',[figura,'.pdf']);
+     %system(['pstopdf ',figura,'.eps', ' -o ',figuras{naux}])
+     
+    catch
+     figuras{naux}=fullfile([figura,'.eps']);
+    end
 end
 cd(cwd);
 catch exception
