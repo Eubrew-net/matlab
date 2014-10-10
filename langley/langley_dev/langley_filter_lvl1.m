@@ -15,7 +15,7 @@ function [data selected_days all_days] = langley_filter_lvl1(data,varargin)
 %
 % - std < 2.5    (it is better to work with more restricted 1.5 criterion) -> hardcode
 % - O3 100-600   (removing outliers in ozone)                              -> hardcode
-% - hg flag == 1 (bad Hg measurements removed)                             -> hardcode
+% - hg flag == 0 (bad Hg measurements removed)                             -> hardcode
 % - n = 5        (DS not aborted)                                          -> hardcode
 %
 % SECOND SET OF FILTERS:
@@ -23,32 +23,36 @@ function [data selected_days all_days] = langley_filter_lvl1(data,varargin)
 % Defined through optional arguments (see below).
 %
 % INPUT
-% - data: langley data. Individual (langley_data_cell first output) or
-%         summaries (langley_summ_sync / langley_data_cell output)
+% - data       : langley data. Individual (langley_data_cell first output) or
+%                summaries (langley_summ_sync / langley_data_cell output)
 %
-% Input optional:
-% - summ       : 0 (default) or 1 (It is mandatory to declare summ=1 when working with summaries)
-% - airmass    : Working airmass range (no filter default). It could be 1 or 2 length vector
-% - N_hday     : Number of O3 measurements, summaries, for each half day (20 default)
-% - O3_hday    : Maximum O3 std allowed for each half day (no filter by default)
-% - N_flt      : Number of mesurements / filter (NOT implemented)
+% Input optional (described as they are applied to data):
+% - date_range : As usual (No date filter by default)
 % - F_corr     : Filter correction factors to  be applied. It could be directly from configuration
 %                matrix (as produced by read_cal_config_new, F_corr variable). This is the preferred form
 %                (1 vector / day). It could be also simply a 6-vector, e.g. [0  0  0  11  NaN  0]
-% - date_range : As usual. Default No date filter
+% - airmass    : Working airmass range (all air masses by default). It could be 1 or 2 length vector
+% - N_flt      : Number of mesurements / filter (NOT implemented)
+% - N_hday     : Number of O3 measurements (summaries), for each half day (20 default)
+% - O3_hday    : Maximum O3 std allowed for each half day (no filter by default)
+% - summ       : 0 (default) or 1 (It is mandatory to declare summ=1 when working with summaries)
 % - AOD        : AOD lvl1.5 from AERONET. Daily AOD_340 < 0.05, when filtered (no filter by default)
-% - Cloud      :
-% - plots      :
-% - lgl_days   :
+% - Cloud      : Clear days filter (see \matlab\langley\langley_dev\cloud_screening.m)
+% - lgl_days   : Useful statistics for all analyzed days. They include, for each half-day:                               
+%                          " Year, Diaj, O3 AM, O3_std AM, N AM, AOD AM, AOD_std AM, Cloud AM
+%                                        O3 PM, O3_std PM, N PM, AOD PM, AOD_std PM, Cloud PM "
+% - plots      : Langley plot for each half-day. With (residuals) / without (MS9 vs m) data - filters
 % 
 % OUTPUT:
 % - langley FILTERED data (either individuals or summaries, depending on the input).
 % 
 % - selected_days: Struct var with fields:
+% 
 %           - data = 2D matrix with auxiliary information for langley processing. Just selected days 
 %           - labels = 'Date','AM','O3','O3_std','N','AOD','AOD_std','Cld','PM','O3','O3_std','N','AOD','AOD_std','Cld'
 % 
 % - all_days     : Struct var with fields:
+% 
 %           - data = 2D matrix with auxiliary information for langley processing. All days
 %           - labels = 'Date','AM','O3','O3_std','N','AOD','AOD_std','Cld','PM','O3','O3_std','N','AOD','AOD_std','Cld'
 % 
@@ -71,18 +75,17 @@ arg.FunctionName = 'langley_filter_lvl1';
 arg.addRequired('data',@iscell);
 
 % input param - value
-arg.addParamValue('summ', 0, @(x)(x==0 || x==1));         % por defecto no sumarios
-
-arg.addParamValue('airmass'   , []     , @isfloat);       % default all airmasses
-arg.addParamValue('N_flt'     , 5      , @isfloat);       % default 5 meas. / filter (NOT implemented)
-arg.addParamValue('N_hday'    , 20     , @isfloat);       % default 20 o3 summaries / hday
-arg.addParamValue('O3_hday'   , NaN    , @isfloat);       % default NaN O3 std / hday
+arg.addParamValue('date_range', []     , @isfloat);                     % default no date_range filter
 arg.addParamValue('F_corr'    , []     , @(x)iscell(x) || isvector(x)); % default no filter corr
-arg.addParamValue('date_range', []     , @isfloat);       % default no date_range filter
-arg.addParamValue('AOD'       , ''     , @(x)ischar(x));  % default no AoD filtering
-arg.addParamValue('Cloud'     , ''     , @(x)ischar(x));  % default no cloud-screening
-arg.addParamValue('plots'     , 0      , @(x)(x==0 || x==1));  % default no individual plots
-arg.addParamValue('lgl_days'  , 0      , @(x)(x==0 || x==1));  % default no table
+arg.addParamValue('airmass'   , []     , @isfloat);                     % default all airmasses
+arg.addParamValue('N_flt'     , 5      , @isfloat);                     % default 5 meas. / filter (NOT implemented)
+arg.addParamValue('N_hday'    , 20     , @isfloat);                     % default 20 o3 summaries / hday
+arg.addParamValue('O3_hday'   , NaN    , @isfloat);                     % default NaN O3 std / hday
+arg.addParamValue('summ'      , 0      , @(x)(x==0 || x==1));           % por defecto no sumarios
+arg.addParamValue('AOD'       , ''     , @(x)ischar(x));                % default no AOD filtering
+arg.addParamValue('Cloud'     , ''     , @(x)ischar(x));                % default no cloud-screening
+arg.addParamValue('lgl_days'  , 0      , @(x)(x==0 || x==1));           % default no table
+arg.addParamValue('plots'     , 0      , @(x)(x==0 || x==1));           % default no individual plots
 
 % validamos los argumentos definidos:
 arg.parse(data, varargin{:});
@@ -231,8 +234,6 @@ data=cellfun(@(x,y) cat(1,x,y),data_AM, data_PM,'UniformOutput',false);
 data=data(cellfun(@(x) ~isempty(x),data));
 
 %% Tabla: Selected days
-% fprintf('Selected days: conditions\r\n');
-
 j_=cellfun(@(x) x(:,9)/60>12,data,'UniformOutput',false);
 j_idx=cellfun(@(x) unique(x)+1,j_,'UniformOutput',false); 
 [m_ampm s_ampm,n_ampm]=cellfun(@(x,y) grpstats(x(:,33),y,{'mean','std','numel'}),data,j_,'UniformOutput',false);
@@ -260,8 +261,8 @@ end
 selected_days.data  =[cellfun(@(x) fix(x(1,1)),data),aux_ampm(:,[1 3 5 7 9 10 13 2 4 6 8 11 12 14])];
 selected_days.labels={'Diaj','AM','O3','O3_std','N','AOD','AOD_std','Cld',...
                       'PM','O3','O3_std','N','AOD','AOD_std','Cld'};
-% fms = {'d','d','.1f','.2f','d','.4f','.5f','d','d','.1f','.2f','d','.4f','.5f','d'};
-% displaytable([diaj(selected_days.data(:,1)) selected_days.data(:,2:end)], selected_days.labels, 8, fms, cellstr(datestr(cellfun(@(x) fix(x(1,1)),data))));
+fms = {'d','d','.1f','.2f','d','.4f','.5f','d','d','.1f','.2f','d','.4f','.5f','d'};
+displaytable([diaj(selected_days.data(:,1)) selected_days.data(:,2:end)], selected_days.labels, 8, fms, cellstr(datestr(cellfun(@(x) fix(x(1,1)),data))));
 
 %% Tabla con condiciones para todos los días
 if arg.Results.lgl_days
@@ -291,10 +292,20 @@ if arg.Results.lgl_days
       aux_ampm(:,13:14)=cloud_ampm(:,3:4);
    end
    all_days.data  =aux_ampm(:,[1 2 3 5 7 9 10 13 4 6 8 11:12 14]);
-   all_days.labels={'Diaj','O3','O3_std','N','AOD','AOD_std','Cld',...
+   all_days.labels={'Year','Diaj','O3','O3_std','N','AOD','AOD_std','Cld',...
                     'O3','O3_std','N','AOD','AOD_std','Cld'};
-%    fms = {'d','.1f','.2f','d','.4f','.5f','d','.1f','.2f','d','.4f','.5f','d'};
-%    displaytable(all_days.data(:,2:end), all_days.labels, 8, fms, cellstr(datestr(fix(aux_ampm(:,1)))));
+ 
+   % open a file for writing
+   fid = fopen('loglangley.txt', 'w');
+   fprintf(fid,'%%%s\n',cell2str(all_days.labels));
+   for i=1:size(all_days.data,1)
+       fprintf(fid,'%d %03d %4.1f %.2f %3d %.4f %.5f %d %.1f %.2f %3d %.4f %.5f %d\n',...
+                                      [year(all_days.data(i,1)) all_days.data(i,2:end)]);
+   end
+   fclose(fid);
+
+   fms = {'d','.1f','.2f','d','.4f','.5f','d','.1f','.2f','d','.4f','.5f','d\n'};
+   displaytable(all_days.data(:,2:end), all_days.labels(2:end), 7, fms, cellstr(datestr(fix(aux_ampm(:,1)))));  
 end
 
 %% Ploteo de días individuales. Con / Sin filtros
