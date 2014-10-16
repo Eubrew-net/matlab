@@ -25,10 +25,11 @@ arg.FunctionName = 'cloud_screening';
 arg.addRequired('bsrn_dir',@ischar); arg.addRequired('aod_file',@ischar);
 
 % input param - value
-arg.addParamValue('plot'       , 0  , @(x)(x==0 || x==1)); % por defecto no individual plots
-arg.addParamValue('date_range' , [] , @isfloat);           % default all data in bsrn dir
-arg.addParamValue('file_write' , 1  , @(x)(x==0 || x==1)); % default writing results
-arg.addParamValue('cld_umbral' , 100, @isfloat);           % 100% clear conditions
+arg.addParamValue('plot'            , 0  , @(x)(x==0 || x==1)); % por defecto no individual plots
+arg.addParamValue('date_range'      , [] , @isfloat);           % default all data in bsrn dir
+arg.addParamValue('file_write'      , 1  , @(x)(x==0 || x==1)); % default writing results
+arg.addParamValue('file_indv_write' , 0  , @(x)(x==0 || x==1)); % default No writing results
+arg.addParamValue('cld_umbral'      , 100, @isfloat);           % 100% clear conditions
 
 % validamos los argumentos definidos:
 arg.parse(bsrn_dir,aod_file,varargin{:});
@@ -193,8 +194,25 @@ for i=1:l1
              datestr(DATA0(i,1),1),diaj(DATA0(i,1)),results{i}(4),results{i}(5),results{i}(7),results{i}(8)));         
        vl=vline_v(DATA2(j_szanoon,3)/60,'-r',{'noon'}); set(vl,'LineWidth',2);
     end  
+    
+    if arg.Results.file_indv_write
+       f1 = fopen(fullfile(bsrn_dir,sprintf('Cloud%03d%d.txt',dayj,year(fix(DATA0(i,1)))-2000)),'w');
+       fprintf(f1,'%%date az R_Global, R_difusa, crit1 crit2 crit3 crit4\n');
+       try
+           aux=cat(2,DATA2(:,1:2), Rglobal, Rdifusa, CRIT(:,3:6));
+       catch exception
+           aux=cat(2,DATA2(:,1:2), Rglobal, Rdifusa, NaN*ones(length(Rglobal),4));   
+           fprintf('%s (Cloud-screening algorithm failed)\r\n',exception.message)
+       end
+       for row=1:size(Rglobal,1)
+           fprintf(f1,'%f %5.2f %6.2f %6.2f %d %d %d %d\n',aux(row,:));
+       end
+    end
+    fclose(f1);
+
     fprintf('Day: %03d (AM), clear(%%):%4.1f, no_clear(%%):%4.1f, aod:%f -- (PM) clear(%%):%4.1f, no_clear(%%):%4.1f, aod:%f\n',...
                   dayj, results{i}(4), results{i}(5), aod, results{i}(7), results{i}(8), aod);  
+              
 end
 results=results(cellfun(@(x) ~isempty(x),results));
 
