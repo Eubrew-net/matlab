@@ -86,7 +86,12 @@ for cz=1:2
     id=find(abs(fwhm)>25); wl(id,:)=[]; fwhm(id)=[];
     id=find(isnan(fwhm));  wl(id,:)=[]; fwhm(id)=[];
 
-    wl(:,end)=fwhm';   
+    if isempty(wl)
+       wl=wl_{cz}; 
+       wl(:,1)=arg.Results.date_range(1)'; 
+    else
+       wl(:,end)=fwhm';   
+    end
     tab_cz{cz}=meanperiods(wl, event_info);
 end
 
