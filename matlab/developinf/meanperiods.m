@@ -35,7 +35,7 @@ function data_tab=meanperiods(data,event)
  
 %%
 if isempty(data)
-   m=NaN*ones(event.dates,30); m(:,1)=event.dates; std=m; N=m;
+   m=NaN*ones(length(event.dates),30); m(:,1)=event.dates; std=m; N=m;
    data_tab.m=m; data_tab.std=std; data_tab.N=N; data_tab.evnts=event.labels;     
    return;
 end
@@ -45,7 +45,12 @@ if any(a==0)
    fprintf('Removing data before 1st event as input.\n');
    data(a==0,:)=[]; a(a==0)=[]; 
 end
-[m std N]=grpstats(data,a,{@(x) nanmean(x,1),@(x) nanstd(x,1,1),'numel'});
+
+if size(data,1)==1
+   m=data;   std=zeros(1,size(data,2));   N=ones(1,size(data,2));    
+else
+   [m std N]=grpstats(data,a,{@(x) nanmean(x,1),@(x) nanstd(x,1,1),'numel'});
+end
 
 %% Structure: init
 data_tab.m=NaN*ones(length(event.dates),size(m,2));
