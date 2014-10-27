@@ -187,7 +187,7 @@ if ~isempty(arg.Results.AOD)
 
        [id_am loc_am]=ismember(fix(aod_m(:,1)),cellfun(@(x) unique(fix(x(:,1))),data_AM));
        data_AM_(loc_am(loc_am~=0))=data_AM(loc_am(loc_am~=0));
-       aod_am=aod_m(id_am,:);        idx_am=aod_am(:,4)>0.01; 
+       aod_am=aod_m(id_am,:);        idx_am=aod_am(:,4)>0.005; 
        [id_am loc_am]=ismember(fix(aod_am(idx_am,1)),cellfun(@(x) unique(fix(x(:,1))),data_AM_)); 
        data_AM_(loc_am)={NaN}; data_AM_(cellfun(@(x) length(x)==1,data_AM_))={[]};
        
@@ -261,8 +261,10 @@ end
 selected_days.data  =[cellfun(@(x) fix(x(1,1)),data),aux_ampm(:,[1 3 5 7 9 10 13 2 4 6 8 11 12 14])];
 selected_days.labels={'Diaj','AM','O3','O3_std','N','AOD','AOD_std','Cld',...
                       'PM','O3','O3_std','N','AOD','AOD_std','Cld'};
-fms = {'d','d','.1f','.2f','d','.4f','.5f','d','d','.1f','.2f','d','.4f','.5f','d'};
-displaytable([diaj(selected_days.data(:,1)) selected_days.data(:,2:end)], selected_days.labels, 8, fms, cellstr(datestr(cellfun(@(x) fix(x(1,1)),data))));
+if arg.Results.lgl_days
+   fms = {'d','d','.1f','.2f','d','.4f','.5f','d','d','.1f','.2f','d','.4f','.5f','d'};
+   displaytable([diaj(selected_days.data(:,1)) selected_days.data(:,2:end)], selected_days.labels, 8, fms, cellstr(datestr(cellfun(@(x) fix(x(1,1)),data))));
+end
 
 %% Tabla con condiciones para todos los días
 if arg.Results.lgl_days
@@ -304,8 +306,8 @@ if arg.Results.lgl_days
    end
    fclose(fid);
 
-   fms = {'d','.1f','.2f','d','.4f','.5f','d','.1f','.2f','d','.4f','.5f','d\n'};
-   displaytable(all_days.data(:,2:end), all_days.labels(2:end), 7, fms, cellstr(datestr(fix(aux_ampm(:,1)))));  
+%    fms = {'d','.1f','.2f','d','.4f','.5f','d','.1f','.2f','d','.4f','.5f','d\n'};
+%    displaytable(all_days.data(:,2:end), all_days.labels(2:end), 7, fms, cellstr(datestr(fix(aux_ampm(:,1)))));  
 end
 
 %% Ploteo de días individuales. Con / Sin filtros
