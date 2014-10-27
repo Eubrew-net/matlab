@@ -44,6 +44,8 @@ stats_brw.ci=NaN*ones(length(lgl_data{brw}),5,2); stats_brw.ci(:,1,[1 2])=repmat
 stats_brw.r=cellfun(@(x) NaN*ones(x,13,2),cellfun(@(x) size(x,1),lgl_data{brw},'UniformOutput', 0),'UniformOutput', 0);
 stats_brw.rs=NaN*ones(length(lgl_data{brw}),11,2); stats_brw.rs(:,1,[1 2])=repmat(cellfun(@(x) unique(fix(x(:,1))),lgl_data{brw}),1,2); 
 
+ampm_label={'AM','PM'}; 
+
 %%
 for dd=1:length(lgl_data{brw})
     lgl=lgl_data{brw}{dd};  
@@ -61,6 +63,12 @@ for dd=1:length(lgl_data{brw})
         end
        
         if ~any(jk{ampm})
+           if arg.Results.plot_flag
+              figure; subplot(2,1,1);
+                      title(sprintf('Residuals: %s (%d, %s)',datestr(lgl(1,1),1),diaj(lgl(1,1)),ampm_label{ampm}));
+                      subplot(2,1,2); 
+                      title(sprintf('Langley Plots: %s (%d, %s)',datestr(lgl(1,1),1),diaj(lgl(1,1)),ampm_label{ampm}));
+           end            
            continue
         end
 
@@ -69,32 +77,36 @@ for dd=1:length(lgl_data{brw})
             try
 %             Brewer method
               for slit=1:5
+                  r_orig{slit}=[NaN NaN]; 
                   jk_idx{ampm}=jk{ampm}; 
                   X=[ones(size(P_brw{ampm,2},1),1),P_brw{ampm,2}(:,1)];% matriz de diseño
                   [c1_brw,ci,r,ri,st]=regress(P_brw{ampm,ncfg}(:,slit+2),X);
                   if arg.Results.res_filt
-                     idx=abs(r)>1.5*nanstd(r);
-                     if any(idx==1)
-                        X=X(~idx,:); 
+%                    we keep original 
+                     r_orig{slit}=[X(:,2) r]; 
+                     idx=abs(r_orig{slit}(:,2))>1.5*nanstd(r_orig{slit}(:,2));
+                     if any(idx==1)                        
                         if ampm==1
                            jk_idx{ampm}(find(idx))=0;
                         else
                            jk_idx{ampm}(find(idx)+length(find(jam)))=0;                          
                         end
                      end
-                     [c1_brw,ci,r,ri,st]=regress(P_brw{ampm,ncfg}(~idx,slit+2),X);
+                     [c1_brw,ci,r,ri,st]=regress(P_brw{ampm,ncfg}(~idx,slit+2),X(~idx,:));
                   end
                   if ampm==1
+                     idx_=ampm+2;
                      resp_brw(dd,ampm+slit,ncfg)                    = c1_brw(1);    
                      resp_brw(dd,ampm+slit+10,ncfg)                 = c1_brw(2);    
 %                    stats_brw.ci(dd,ci_idx,ncfg)                   = ci(1,:);
-                     stats_brw.r{dd}(jk_idx{ampm},ampm+slit+2,ncfg) = r; 
+                     stats_brw.r{dd}(jk_idx{ampm},idx_+slit,ncfg)   = r; 
                      stats_brw.rs(dd,ampm+slit,ncfg)                = st(1);
                   else
+                     idx_=ampm+6;
                      resp_brw(dd,slit+ampm+4,ncfg)                  = c1_brw(1);    
                      resp_brw(dd,ampm+slit+14,ncfg)                 = c1_brw(2);    
 %                    stats_brw.ci(dd,ci_idx,ncfg)                   = ci(1,:);
-                     stats_brw.r{dd}(jk_idx{ampm},ampm+slit+6,ncfg) = r; 
+                     stats_brw.r{dd}(jk_idx{ampm},idx_+slit,ncfg)   = r; 
                      stats_brw.rs(dd,slit+ampm+4,ncfg)              = st(1);                       
                   end
               end                
@@ -107,63 +119,73 @@ for dd=1:length(lgl_data{brw})
 %             stats(ampm,ncfg,idx,:)=st; %npoints...
 %             data{ampm,ncfg,idx}=[lgl(jk,5),X(:,1:2)*c1(1:2),RC,r,ri];
         end
-    end
-    if arg.Results.plot_flag
-%        rat_res=cat(1,stats_brw.r{dd}(jk_idx{1},4:8,1),stats_brw.r{dd}(jk_idx{2},9:13,1))./cat(1,stats_brw.r{dd}(jk_idx{1},4:8,2),stats_brw.r{dd}(jk_idx{2},9:13,2)); 
-       m_oz=stats_brw.r{dd}(:,2,1); filt=stats_brw.r{dd}(:,3,1);
+        if arg.Results.plot_flag
+%          rat_res=cat(1,stats_brw.r{dd}(jk_idx{1},4:8,1),stats_brw.r{dd}(jk_idx{2},9:13,1))./cat(1,stats_brw.r{dd}(jk_idx{1},4:8,2),stats_brw.r{dd}(jk_idx{2},9:13,2)); 
+           m_oz=stats_brw.r{dd}(:,2,1); 
        
-       figure; 
-       a(1)=subaxis(3,2,1);  gscatter(stats_brw.r{dd}(jk_idx{1},2,1),stats_brw.r{dd}(jk_idx{1},1+3,1),stats_brw.r{dd}(jk_idx{1},3,1),'','o',{},'off'); hold all
-                             gscatter(stats_brw.r{dd}(jk_idx{1},2,2),stats_brw.r{dd}(jk_idx{1},1+3,2),stats_brw.r{dd}(jk_idx{1},3,2),'','.',{},'off'); 
-                             text(3,-500,'Slit#2','Background','w'); xlabel(gca,'');
-       a(2)=subaxis(3,2,2);  gscatter(stats_brw.r{dd}(jk_idx{1},2,1),stats_brw.r{dd}(jk_idx{1},2+3,1),stats_brw.r{dd}(jk_idx{1},3,1),'','o',{},'off'); hold all
-                             gscatter(stats_brw.r{dd}(jk_idx{1},2,2),stats_brw.r{dd}(jk_idx{1},2+3,2),stats_brw.r{dd}(jk_idx{1},3,2),'','.',{},'off'); 
-                             text(3,-500,'Slit#3','Background','w'); xlabel(gca,'');
-       a(3)=subaxis(3,2,3);  gscatter(stats_brw.r{dd}(jk_idx{1},2,1),stats_brw.r{dd}(jk_idx{1},3+3,1),stats_brw.r{dd}(jk_idx{1},3,1),'','o',{},'off'); hold all
-                             gscatter(stats_brw.r{dd}(jk_idx{1},2,2),stats_brw.r{dd}(jk_idx{1},3+3,2),stats_brw.r{dd}(jk_idx{1},3,2),'','.',{},'off'); 
-                             text(3,-500,'Slit#4','Background','w'); xlabel(gca,'');
-       a(4)=subaxis(3,2,4);  gscatter(stats_brw.r{dd}(jk_idx{1},2,1),stats_brw.r{dd}(jk_idx{1},4+3,1),stats_brw.r{dd}(jk_idx{1},3,1),'','o',{},'off'); hold all
-                             gscatter(stats_brw.r{dd}(jk_idx{1},2,2),stats_brw.r{dd}(jk_idx{1},4+3,2),stats_brw.r{dd}(jk_idx{1},3,2),'','.',{},'off'); 
-                             text(3,-500,'Slit#5','Background','w'); xlabel(gca,'');
-       a(5)=subaxis(3,2,5);  gscatter(stats_brw.r{dd}(jk_idx{1},2,1),stats_brw.r{dd}(jk_idx{1},5+3,1),stats_brw.r{dd}(jk_idx{1},3,1),'','o',{},'off'); hold all
-                             gscatter(stats_brw.r{dd}(jk_idx{1},2,2),stats_brw.r{dd}(jk_idx{1},5+3,2),stats_brw.r{dd}(jk_idx{1},3,2),'','.',{},'off'); 
-                             text(3,-500,'Slit#6','Background','w'); xlabel(gca,'');
-       set(a,'Xgrid','On','Ygrid','On','Box','On','Ylim',[-200 200]);  set(a(1:4),'XTickLabel','');      
-       pos=get(a(5),'Position'); set(a(5),'Position',[0.31 pos(2:4)]);
-       suptitle(sprintf('%s (%d, AM)',datestr(lgl(1,1),1),diaj(lgl(1,1))));
+           figure; suptitle(sprintf('Residuals: %s (%d, %s)',datestr(lgl(1,1),1),diaj(lgl(1,1)),ampm_label{ampm}));
+           a(1)=subaxis(3,2,1);  p=plot(r_orig{1}(:,1),r_orig{1}(:,2),'.'); hold all
+                                 gs_1=gscatter(stats_brw.r{dd}(jk_idx{ampm},2,1),stats_brw.r{dd}(jk_idx{ampm},1+idx_,1),stats_brw.r{dd}(jk_idx{ampm},3,1),'','o',{},'off'); 
+                                 gs_2=gscatter(stats_brw.r{dd}(jk_idx{ampm},2,2),stats_brw.r{dd}(jk_idx{ampm},1+idx_,2),stats_brw.r{dd}(jk_idx{ampm},3,2),'','.',{},'off'); 
+                                 l=legend(p,'Slit#2','Location','se'); set(l,'Box','Off'); xlabel(gca,''); set(gs_1,'MarkerSize',5); set(gs_2,'MarkerSize',3);
+           a(2)=subaxis(3,2,2);  p=plot(r_orig{2}(:,1),r_orig{2}(:,2),'.'); hold all
+                                 gs_1=gscatter(stats_brw.r{dd}(jk_idx{ampm},2,1),stats_brw.r{dd}(jk_idx{ampm},2+idx_,1),stats_brw.r{dd}(jk_idx{ampm},3,1),'','o',{},'off');
+                                 gs_2=gscatter(stats_brw.r{dd}(jk_idx{ampm},2,2),stats_brw.r{dd}(jk_idx{ampm},2+idx_,2),stats_brw.r{dd}(jk_idx{ampm},3,2),'','.',{},'off'); 
+                                 l=legend(p,'Slit#3','Location','se'); set(l,'Box','Off'); xlabel(gca,''); set(gs_1,'MarkerSize',5); set(gs_2,'MarkerSize',3);
+           a(3)=subaxis(3,2,3);  p=plot(r_orig{3}(:,1),r_orig{3}(:,2),'.'); hold all
+                                 gs_1=gscatter(stats_brw.r{dd}(jk_idx{ampm},2,1),stats_brw.r{dd}(jk_idx{ampm},3+idx_,1),stats_brw.r{dd}(jk_idx{ampm},3,1),'','o',{},'off');
+                                 gs_2=gscatter(stats_brw.r{dd}(jk_idx{ampm},2,2),stats_brw.r{dd}(jk_idx{ampm},3+idx_,2),stats_brw.r{dd}(jk_idx{ampm},3,2),'','.',{},'off'); 
+                                 l=legend(p,'Slit#4','Location','se'); set(l,'Box','Off'); xlabel(gca,''); set(gs_1,'MarkerSize',5); set(gs_2,'MarkerSize',3);
+           a(4)=subaxis(3,2,4);  p=plot(r_orig{4}(:,1),r_orig{4}(:,2),'.'); hold all
+                                 gs_1=gscatter(stats_brw.r{dd}(jk_idx{ampm},2,1),stats_brw.r{dd}(jk_idx{ampm},4+idx_,1),stats_brw.r{dd}(jk_idx{ampm},3,1),'','o',{},'off');
+                                 gs_2=gscatter(stats_brw.r{dd}(jk_idx{ampm},2,2),stats_brw.r{dd}(jk_idx{ampm},4+idx_,2),stats_brw.r{dd}(jk_idx{ampm},3,2),'','.',{},'off'); 
+                                 l=legend(p,'Slit#5','Location','se'); set(l,'Box','Off'); xlabel(gca,''); set(gs_1,'MarkerSize',5); set(gs_2,'MarkerSize',3);
+           a(5)=subaxis(3,2,5);  p=plot(r_orig{5}(:,1),r_orig{5}(:,2),'.'); hold all
+                                 gs_1=gscatter(stats_brw.r{dd}(jk_idx{ampm},2,1),stats_brw.r{dd}(jk_idx{ampm},5+idx_,1),stats_brw.r{dd}(jk_idx{ampm},3,1),'','o',{},'off');
+                                 gs_2=gscatter(stats_brw.r{dd}(jk_idx{ampm},2,2),stats_brw.r{dd}(jk_idx{ampm},5+idx_,2),stats_brw.r{dd}(jk_idx{ampm},3,2),'','.',{},'off'); 
+                                 xlabel(gca,'airmass'); set(gs_1,'MarkerSize',5); set(gs_2,'MarkerSize',3);
+           set(a,'Xgrid','On','Ygrid','On');  set(a(1:4),'XTickLabel',''); % ,'Ylim',[-200 200]
+           pos=get(a(5),'Position'); set(a(5),'Position',[0.31 pos(2:4)]);
+                                 l=legend(p,'Slit#6','Location','se'); set(l,'Box','Off'); 
+   
+           figure; suptitle(sprintf('Langley Plots: %s (%d, %s)',datestr(lgl(1,1),1),diaj(lgl(1,1)),ampm_label{ampm}));
+           if ~isempty(P_brw{ampm,1});
+              if ampm==1
+                 indx=1; 
+              else
+                 indx=6; 
+              end
+              a=[];
+              a(1)=subaxis(2,1,1); hold all;
+              g1=gscatter(P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),1),P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),1+2),...
+                          P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),2),'','.',{},'off'); set(g1,'MarkerSize',6);        
+                 plot(m_oz(jk_idx{ampm}),polyval(resp_brw(dd,[indx+10+1 indx+1],1),m_oz(jk_idx{ampm})),'m-'); 
+              g2=gscatter(P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),1),P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),2+2),...
+                          P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),2),'','*',{},'off');
+                 plot(m_oz(jk_idx{ampm}),polyval(resp_brw(dd,[indx+10+2 indx+2],2),m_oz(jk_idx{ampm})),'m-'); set(g2,'MarkerSize',4);  
+              g3=gscatter(P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),1),P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),3+2),...
+                          P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),2),'','s',{},'off');
+                 plot(m_oz(jk_idx{ampm}),polyval(resp_brw(dd,[indx+10+3 indx+3],2),m_oz(jk_idx{ampm})),'m-'); set(g3,'MarkerSize',4);  
+              g4=gscatter(P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),1),P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),4+2),...
+                          P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),2),'','d',{},'off');
+                 plot(m_oz(jk_idx{ampm}),polyval(resp_brw(dd,[indx+10+4 indx+4],2),m_oz(jk_idx{ampm})),'m-'); set(g4,'MarkerSize',4);  
+              g5=gscatter(P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),1),P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),5+2),...
+                          P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),2),'','p',{},'off');        
+                 plot(m_oz(jk_idx{ampm}),polyval(resp_brw(dd,[indx+10+5 indx+5],2),m_oz(jk_idx{ampm})),'m-');  set(g5,'MarkerSize',4);  
 
-       figure; 
-       if ~isempty(P_brw{1,1});
-           a=[];
-           a(1)=subaxis(2,1,1); hold all;
-           g1=gscatter(P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),1),P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),1+2),...
-                       P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),2),'','.',{},'off'); set(g1,'MarkerSize',6);        
-              plot(m_oz(jk_idx{1}),polyval(resp_brw(dd,[1+11 1+1],1),m_oz(jk_idx{1})),'m-'); 
-           g2=gscatter(P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),1),P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),2+2),...
-                       P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),2),'','*',{},'off');
-              plot(m_oz(jk_idx{1}),polyval(resp_brw(dd,[2+11 2+1],2),m_oz(jk_idx{1})),'m-'); set(g2,'MarkerSize',4);  
-           g3=gscatter(P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),1),P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),3+2),...
-                       P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),2),'','s',{},'off');
-              plot(m_oz(jk_idx{1}),polyval(resp_brw(dd,[3+11 3+1],2),m_oz(jk_idx{1})),'m-'); set(g3,'MarkerSize',4);  
-           g4=gscatter(P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),1),P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),4+2),...
-                       P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),2),'','d',{},'off');
-              plot(m_oz(jk_idx{1}),polyval(resp_brw(dd,[4+11 4+1],2),m_oz(jk_idx{1})),'m-'); set(g4,'MarkerSize',4);  
-           g5=gscatter(P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),1),P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),5+2),...
-                       P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),2),'','p',{},'off');        
-              plot(m_oz(jk_idx{1}),polyval(resp_brw(dd,[5+11 5+1],2),m_oz(jk_idx{1})),'m-');  set(g5,'MarkerSize',4);  
-
-           set(gca,'Xgrid','On','Ygrid','On');               
-%            legend([g1(1) g2(1) g3(1) g4(1) g5(1)],'Slit#1','Slit#2','Slit#3','Slit#4','Slit#5','Location','SouthWest');                           
+              set(gca,'Xgrid','On','Ygrid','On');               
+   %            legend([g1(1) g2(1) g3(1) g4(1) g5(1)],'Slit#1','Slit#2','Slit#3','Slit#4','Slit#5','Location','SouthWest');                           
            
-           a(2)=subaxis(2,1,2); hold all
-           plot(1:5,stats_brw.rs(dd,2:6,1), 'sb');    plot(1:5,stats_brw.rs(dd,7:11,1),'sr'); 
-           plot(1:5,stats_brw.rs(dd,2:6,2), '*b');    plot(1:5,stats_brw.rs(dd,7:11,2),'*r'); 
-           set(gca,'Xgrid','On','Ygrid','On','Box','On','XLim',[0.5 5.5],...
-                   'XTick',1:5,'XTickLabel',{'#1','#2','#3','#4','#5'});   ylabel('Rsquared'); 
-           legend({'Cfg1: AM','Cfg1: PM','Cfg2: AM','Cfg2: PM'},'Location','NorthEast');                
-       end
-       suptitle(sprintf('%s (%d, AM)',datestr(lgl(1,1),1),diaj(lgl(1,1)))); 
-       drawnow
+              a(2)=subaxis(2,1,2); hold all
+              plot(1:5,stats_brw.rs(dd,indx+1:indx+5,1), 'sb');    %plot(1:5,stats_brw.rs(dd,7:11,1),'sr'); 
+              plot(1:5,stats_brw.rs(dd,indx+1:indx+5,2), '*r');     %  plot(1:5,stats_brw.rs(dd,7:11,2),'*r'); 
+              set(gca,'Xgrid','On','Ygrid','On','Box','On','XLim',[0.5 5.5],...
+                      'XTick',1:5,'XTickLabel',{'#1','#2','#3','#4','#5'});   ylabel('Rsquared'); 
+              l=legend({sprintf('Cfg1: %s',ampm_label{ampm}),sprintf('Cfg2: %s',ampm_label{ampm})},'Location','NorthEast');                
+              set(l,'HandleVisibility','Off');
+          end
+          drawnow
+       end        
     end
 end
 
