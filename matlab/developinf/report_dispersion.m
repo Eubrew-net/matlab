@@ -56,6 +56,7 @@ arg.addParamValue('grp', '', @(x)any(strcmpi(x,{'events','month','week','month+e
 arg.addParamValue('grp_custom', [], @isstruct);    
 arg.addParamValue('fpath', fullfile(Cal.path_root,'DSP'), @ischar);    
 arg.addParamValue('date_range', Cal.Date.CALC_DAYS, @isfloat);    
+arg.addParamValue('process'   , 0  ,  @(x)(x==0 || x==1));      % por defecto, no reprocessing
 
 arg.parse(Cal, varargin{:});
 
@@ -64,10 +65,12 @@ O3W=[0.00 0.00 -1.00 0.50 2.20 -1.70];% ozone weighting factors
 
 if length(arg.Results.date_range)==1
    [dsp_quad dsp_cubic]=read_dsp(arg.Results.fpath,'brwid',Cal.brw_str{Cal.n_inst},...
-             'inst',Cal.n_inst,'configs',Cal.brw_config_files,'date_range',arg.Results.date_range);
+             'inst',Cal.n_inst,'configs',Cal.brw_config_files,...
+             'process',arg.Results.process,'date_range',arg.Results.date_range);
 else
    [dsp_quad dsp_cubic]=read_dsp(arg.Results.fpath,'brwid',Cal.brw_str{Cal.n_inst},...
-             'inst',Cal.n_inst,'configs',Cal.brw_config_files,'date_range',arg.Results.date_range([1 end]));
+             'inst',Cal.n_inst,'configs',Cal.brw_config_files,...
+             'process',arg.Results.process,'date_range',arg.Results.date_range([1 end]));
 end
 aux=NaN*ones(size(dsp_quad,1),16);
 aux(:,[1 2])=cat(2,dsp_quad(:,1),matadd(dsp_quad(:,17),-dsp_quad(:,16)));
@@ -101,7 +104,7 @@ aux(:,15:16)=cat(1,-O3W*abs(dsp_quad(:,18:23))',-O3W*abs(dsp_cubic(:,18:23))')';
                          aux(:,16)  ,NaN*ones(length(idx),1),ones(length(idx),1));
     tabla_dsp.events=event_info.labels(idx);   tabla_dsp.data_lbl=lbl_dsp;
  else
-    data_tab=meanperiods(aux, event_info);
+    data_tab=meanperiods(aux(~isnan(aux(:,1)),:), event_info);
     tabla_dsp.data=cat(2,data_tab.m(:,1:14),data_tab.m(:,15),data_tab.std(:,15),...
                          data_tab.m(:,16),data_tab.std(:,16),data_tab.N(:,end));
     tabla_dsp.events=data_tab.evnts;  tabla_dsp.data_lbl=lbl_dsp;
