@@ -17,6 +17,7 @@ function [dsp_quad dsp_cubic]=read_dsp(dsp_dir,varargin)
 % - brwid       : número de brewer a procesar (STRING)
 % - dsp         : NOMBRE del directorio a procesar (###_yy_ddd)
 % - date_range  : Filtro de fechas (fecha matlab, uno o dos elementos).
+% - process     : Reprocessing test (even when .mat exist)
 % - configs     : Not clear yet
 % 
 % Si sólo le pasamos brwid, leerá todos los dsp's para el instrumento dado. 
@@ -39,11 +40,13 @@ arg.FunctionName = 'read_dsp';
 
 arg.addRequired('dsp_dir', @ischar);
 
-% input param - value
-arg.addParamValue('brwid', ' ', @ischar);       % por defecto, todo lo que hay en dsp
-arg.addParamValue('dsp'  , [], @ischar);        % por defecto, todo lo que hay en dsp
-arg.addParamValue('configs', {}, @iscell);      % 
-arg.addParamValue('date_range', [], @isfloat);  % por defecto, no date_range
+% input param - value  
+arg.addParamValue('brwid'     , ' ', @ischar);            % por defecto, todo lo que hay en dsp
+arg.addParamValue('inst'      , [] , @isfloat);           % por defecto, todo lo que hay en dsp
+arg.addParamValue('dsp'       , [] , @ischar);            % por defecto, todo lo que hay en dsp
+arg.addParamValue('configs'   , {} , @iscell);            % 
+arg.addParamValue('date_range', [] , @isfloat);           % por defecto, no date_range
+arg.addParamValue('process'   , 0  , @(x)(x==0 | x==1));  % por defecto, no reprocessing
 
 arg.parse(dsp_dir,varargin{:});
 
@@ -96,50 +99,25 @@ for brwi=1:Cal.n_brw
     %%
     for indx=1:length(ldsp)  
         info=sscanf(ldsp{indx},'%d_%d_%d'); info_=brewer_date(str2double(sprintf('%03d%02d',info(3),info(2))));
-        try
-           load(fullfile(dsp_dir,ldsp{indx},strcat(ldsp{indx},'.mat')));
-           wv_matrix_quad(idx,:)=cat(2,info_(1),dsp_sum.brewnb,indx,dsp_sum.salida.QUAD{end-1}.thiswl,dsp_sum.salida.QUAD{end-1}.fwhmwl/2,...
-                                                dsp_sum.salida.QUAD{end-1}.cal_ozonepos,dsp_sum.salida.QUAD{end-1}.ozone_pos,...
-                                                dsp_sum.salida.QUAD{end-1}.o3coeff,dsp_sum.salida.QUAD{end-1}.raycoeff);        
-           wv_matrix_cubic(idx,:)=cat(2,info_(1),dsp_sum.brewnb,indx,dsp_sum.salida.CUBIC{end-1}.thiswl,dsp_sum.salida.CUBIC{end-1}.fwhmwl/2,...
-                                                dsp_sum.salida.CUBIC{end-1}.cal_ozonepos,dsp_sum.salida.CUBIC{end-1}.ozone_pos,...
-                                                dsp_sum.salida.CUBIC{end-1}.o3coeff,dsp_sum.salida.CUBIC{end-1}.raycoeff);        
-        catch exception
-           fprintf('%s\n',exception.message);        
-           
-           %% No hay .mat: procesamos el dsp
-           cfg=dir(fullfile(dsp_dir,ldsp{indx},'orig',['icf*.',Cal.brw_str{brwi}]));
-           dsp_=fullfile(dsp_dir,ldsp{indx},'orig',['DSP.',Cal.brw_str{brwi}]);
-           if ~isempty(cfg)
-              config_n=1;
-              Cal.brw_config_files{Cal.brw(brwi),config_n}=fullfile(dsp_dir,ldsp{indx},'orig',cfg.name); 
-              csn=[];
-           elseif exist(dsp_,'file')==2
-              config_n=1;
-              fid=fopen(dsp_,'r');  
-              csn=textscan(fid,'%f','HeaderLines',1); csn=[csn{1}(3),csn{1}(1),csn{1}(4)];
-              fclose(fid);       
-           else
-              config_n=2; csn=[];
-           end
-           
-           try
-             close all;
-             Cal.n_inst=brwi; Cal.Date.cal_year=year(now);
-             Cal.brw_config_files{Cal.brw(brwi),config_n}=fullfile(dsp_dir,ldsp{indx},'orig',cfg.name);            
-             dspreport(Cal,'dsp_dir',fullfile(dsp_dir,ldsp{indx}),'config_n',config_n,'csn',csn);
-             
-             load(fullfile(dsp_dir,ldsp{indx},strcat(ldsp{indx},'.mat')));
-             wv_matrix_quad(idx,:) =cat(2,info_(1),dsp_sum.brewnb,indx,dsp_sum.salida.QUAD{end-1}.thiswl,dsp_sum.salida.QUAD{end-1}.fwhmwl/2,...
-                                                   dsp_sum.salida.QUAD{end-1}.cal_ozonepos,dsp_sum.salida.QUAD{end-1}.ozone_pos,...
-                                                   dsp_sum.salida.QUAD{end-1}.o3coeff,dsp_sum.salida.QUAD{end-1}.raycoeff);        
-             wv_matrix_cubic(idx,:)=cat(2,info_(1),dsp_sum.brewnb,indx,dsp_sum.salida.CUBIC{end-1}.thiswl,dsp_sum.salida.CUBIC{end-1}.fwhmwl/2,...
-                                                   dsp_sum.salida.CUBIC{end-1}.cal_ozonepos,dsp_sum.salida.CUBIC{end-1}.ozone_pos,...
-                                                   dsp_sum.salida.CUBIC{end-1}.o3coeff,dsp_sum.salida.CUBIC{end-1}.raycoeff);        
-           catch exception
-              fprintf('%s\n',exception.message);        
-           end       
-        end
+        if ~arg.Results.process
+            try
+               load(fullfile(dsp_dir,ldsp{indx},strcat(ldsp{indx},'.mat')));
+               wv_matrix_quad(idx,:)=cat(2,info_(1),dsp_sum.brewnb,indx,dsp_sum.salida.QUAD{end-1}.thiswl,dsp_sum.salida.QUAD{end-1}.fwhmwl/2,...
+                                                    dsp_sum.salida.QUAD{end-1}.cal_ozonepos,dsp_sum.salida.QUAD{end-1}.ozone_pos,...
+                                                    dsp_sum.salida.QUAD{end-1}.o3coeff,dsp_sum.salida.QUAD{end-1}.raycoeff);        
+               wv_matrix_cubic(idx,:)=cat(2,info_(1),dsp_sum.brewnb,indx,dsp_sum.salida.CUBIC{end-1}.thiswl,dsp_sum.salida.CUBIC{end-1}.fwhmwl/2,...
+                                                    dsp_sum.salida.CUBIC{end-1}.cal_ozonepos,dsp_sum.salida.CUBIC{end-1}.ozone_pos,...
+                                                    dsp_sum.salida.CUBIC{end-1}.o3coeff,dsp_sum.salida.CUBIC{end-1}.raycoeff);        
+            catch exception
+               fprintf('%s\n',exception.message);  
+               [wv_quad wv_cubic]=no_hay_mat(dsp_dir,ldsp,indx,{arg.Results.inst,Cal.brw_str},Cal.brw_config_files);
+               wv_matrix_quad=cat(1,wv_matrix_quad,wv_quad); wv_matrix_cubic=cat(1,wv_matrix_cubic,wv_cubic);
+            end
+        else
+            fprintf('Reprocessing all available tests\n');  
+            [wv_quad wv_cubic]=no_hay_mat(dsp_dir,ldsp,indx,{arg.Results.inst,Cal.brw_str},Cal.brw_config_files);
+            wv_matrix_quad=cat(1,wv_matrix_quad,wv_quad); wv_matrix_cubic=cat(1,wv_matrix_cubic,wv_cubic);
+        end           
         idx=idx+1;
     end
 end
@@ -165,3 +143,41 @@ for l=1:size(dsp_quad,1)
     fprintf(fid_cubic,'%f %d %d %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %4.2f %4.2f %4.2f %4.2f %4.2f %4.2f %d %d %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f\n\r',dsp_cubic(l,:));
 end
 fclose all;
+
+function [wv_matrix_quad wv_matrix_cubic]=no_hay_mat(path_dsp,ldsp,indx,inst_info,brw_config_files) 
+               
+%% No hay .mat: procesamos el dsp
+info=sscanf(ldsp{indx},'%d_%d_%d'); info_=brewer_date(str2double(sprintf('%03d%02d',info(3),info(2))));
+Cal.brw_config_files=brw_config_files;
+Cal.brw_str=cell(1,inst_info{1}); Cal.brw_str{inst_info{1}}=inst_info{2}{1};
+
+cfg=dir(fullfile(path_dsp,ldsp{indx},'orig',strcat('icf*.',inst_info{2}{1})));
+dsp_=fullfile(path_dsp,ldsp{indx},'orig',strcat('DSP.',inst_info{2}{1}));
+if ~isempty(cfg)
+   config_n=1;
+   Cal.brw_config_files{inst_info{1},config_n}=fullfile(path_dsp,ldsp{indx},'orig',cfg.name); 
+   csn=[];
+elseif exist(dsp_,'file')==2
+   config_n=1;
+   fid=fopen(dsp_,'r');  
+   csn=textscan(fid,'%f','HeaderLines',1); csn=[csn{1}(3),csn{1}(1),csn{1}(4)];
+   fclose(fid);       
+else
+   config_n=2; csn=[];
+end
+           
+try
+   close all;
+   Cal.n_inst=inst_info{1}; Cal.Date.cal_year=year(now);
+   dspreport(Cal,'dsp_dir',fullfile(path_dsp,ldsp{indx}),'config_n',config_n,'csn',csn);
+             
+   load(fullfile(path_dsp,ldsp{indx},strcat(ldsp{indx},'.mat')));
+   wv_matrix_quad =cat(2,info_(1),dsp_sum.brewnb,indx,dsp_sum.salida.QUAD{end-1}.thiswl,dsp_sum.salida.QUAD{end-1}.fwhmwl/2,...
+                                         dsp_sum.salida.QUAD{end-1}.cal_ozonepos,dsp_sum.salida.QUAD{end-1}.ozone_pos,...
+                                         dsp_sum.salida.QUAD{end-1}.o3coeff,dsp_sum.salida.QUAD{end-1}.raycoeff);        
+   wv_matrix_cubic=cat(2,info_(1),dsp_sum.brewnb,indx,dsp_sum.salida.CUBIC{end-1}.thiswl,dsp_sum.salida.CUBIC{end-1}.fwhmwl/2,...
+                                         dsp_sum.salida.CUBIC{end-1}.cal_ozonepos,dsp_sum.salida.CUBIC{end-1}.ozone_pos,...
+                                         dsp_sum.salida.CUBIC{end-1}.o3coeff,dsp_sum.salida.CUBIC{end-1}.raycoeff);        
+catch exception
+      fprintf('%s\n',exception.message);        
+end       
