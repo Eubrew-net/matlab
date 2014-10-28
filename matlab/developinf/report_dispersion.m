@@ -64,10 +64,10 @@ O3W=[0.00 0.00 -1.00 0.50 2.20 -1.70];% ozone weighting factors
 
 if length(arg.Results.date_range)==1
    [dsp_quad dsp_cubic]=read_dsp(arg.Results.fpath,'brwid',Cal.brw_str{Cal.n_inst},...
-            'configs',Cal.brw_config_files,'date_range',arg.Results.date_range);
+             'inst',Cal.n_inst,'configs',Cal.brw_config_files,'date_range',arg.Results.date_range);
 else
    [dsp_quad dsp_cubic]=read_dsp(arg.Results.fpath,'brwid',Cal.brw_str{Cal.n_inst},...
-            'configs',Cal.brw_config_files,'date_range',arg.Results.date_range([1 end]));
+             'inst',Cal.n_inst,'configs',Cal.brw_config_files,'date_range',arg.Results.date_range([1 end]));
 end
 aux=NaN*ones(size(dsp_quad,1),16);
 aux(:,[1 2])=cat(2,dsp_quad(:,1),matadd(dsp_quad(:,17),-dsp_quad(:,16)));
