@@ -77,6 +77,7 @@ arg.addRequired('data',@iscell);
 % input param - value
 arg.addParamValue('date_range', []     , @isfloat);                     % default no date_range filter
 arg.addParamValue('F_corr'    , []     , @(x)iscell(x) || isvector(x)); % default no filter corr
+arg.addParamValue('F_corr_AOD', []     , @(x)isnumeric(x));             % default no filter corr
 arg.addParamValue('airmass'   , []     , @isfloat);                     % default all airmasses
 arg.addParamValue('N_flt'     , 5      , @isfloat);                     % default 5 meas. / filter (NOT implemented)
 arg.addParamValue('N_hday'    , 20     , @isfloat);                     % default 20 o3 summaries / hday
@@ -126,6 +127,25 @@ if ~isempty(arg.Results.F_corr)
                MS9_corr(idx_flt,2:end)=matadd(MS9_corr(idx_flt,2:end),-repmat(f_corr(filtro),1,2));
            end
            data{dd}(:,[25 end])=MS9_corr(:,2:end);
+        end
+    end
+end
+
+%% Filter corr AOD
+if ~isempty(arg.Results.F_corr_AOD)
+    f_corr_aod=arg.Results.F_corr_AOD;
+    
+    for dd=1:size(data,1)
+        slits=data{dd}(:,[10 14:18 28:32]);
+        for slit=1:5
+            for filtro=1:6
+                idx_flt=slits(:,1)==64*(filtro-1);
+%               cfg1
+                slits(idx_flt,slit+1)=matadd(slits(idx_flt,slit+1),-f_corr_aod(slit,filtro));
+%               cfg2
+                slits(idx_flt,slit+6)=matadd(slits(idx_flt,slit+6),-f_corr_aod(slit,filtro));
+            end
+            data{dd}(:,[14:18 28:32])=slits(:,2:end);
         end
     end
 end

@@ -123,27 +123,27 @@ for dd=1:length(lgl_data{brw})
 %          rat_res=cat(1,stats_brw.r{dd}(jk_idx{1},4:8,1),stats_brw.r{dd}(jk_idx{2},9:13,1))./cat(1,stats_brw.r{dd}(jk_idx{1},4:8,2),stats_brw.r{dd}(jk_idx{2},9:13,2)); 
            m_oz=stats_brw.r{dd}(:,2,1); 
        
-           figure; suptitle(sprintf('Residuals: %s (%d, %s)',datestr(lgl(1,1),1),diaj(lgl(1,1)),ampm_label{ampm}));
+           figure; suptitle(sprintf('Langley Plot Residuals: %s (%d, %s)',datestr(lgl(1,1),1),diaj(lgl(1,1)),ampm_label{ampm}));
            a(1)=subaxis(3,2,1);  p=plot(r_orig{1}(:,1),r_orig{1}(:,2),'.'); hold all
                                  gs_1=gscatter(stats_brw.r{dd}(jk_idx{ampm},2,1),stats_brw.r{dd}(jk_idx{ampm},1+idx_,1),stats_brw.r{dd}(jk_idx{ampm},3,1),'','o',{},'off'); 
                                  gs_2=gscatter(stats_brw.r{dd}(jk_idx{ampm},2,2),stats_brw.r{dd}(jk_idx{ampm},1+idx_,2),stats_brw.r{dd}(jk_idx{ampm},3,2),'','.',{},'off'); 
-                                 l=legend(p,'Slit#2','Location','se'); set(l,'Box','Off'); xlabel(gca,''); set(gs_1,'MarkerSize',5); set(gs_2,'MarkerSize',3);
+                                 l=legend(p,'Slit#2','Location','se'); set(l,'Box','Off'); xlabel(gca,''); set(gs_1,'MarkerSize',5); set(gs_2,'MarkerSize',6);
            a(2)=subaxis(3,2,2);  p=plot(r_orig{2}(:,1),r_orig{2}(:,2),'.'); hold all
                                  gs_1=gscatter(stats_brw.r{dd}(jk_idx{ampm},2,1),stats_brw.r{dd}(jk_idx{ampm},2+idx_,1),stats_brw.r{dd}(jk_idx{ampm},3,1),'','o',{},'off');
                                  gs_2=gscatter(stats_brw.r{dd}(jk_idx{ampm},2,2),stats_brw.r{dd}(jk_idx{ampm},2+idx_,2),stats_brw.r{dd}(jk_idx{ampm},3,2),'','.',{},'off'); 
-                                 l=legend(p,'Slit#3','Location','se'); set(l,'Box','Off'); xlabel(gca,''); set(gs_1,'MarkerSize',5); set(gs_2,'MarkerSize',3);
+                                 l=legend(p,'Slit#3','Location','se'); set(l,'Box','Off'); xlabel(gca,''); set(gs_1,'MarkerSize',5); set(gs_2,'MarkerSize',6);
            a(3)=subaxis(3,2,3);  p=plot(r_orig{3}(:,1),r_orig{3}(:,2),'.'); hold all
                                  gs_1=gscatter(stats_brw.r{dd}(jk_idx{ampm},2,1),stats_brw.r{dd}(jk_idx{ampm},3+idx_,1),stats_brw.r{dd}(jk_idx{ampm},3,1),'','o',{},'off');
                                  gs_2=gscatter(stats_brw.r{dd}(jk_idx{ampm},2,2),stats_brw.r{dd}(jk_idx{ampm},3+idx_,2),stats_brw.r{dd}(jk_idx{ampm},3,2),'','.',{},'off'); 
-                                 l=legend(p,'Slit#4','Location','se'); set(l,'Box','Off'); xlabel(gca,''); set(gs_1,'MarkerSize',5); set(gs_2,'MarkerSize',3);
+                                 l=legend(p,'Slit#4','Location','se'); set(l,'Box','Off'); xlabel(gca,''); set(gs_1,'MarkerSize',5); set(gs_2,'MarkerSize',6);
            a(4)=subaxis(3,2,4);  p=plot(r_orig{4}(:,1),r_orig{4}(:,2),'.'); hold all
                                  gs_1=gscatter(stats_brw.r{dd}(jk_idx{ampm},2,1),stats_brw.r{dd}(jk_idx{ampm},4+idx_,1),stats_brw.r{dd}(jk_idx{ampm},3,1),'','o',{},'off');
                                  gs_2=gscatter(stats_brw.r{dd}(jk_idx{ampm},2,2),stats_brw.r{dd}(jk_idx{ampm},4+idx_,2),stats_brw.r{dd}(jk_idx{ampm},3,2),'','.',{},'off'); 
-                                 l=legend(p,'Slit#5','Location','se'); set(l,'Box','Off'); xlabel(gca,''); set(gs_1,'MarkerSize',5); set(gs_2,'MarkerSize',3);
+                                 l=legend(p,'Slit#5','Location','se'); set(l,'Box','Off'); xlabel(gca,''); set(gs_1,'MarkerSize',5); set(gs_2,'MarkerSize',6);
            a(5)=subaxis(3,2,5);  p=plot(r_orig{5}(:,1),r_orig{5}(:,2),'.'); hold all
                                  gs_1=gscatter(stats_brw.r{dd}(jk_idx{ampm},2,1),stats_brw.r{dd}(jk_idx{ampm},5+idx_,1),stats_brw.r{dd}(jk_idx{ampm},3,1),'','o',{},'off');
                                  gs_2=gscatter(stats_brw.r{dd}(jk_idx{ampm},2,2),stats_brw.r{dd}(jk_idx{ampm},5+idx_,2),stats_brw.r{dd}(jk_idx{ampm},3,2),'','.',{},'off'); 
-                                 xlabel(gca,'airmass'); set(gs_1,'MarkerSize',5); set(gs_2,'MarkerSize',3);
+                                 xlabel(gca,'airmass'); set(gs_1,'MarkerSize',5); set(gs_2,'MarkerSize',6);
            set(a,'Xgrid','On','Ygrid','On');  set(a(1:4),'XTickLabel',''); % ,'Ylim',[-200 200]
            pos=get(a(5),'Position'); set(a(5),'Position',[0.31 pos(2:4)]);
                                  l=legend(p,'Slit#6','Location','se'); set(l,'Box','Off'); 
