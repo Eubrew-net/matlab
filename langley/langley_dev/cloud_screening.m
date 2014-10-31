@@ -207,8 +207,8 @@ for i=1:l1
        for row=1:size(Rglobal,1)
            fprintf(f1,'%f %5.2f %6.2f %6.2f %d %d %d %d\n',aux(row,:));
        end
-    end
     fclose(f1);
+    end
 
     fprintf('Day: %03d (AM), clear(%%):%4.1f, no_clear(%%):%4.1f, aod:%f -- (PM) clear(%%):%4.1f, no_clear(%%):%4.1f, aod:%f\n',...
                   dayj, results{i}(4), results{i}(5), aod, results{i}(7), results{i}(8), aod);  
