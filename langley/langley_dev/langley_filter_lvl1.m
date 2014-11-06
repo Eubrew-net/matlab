@@ -207,7 +207,7 @@ if ~isempty(arg.Results.AOD)
 
        [id_am loc_am]=ismember(fix(aod_m(:,1)),cellfun(@(x) unique(fix(x(:,1))),data_AM));
        data_AM_(loc_am(loc_am~=0))=data_AM(loc_am(loc_am~=0));
-       aod_am=aod_m(id_am,:);        idx_am=aod_am(:,4)>0.005; 
+       aod_am=aod_m(id_am,:);        idx_am=aod_am(:,4)>0.01; 
        [id_am loc_am]=ismember(fix(aod_am(idx_am,1)),cellfun(@(x) unique(fix(x(:,1))),data_AM_)); 
        data_AM_(loc_am)={NaN}; data_AM_(cellfun(@(x) length(x)==1,data_AM_))={[]};
        
