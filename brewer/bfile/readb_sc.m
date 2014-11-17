@@ -20,7 +20,7 @@ function [sc,sc_raw,co,o3]=readb_sc(bfile,config_file,varargin)
 %  MODIFICADO:  
 %  Juanjo 08/02/2012: Añadido condicional para evitar problemas cuando se detiene el sc
 %                    (HOME key pressed) -> líneas 120:122
-% 
+%  Alberto 2014: Suppresed correctes
 
 sc=[];
 fmtsc=' sc %c %d %f %d %d %d %d %d %d %d %d %d %d rat %f %f %f %f';
@@ -118,6 +118,7 @@ end
         jsc_aux=strfind(co,'sc:');
         jsc=find(~cellfun('isempty',jsc_aux)); 
         co_aux=find(~cellfun('isempty',strfind(co,'sc: Suppressed'))); 
+        co_aux=find(~cellfun('isempty',strfind(co,'sc: Suppressed')));
         [a b]=intersect(jsc,co_aux); 
         jsc(b)=[];
         c=find(cellfun(@(x) ~isempty(strfind(x,'Running')),co(jsc)));
@@ -183,7 +184,10 @@ end
                
                 ini_med=jco(jsc(jj));
                 fin_med=jco(jsc(jj+1));
-                sc_meas=sscanf(char(l{ini_med+1:fin_med-1})',fmtsc,[17,Inf])';
+                [sc_meas,sc_c]=sscanf(char(l{ini_med+1:fin_med-1})',fmtsc,[17,Inf]);
+                
+               if sc_c
+                sc_meas=sc_meas';
                 time_meas=datefich(1)+sc_meas(:,3)/60/24;
                 n=size(sc_meas,1);
                 % indice+ n_sc +scan
@@ -250,6 +254,11 @@ end
                 end
                 sc=[sc;aux_sc];
                 sc_raw=[sc_raw;sc_aux];
+
+               else % error measure.
+                  disp( char(l{ini_med+1:fin_med-1})' )
+               end
+
             end
 
 
