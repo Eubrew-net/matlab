@@ -79,8 +79,11 @@ try
     else flag='';
     end
     [sl_data,OutR6R5F5]=sl_avg(slfile,date_range,SL_REF,flag);
+    OUTliers.SL=OutR6R5F5;
+
 catch
     disp(['ERROR',slfile]); sl_data=[];
+    OUTliers.SL=NaN;
 end
 
 %% Dead time report
@@ -194,7 +197,6 @@ catch
     disp(['ERROR',opfile]); op_data=[];
 end
 %% Guardamos outliers
-   OUTliers.SL=OutR6R5F5;
    OUTliers.DT=OutHTLT;
    OUTliers.RS=OutRS;
 %     [OutR6F5R5 (:,[6:end]) OutRS(:,[6:end]) OutHTSL5V(:,[6:end]) OutHG(:,[6:end]) OutMSFW(:,[6:end])];

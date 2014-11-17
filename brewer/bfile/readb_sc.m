@@ -117,7 +117,7 @@ end
         co=l(jco);
         jsc_aux=strfind(co,'sc:');
         jsc=find(~cellfun('isempty',jsc_aux)); 
-        co_aux=find(~cellfun('isempty',strfind(co,'sc: Supressed'))); 
+        co_aux=find(~cellfun('isempty',strfind(co,'sc: Suppressed'))); 
         [a b]=intersect(jsc,co_aux); 
         jsc(b)=[];
         c=find(cellfun(@(x) ~isempty(strfind(x,'Running')),co(jsc)));
@@ -244,9 +244,12 @@ end
                 end
 
                 aux_sc=[aux_sc,v,s.normr,p,sc_flag,hg_start(1),hg_end(1)];
+                if aux_sc(:,8)==-999
+                    [szasc,m2sc]=brewersza(nanmean(aux_sc(1:2)),fileinfo(2),fileinfo(3),lat,long);
+                    aux_sc(:,[8 10 11])=[m2sc v(1) v(2)];
+                end
                 sc=[sc;aux_sc];
                 sc_raw=[sc_raw;sc_aux];
-
             end
 
 

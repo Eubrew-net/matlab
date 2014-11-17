@@ -87,6 +87,6 @@ for pp=1:length(id_period)
 end
 
 %% Tabla
-   data_tab=meanperiods(cell2mat(CSN.cal_step'),event_info);
+   data_tab=meanperiods(cell2mat(CSN.cal_step(cellfun(@(x) ~isnan(x(:,1)),CSN.cal_step))'),event_info);
    
    tabla_sc.data=cat(2,data_tab.m(:,:),data_tab.N(:,2)); tabla_sc.events=data_tab.evnts; tabla_sc.data_lbl=lbl_sc;
