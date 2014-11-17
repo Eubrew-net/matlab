@@ -154,7 +154,7 @@ if control_flag==1
     
     if ~ (isempty(a) || isempty(b) )
         % filtro NaN
-        a(any(isnan(a')),:)=[];
+%         a(any(isnan(a')),:)=[];
         
         % Filtro Steps to far
         jnan=find(abs(a(:,15)-a(:,14))>40);
