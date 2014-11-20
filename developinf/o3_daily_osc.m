@@ -1,4 +1,4 @@
-function ozone_osc_sum=o3_daily_osc(Cal,TIME_SYNC,n_ref,ETC_SUG,A1_old,summary_orig_old,summary_old,summary)
+function ozone_osc_sum=o3_daily_osc(Cal,TIME_SYNC,n_ref,summary_orig_old,summary_old,summary)
 
 blinddays=Cal.calibration_days{Cal.n_inst,2}; finaldays=Cal.calibration_days{Cal.n_inst,3};
 if isequal(blinddays,finaldays)
