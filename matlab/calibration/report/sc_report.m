@@ -217,7 +217,7 @@ if control_flag==1
         a(j,:)=[];
         
         % AIRM
-        j=find(abs(a(:,8)>=6.0));
+        j=find(abs(a(:,8)>=6.5));
         for ii=1:length(j)
             J=find(fix(b(:,1))==fix(a(j(ii),1)) & fix(b(:,2)/100)==a(j(ii),3) );
             b(J,:)=[];
