@@ -47,7 +47,7 @@ try
     if isempty(jsc) || isempty(jco)
        o3.sc_avg=[];      o3.sc_raw=[];
        sc=[];    sc_raw=[];    co='No SC';
-       fprintf('%s: No SC''s\n',bfile);
+%        fprintf('%s: No SC''s\n',bfile);
        return
     end
     jhg=strmatch('hg',l);
