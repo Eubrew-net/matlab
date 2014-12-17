@@ -1,5 +1,4 @@
-function  [A,ETC,SL_B,SL_R,F_corr,cfg]=read_cal_config_new(config,file_setup,sl_s)
-% 
+function  [A,ETC,SL_B,SL_R,F_corr,SL_corr_flag,cfg]=read_cal_config_new(config,file_setup,sl_s) 
 
 % Updated:
 %   - 27/11/2012 (Juanjo): Now it gives filter correction as output
@@ -39,6 +38,8 @@ A=struct('new',{NaN*ones(d_,n_)},'old',{NaN*ones(d_,n_)},'b',{NaN*ones(d_,n_)});
 ETC=struct('new',{NaN*ones(d_,n_)},'old',{NaN*ones(d_,n_)},'b',{NaN*ones(d_,n_)});
 SL_R=struct('new',{NaN*ones(d_,n_)},'old',{NaN*ones(d_,n_)});
 SL_B=struct('new',{NaN*ones(d_,n_)},'old',{NaN*ones(d_,n_)});
+SL_corr_flag=struct('new',{NaN*ones(d_,n_)},'old',{NaN*ones(d_,n_)});
+
 for i=1:Cal.n_brw
     F_corr{i}=struct('new',{NaN*ones(d_,7)},'old',{NaN*ones(d_,7)});
 end
@@ -83,6 +84,7 @@ for i=1:Cal.n_brw
           A.old(idx,i+1)= cfg.old{i}(y(loc(loc~=0)),8);
           ETC.old(idx,i+1)= cfg.old{i}(y(loc(loc~=0)),11);
           SL_R.old(idx,i+1)= Cal.SL_OLD_REF(i);
+          SL_corr_flag.old(idx,i+1)=1; % es irrelevante en este caso. La corrección vendrá dada por test_recalculation.m
           for f=1:6
               F_corr{i}.old(idx,f+1)=Cal.ETC_C{i}(f);                              
           end
@@ -107,10 +109,13 @@ for i=1:Cal.n_brw
              ETC.old(idx,i+1)= cfg.old{i}(y(loc(loc~=0)),11);             
              SL_R.old(idx,i+1)=cfg.old{i}(y(loc(loc~=0)),27);
              F_corr{i}.old(idx,2:end)=cat(2,repmat(0,length(loc(loc~=0)),2),cfg.old{i}(y(loc(loc~=0)),29:32));
+             SL_corr_flag.old(idx,i+1)=cfg.old{i}(y(loc(loc~=0)),25);
+             
           else
              A.old(idx,i+1)= cfg.old{i}(8);% si falta algun fichero -> NaN
              ETC.old(idx,i+1)=cfg.old{i}(11);
              SL_R.old(idx,i+1)=Cal.SL_OLD_REF(i);
+             SL_corr_flag.old(idx,i+1)=1; % es irrelevante en este caso. La corrección vendrá dada por test_recalculation.m
              try
                  for f=1:6
                      F_corr{i}.old(idx,f+1)=Cal.ETC_C{i}(f);                                                                            
@@ -146,10 +151,13 @@ for i=1:Cal.n_brw
           ETC.new(idx,i+1)= cfg.new{i}(y(loc(loc~=0)),11);             
           SL_R.new(idx,i+1)=cfg.new{i}(y(loc(loc~=0)),27);
           F_corr{i}.new(idx,2:end)=cat(2,repmat(0,length(loc(loc~=0)),2),cfg.new{i}(y(loc(loc~=0)),29:32));                 
+          SL_corr_flag.new(idx,i+1)=cfg.new{i}(y(loc(loc~=0)),25);
+
        else
           A.new(idx,i+1)= cfg.new{i}(8);% si falta algun fichero -> NaN
           ETC.new(idx,i+1)=cfg.new{i}(11);               
           SL_R.new(idx,i+1)=Cal.SL_NEW_REF(i);
+          SL_corr_flag.new(idx,i+1)=1; % es irrelevante en este caso. La corrección vendrá dada por test_recalculation.m
           try
              for f=1:6
                  F_corr{i}.new(idx,f+1)=Cal.ETC_C{i}(f);                              
@@ -217,3 +225,5 @@ end
     ETC.old(:,1) = fecha_days; ETC.new(:,1) = fecha_days;
     SL_R.old(:,1)= fecha_days; SL_R.new(:,1)= fecha_days;
     SL_B.old(:,1)= fecha_days; SL_B.new(:,1)= fecha_days;
+    SL_corr_flag.old(:,1)= fecha_days; SL_corr_flag.new(:,1)= fecha_days;
+    
