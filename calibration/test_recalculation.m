@@ -38,6 +38,7 @@ arg.addRequired('SL_B');
 
 % input param - value
 arg.addParamValue('flag_sl', 0, @(x)(x==0 || x==1)); % por defecto no SL corr
+arg.addParamValue('flag_sl_corr', 0, @isstruct)      % por defecto no SL corr
 arg.addParamValue('FC', [0 0 0 0 0 0], @isfloat); % por defecto, [0 0 0 0 0 0]
 arg.addParamValue('plot_sl', 0, @(x)(x==0 || x==1)); % por defecto no plotea
 arg.addParamValue('O3_std', 2.5, @isfloat); % por defecto 2.5 O3 std. filter
@@ -86,25 +87,35 @@ end
 %%
 if ~isempty(fecha)
 
-    if flag_sl       
-       % SL correction
-       RC_new=(SL_R.new(:,ninst+1)-SL_B.new(:,ninst+1))./(A.new(:,ninst+1)*10);
-       RC_old=(SL_R.old(:,ninst+1)-SL_B.old(:,ninst+1))./(A.old(:,ninst+1)*10);
+    % SL correction
+    RC_new=(SL_R.new(:,ninst+1)-SL_B.new(:,ninst+1))./(A.new(:,ninst+1)*10);
+    RC_old=(SL_R.old(:,ninst+1)-SL_B.old(:,ninst+1))./(A.old(:,ninst+1)*10);
+    if plot_sl
+       figure; set(gcf,'Tag','SLref_diffs')
+       plot(SL_R.new(:,1),matadd(SL_R.new(:,ninst+1),-SL_B.new(:,ninst+1)),'og');
+       hold on; plot(SL_R.old(:,1),matadd(SL_R.old(:,ninst+1),-SL_B.old(:,ninst+1)),'*r');
+       set(gca,'YLim',[-20 20]); grid;  datetick('x',2,'Keeplimits','Keepticks');
+       title(sprintf('SL correction applied, daily median (Ylimit fixed to [-20 20])\r\n Brewer %s',Cal.brw_name{ninst}));
+       legend({'SL ref New','SL ref Old'});
+    end 
 
-      if plot_sl
-         figure; set(gcf,'Tag','SLref_diffs')
-         plot(SL_R.new(:,1),matadd(SL_R.new(:,ninst+1),-SL_B.new(:,ninst+1)),'og');
-         hold on; plot(SL_R.old(:,1),matadd(SL_R.old(:,ninst+1),-SL_B.old(:,ninst+1)),'*r');
-         set(gca,'YLim',[-20 20]); grid;  datetick('x',2,'Keeplimits','Keepticks');
-         title(sprintf('SL correction applied, daily median (Ylimit fixed to [-20 20])\r\n Brewer %s',Cal.brw_name{ninst}));
-         legend({'SL ref New','SL ref Old'});
-      end 
+    % no SL correction (por defecto)
+    ozo_c=cellfun(@(x) x(:,15),ozone,'UniformOutput',false);
+    ozo_o=cellfun(@(x) x(:,8),ozone,'UniformOutput',false);    
+    if isstruct(flag_sl_corr)
+       idx=isnan(flag_sl_corr.new(:,ninst+1)); flag_sl_corr.new(idx,ninst+1)=0;
+       RC_new(~flag_sl_corr.new(:,ninst+1))=0; 
        ozo_c=cellfun(@(x,y) x(:,15)+y./x(:,5),ozone,num2cell(RC_new),'UniformOutput',false);
+       
+       idx=isnan(flag_sl_corr.old(:,ninst+1)); flag_sl_corr.old(idx,ninst+1)=0;
+       RC_old(~flag_sl_corr.old(:,ninst+1))=0; 
        ozo_o=cellfun(@(x,y) x(:,8)+y./x(:,5),ozone,num2cell(RC_old),'UniformOutput',false);       
-    else
-       % no SL correction
-       ozo_c=cellfun(@(x) x(:,15),ozone,'UniformOutput',false);
-       ozo_o=cellfun(@(x) x(:,8),ozone,'UniformOutput',false);
+    end    
+    
+    % flag_sl dominará sobre la corrección aplicada por periodos, en su caso
+    if flag_sl       
+       ozo_c=cellfun(@(x,y) x(:,15)+y./x(:,5),ozone,num2cell(RC_new),'UniformOutput',false);
+       ozo_o=cellfun(@(x,y) x(:,8) +y./x(:,5),ozone,num2cell(RC_old),'UniformOutput',false);       
     end    
     idx=cellfun(@(x) fix(x(:,3)/10) ,ozone,'UniformOutput',false);
 
