@@ -299,7 +299,7 @@ if  nargin~=3 && ~strcmp(name_a,name_b)
      f=figure; 
      set(f,'Tag','RATIO_TIME_S');    
     try
-     [m,s,n,mci]=grpstats([rp(:,1),rp(:,2)],diaj(rp(:,1)),{'mean','sem','numel','meanci'});
+     [m,s,n,mci]=grpstats([rp(:,1),rp(:,2)],fix(rp(:,1)),{'mean','sem','numel','meanci'});
      seb=shadedErrorBar(m(:,1),m(:,2),abs(matadd(mci(:,[2,4]),-m(:,2)))); hold on;
      datetick;
      he=errorbar(m(:,1),m(:,2),s(:,2),'o');
