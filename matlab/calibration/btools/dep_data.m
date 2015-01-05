@@ -9,14 +9,16 @@ function data=dep_data(incidences,data)
     chk=cellfun(@(x) str2num(x),incidences(idx,4:5),'UniformOutput',0);
 
     % De todos los días cargados, escogemos los que vamos a depurar
-    [days a b]=intersect(cellfun(@(x) unique(fix(x(:,1))),data.ozone_ds,'UniformOutput',1),...
+    % Primero eliminamos dias vacios
+    idx_noempty=cellfun(@(x) ~isempty(x(:,1)),data.ozone_ds,'UniformOutput',1);
+    [days a b]=intersect(cellfun(@(x) unique(fix(x(:,1))),data.ozone_ds(idx_noempty),'UniformOutput',1),...
                          fix(datenum(cell2mat(chk(:,1)))));
 
     % y ahora depuramos. Usamos un bucle
     % En principio solo hara falta para ozone_ds, raw y raw0
     for dd=1:length(a)
         fprintf('Removing outliers. Day %d (from %s to %s)\n',...
-                 diaj(days(dd)),datestr(chk{dd,1},16),datestr(chk{dd,2},16));
+                 diaj(days(dd)),datestr(chk{b(dd),1},16),datestr(chk{b(dd),2},16));
 
         rmv=find(data.ozone_ds{a(dd)}(:,1)>=datenum(chk{b(dd),1}) & ...
                   data.ozone_ds{a(dd)}(:,1)<=datenum(chk{b(dd),2}));                      

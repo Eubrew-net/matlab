@@ -340,9 +340,9 @@ ref=summary{n_ref}(jday,:);
          f=figure;    set(f,'Tag','1P_Time');
          ETC_time=cat(2,o3_c(j,1),ms9(j)-o3p(j));
          [m,s,cx,dx]=outliers_bp(ETC_time(:,2),3.5); ETC_time(dx,:)=[]; 
-         [mn err]=grpstats(ETC_time,diaj(ETC_time(:,1)),{@(x)nanmean(x,1),'sem'});        
-         errorbar(diaj(mn(:,1)),mn(:,2),err(:,2),'s'); grid;
-         set(gca,'Ylim',[m-10 m+10]);  hline(m,'b-',sprintf('%d \\pm %d',round(m),round(s)));
+         [mn err]=grpstats(ETC_time,fix(ETC_time(:,1)),{@(x)nanmean(x,1),'sem'});        
+         errorbar(mn(:,1),mn(:,2),err(:,2),'s'); grid;
+         set(gca,'Ylim',[m-10 m+10],'XTicklabel',diaj(get(gca,'XTick')));  hline(m,'b-',sprintf('%d \\pm %d',round(m),round(s)));
          title(sprintf('ETC Daily Means and Standard Error CI.'));
          ylabel('ETC =  MS9 - A1*{O_{3REF}}*M2'); xlabel('Julian Day');
          legend(sprintf('%s vs. %s',file_setup.brw_name{instrumento},file_setup.brw_name{referencia}))   
