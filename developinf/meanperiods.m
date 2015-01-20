@@ -1,10 +1,15 @@
 function data_tab=meanperiods(data,event)
 
 %   function data_tab = meanperiods(data,event)
-%  
+% 
 % Calculo de estadisticas (promedio, desviacion standard y numero de elementos) para
 % un conjunto de periodos. Los intervalos de produccion de estadisticas estan definidos 
 % a partir de un vector de eventos (fechas) 
+% 
+% Example:
+% 
+% ev.dates=datenum(2012,1,[180 196 214 243]); ev.labels={'Bef.  UV Focus','After. UV Focus'};
+% data_tab=meanperiods(lang{3}, ev); 
 % 
 % INPUT
 % 

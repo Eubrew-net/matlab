@@ -176,8 +176,8 @@ for dd=CALC_DAYS
       ozone_ds=[ozone_ds;o3.ozone_ds];
       ozone_raw=[ozone_raw;o3.ozone_raw];
       
-      ozone_dzsum=[ozone_dzsum;o3.dzsum];
-      ozone_dzraw0=[ozone_dzraw0;o3.dz_raw0];
+%       ozone_dzsum=[ozone_dzsum;o3.dzsum];
+%       ozone_dzraw0=[ozone_dzraw0;o3.dz_raw0];
       
       
       config=[config;config_];
