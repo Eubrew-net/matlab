@@ -21,11 +21,11 @@ function [Options,figuras]=printfiles_report(n0,patern,varargin)
 Options.Format='eps';   %'Format'  a string specifies the output format. Defaults to 'eps'. For 
 Options.Preview='tiff'; %'Preview' one of the strings 'none', 'tiff' specifies a preview for EPS files. Defaults to 'none'.  
 
-Options.Width=18;  %cm a positive scalar specifies the width in the figure's PaperUnits
-Options.Height=14;  %a positive scalar  specifies the height in the figure's PaperUnits
+Options.Width=12;  %cm a positive scalar specifies the width in the figure's PaperUnits
+Options.Height=6.5;  %a positive scalar  specifies the height in the figure's PaperUnits
                    %Specifying only one dimension sets the other  dimension so that the exported aspect ratio is the same as the
                    %figure's or reference axes' current aspect ratio. 
-Options.Bounds='tight';  %'Bounds' one of the strings 'tight', 'loose'  specifies a tight or loose bounding box. Defaults to 'tight'.
+Options.Bounds='loose';  %'Bounds' one of the strings 'tight', 'loose'  specifies a tight or loose bounding box. Defaults to 'tight'.
 % Options.Reference='auto';   %'Reference' an axes handle or a string  specifies that the width and height parameters
                          %are relative to the given axes. If a string is  specified then it must evaluate to an axes handle.
  
@@ -142,7 +142,7 @@ try
      saveas(h,figura,'fig');
 %      saveas(h,figura,'png');
     try
-     system(['pstopdf ',figura,'.eps']);
+%      system(['pstopdf ',figura,'.eps']);
      %figuras{naux}=fullfile('figures',[figura,'.pdf']);
      %system(['pstopdf ',figura,'.eps', ' -o ',figuras{naux}])
      

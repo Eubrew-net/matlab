@@ -11,8 +11,17 @@ function data=dep_data(incidences,data)
     % De todos los días cargados, escogemos los que vamos a depurar
     % Primero eliminamos dias vacios
     idx_noempty=cellfun(@(x) ~isempty(x(:,1)),data.ozone_ds,'UniformOutput',1);
-    [days a b]=intersect(cellfun(@(x) unique(fix(x(:,1))),data.ozone_ds(idx_noempty),'UniformOutput',1),...
-                         fix(datenum(cell2mat(chk(:,1)))));
+    try 
+        [days a b]=intersect(cellfun(@(x) unique(fix(x(:,1))),data.ozone_ds(idx_noempty),'UniformOutput',1),...
+                             fix(datenum(cell2mat(chk(:,1)))));
+    catch exception
+        fprintf('Error en dep_data:\n%s\n(Different days at the same b file. Removing)\n',exception.message);
+        % Quitamos el fichero malo
+        idx_aux=cellfun(@(x) unique(fix(x(:,1))),data.ozone_ds(idx_noempty),'UniformOutput',0);
+        idx_aux_=cellfun(@(x) length(x)==1,idx_aux,'UniformOutput',1);
+        [days a b]=intersect(cellfun(@(x) unique(fix(x(:,1))),data.ozone_ds(idx_aux_),'UniformOutput',1),...
+                             fix(datenum(cell2mat(chk(:,1)))));        
+    end
 
     % y ahora depuramos. Usamos un bucle
     % En principio solo hara falta para ozone_ds, raw y raw0

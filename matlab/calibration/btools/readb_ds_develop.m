@@ -597,118 +597,118 @@ else
     sl_data.sl_cr=[];
 
 end
-%% DZ
-if ~isempty(jdz)
-dzs=[];dsum=[];ndzs=0;
-jdzsum=[];timedz=[];
-
-   for i=1:length(jsum)
-      dsum=sscanf(l{jsum(i)},fmtsum);
-      type=char(dsum(12:13)');
-      month=char(dsum(4:7)');
-      fecha=datenum(sprintf(' %02d/%s/%02d',dsum(7),month,dsum(8)));
-      hora=dsum(1)/24+dsum(2)/24/60+dsum(3)/24/60/60;
-      
-      if strmatch('dz',type)
-          ndzs=ndzs+1;
-          dz_idx=find(jdz-jsum(i)<0 & jdz-jsum(i)>=-4);
-          jdzsum(ndzs)=jsum(i);
-          if length(dz_idx)==4
-              %timedssum fecha,indice
-              timedzsum=[timedzsum;[fecha+hora,jsum(i)]];
-              dzs=[dzs,dsum];
-              for ii=1:4
-                  ds_=NaN*ones(18,1); 
-                  ds_aux=sscanf(l{jdz(dz_idx(ii))},fmtdz);
-                  if size(ds_aux,1)==18
-                     ds_=ds_aux; 
-                  else
-                     ds_(1:14)=sscanf(l{jdz(dz_idx(ii))},' dz %c %d %f %d %d %d %d %d %d %d %d %d %d %d');                  
-                  end
-                  dz=[dz,ds_];
-                  hora=ds_(3)/60/24;
-                  timedz=[timedz;[fecha+hora,jdz(dz_idx(ii)),size(dzs,2)*10+ii]];
-              end
-          end
-      else
-      end
-  end
-  % ---------------------- Start DZ output ------------------------------------
-  if ~isempty(dzs)
-    % Time calculation: hora a formato matlab -> sumarios
-    hora=dzs(1,:)*60+dzs(2,:)+dzs(3,:)/60;
-    % idx_dz indice de la medida dz
-    idx_dz=fix(timedz(:,3)/10);
-    % asignamos la temperatura al ds tomada del sumario
-    dz_temp=dzs(11,idx_dz)';
-    %filter check
-    if any(dzs(14,idx_dz)-(dz(2,:)/64))   %% why ?
-       % to chek that the filter are 0 64....
-       unique(ds(2,:))
-       unique(dss(14,:))
-       disp('error in filter check');
-       ds(2,:)=64*dss(14,idx_ds);
-    end       
-    
-    % calculo de los angulos zenitales y masa optica sumarios
-      [szadzs,m2dzs,m3dzs]=brewersza(hora',fileinfo(2),fileinfo(3),lat,long);
-      [sza,saz,tst_dz,snoon,sunrise,sunset]=sun_pos(timedzsum(:,1),lat,-long);
-      timedzs=cat(2,timedzsum,[szadzs,m2dzs,m3dzs,sza,saz,tst_dz,snoon,sunrise,sunset]);
-     % calculos se sza y masa op medidas individuales
-      [szadz,m2dz,m3dz]=brewersza(dz(3,:)',fileinfo(2),fileinfo(3),lat,long);
-      [sza,saz,tst_dz,snoon,sunrise,sunset]=sun_pos(timedz(:,1),lat,-long);
-      timedz=[timedz,[szadz,m2dz,m3dz,sza,saz,tst_dz,snoon,sunrise,sunset]];
-
-    %HGFILTER
-    % -> falla si no hay ningun hg->
-        tb_dz=[];    tb_dzsum=[];
-        for ii=1:size(time_badhg,1)
-          tb_dzsum=[tb_dzsum,find((hora>time_badhg(ii,1)   & hora<time_badhg(ii,2)))];
-          tb_dz=[tb_dz,find((dz(3,:)>time_badhg(ii,1) & dz(3,:)<time_badhg(ii,2)))];
-        end
-    % flag hg utilizamos el numero de linea (????)
-       timedz(:,2)=ones(size(timedz(:,2)));
-       timedzs(:,2)=ones(size(timedzs(:,2)));
-      if ~isempty(tb_dzsum)
-         timedz(tb_dz,2)=0;
-         timedzs(tb_dzsum,2)=0;
-      end
-      dz=dz'; dzs=dzs';
-
-     %%  salidas raw DS      
-      o3.dzsum=[timedzs(:,1:2),timedzs(:,8)/60,timedzs(:,4),...
-       dzs(:,9:11),dzs(:,[14,22,30,21,29]),dzs(:,[15,23,16,24,17,25,18,26,19,27,20,28])];
-      o3.dzsum_legend={'date';'hgflag';'hora ';'??';'ang2';'airm';'temp';'filt';'ozo ';'std_ozo';'so2 ';'std_so2';...
-        'ms4 ';'std_ms4';'ms5 ';'std_ms5';'ms6 ';'std_ms6';'ms7 ';'std_ms7';'ms8 ';'std_ms8';'ms9 ';'std_ms9'};
-       % ( bad for dz) sustituimos s0 s1 de la medida por m2 m3
-       dz(:,4:5)=[m2dz,m3dz*pr/1013];
-       dz(:,3)=tst_dz;
-       MS9=dz(:,15)-0.5*dz(:,16)-1.7*dz(:,17); % o3 double ratio ==MS(9)
-       MS8=dz(:,14)-3.2*dz(:,17);              %:REM SO2 ratio MS(8)       
-          
-       o3.dz_raw0=[timedz(:,1:3),dz_temp,dz,MS8,MS9];
-       o3.dz_raw0_legend={'date';'hgflag';'ndz';'tmp';'fl1';'fl2';'tim';'m2 ';'m3*pressure corr';'cy ';...
-                        'F0 ';'F1 ';'F2 ';'F3 ';'F4 ';'F5 ';'F6 '; 'F7 ';'r1 ';'r2 ';'r3 ';'r4 ';'MS8 ';'MS9 '};    
-
-    %% dz re-calculation: Pendiente. TODO
-    %o3.ozone_raw=[timeds(:,1:9),ds(:,2),ds_temp,ds(:,7:13),F,F];
-    %o3.ozone_raw_legend={'date'	'hg'    'idx'   'sza'	'm2'	'm3'	'sza'	'saz'	'tst'  'flt'  'temp'...
-    %                        'OS0'  'OS1'	'OS2'	'OS3'	'OS4'	'OS5'	'OS6' 	...  % cuentas brutas
-    %                        'iS0'  'iS1'	'iS2'	'iS3'	'iS4'	'iS5'	'iS6' 	 ...  % count-rates recalculadas 1 (Rayleight uncorrected !!)
-    %                        'fs0'	'fs1'	'fs2'	'fs3'	'fs4'	'fs5'	'fs6'	...  % count-rates recalculadas 2 (Rayleight uncorrected !!)
-    %                        };
-  else
-    disp('(error in dz measurements)');
-    o3.dzsum=[]; o3.dzsum_legend=[];
-    o3.dz_raw0=[]; o3.dz_raw0_legend=[];
-   end
-else
-    %disp('(no dz measurements)');
-    o3.dzsum=[]; o3.dzsum_legend=[];
-    o3.dz_raw0=[]; o3.dz_raw0_legend=[];
-end
-
-
+% %% DZ
+% if ~isempty(jdz)
+% dzs=[];dsum=[];ndzs=0;
+% jdzsum=[];timedz=[];
+% 
+%    for i=1:length(jsum)
+%       dsum=sscanf(l{jsum(i)},fmtsum);
+%       type=char(dsum(12:13)');
+%       month=char(dsum(4:7)');
+%       fecha=datenum(sprintf(' %02d/%s/%02d',dsum(7),month,dsum(8)));
+%       hora=dsum(1)/24+dsum(2)/24/60+dsum(3)/24/60/60;
+%       
+%       if strmatch('dz',type)
+%           ndzs=ndzs+1;
+%           dz_idx=find(jdz-jsum(i)<0 & jdz-jsum(i)>=-4);
+%           jdzsum(ndzs)=jsum(i);
+%           if length(dz_idx)==4
+%               %timedssum fecha,indice
+%               timedzsum=[timedzsum;[fecha+hora,jsum(i)]];
+%               dzs=[dzs,dsum];
+%               for ii=1:4
+%                   ds_=NaN*ones(18,1); 
+%                   ds_aux=sscanf(l{jdz(dz_idx(ii))},fmtdz);
+%                   if size(ds_aux,1)==18
+%                      ds_=ds_aux; 
+%                   else
+%                      ds_(1:14)=sscanf(l{jdz(dz_idx(ii))},' dz %c %d %f %d %d %d %d %d %d %d %d %d %d %d');                  
+%                   end
+%                   dz=[dz,ds_];
+%                   hora=ds_(3)/60/24;
+%                   timedz=[timedz;[fecha+hora,jdz(dz_idx(ii)),size(dzs,2)*10+ii]];
+%               end
+%           end
+%       else
+%       end
+%   end
+%   % ---------------------- Start DZ output ------------------------------------
+%   if ~isempty(dzs)
+%     % Time calculation: hora a formato matlab -> sumarios
+%     hora=dzs(1,:)*60+dzs(2,:)+dzs(3,:)/60;
+%     % idx_dz indice de la medida dz
+%     idx_dz=fix(timedz(:,3)/10);
+%     % asignamos la temperatura al ds tomada del sumario
+%     dz_temp=dzs(11,idx_dz)';
+%     %filter check
+%     if any(dzs(14,idx_dz)-(dz(2,:)/64))   %% why ?
+%        % to chek that the filter are 0 64....
+%        unique(ds(2,:))
+%        unique(dss(14,:))
+%        disp('error in filter check');
+%        ds(2,:)=64*dss(14,idx_ds);
+%     end       
+%     
+%     % calculo de los angulos zenitales y masa optica sumarios
+%       [szadzs,m2dzs,m3dzs]=brewersza(hora',fileinfo(2),fileinfo(3),lat,long);
+%       [sza,saz,tst_dz,snoon,sunrise,sunset]=sun_pos(timedzsum(:,1),lat,-long);
+%       timedzs=cat(2,timedzsum,[szadzs,m2dzs,m3dzs,sza,saz,tst_dz,snoon,sunrise,sunset]);
+%      % calculos se sza y masa op medidas individuales
+%       [szadz,m2dz,m3dz]=brewersza(dz(3,:)',fileinfo(2),fileinfo(3),lat,long);
+%       [sza,saz,tst_dz,snoon,sunrise,sunset]=sun_pos(timedz(:,1),lat,-long);
+%       timedz=[timedz,[szadz,m2dz,m3dz,sza,saz,tst_dz,snoon,sunrise,sunset]];
+% 
+%     %HGFILTER
+%     % -> falla si no hay ningun hg->
+%         tb_dz=[];    tb_dzsum=[];
+%         for ii=1:size(time_badhg,1)
+%           tb_dzsum=[tb_dzsum,find((hora>time_badhg(ii,1)   & hora<time_badhg(ii,2)))];
+%           tb_dz=[tb_dz,find((dz(3,:)>time_badhg(ii,1) & dz(3,:)<time_badhg(ii,2)))];
+%         end
+%     % flag hg utilizamos el numero de linea (????)
+%        timedz(:,2)=ones(size(timedz(:,2)));
+%        timedzs(:,2)=ones(size(timedzs(:,2)));
+%       if ~isempty(tb_dzsum)
+%          timedz(tb_dz,2)=0;
+%          timedzs(tb_dzsum,2)=0;
+%       end
+%       dz=dz'; dzs=dzs';
+% 
+%      %%  salidas raw DS      
+%       o3.dzsum=[timedzs(:,1:2),timedzs(:,8)/60,timedzs(:,4),...
+%        dzs(:,9:11),dzs(:,[14,22,30,21,29]),dzs(:,[15,23,16,24,17,25,18,26,19,27,20,28])];
+%       o3.dzsum_legend={'date';'hgflag';'hora ';'??';'ang2';'airm';'temp';'filt';'ozo ';'std_ozo';'so2 ';'std_so2';...
+%         'ms4 ';'std_ms4';'ms5 ';'std_ms5';'ms6 ';'std_ms6';'ms7 ';'std_ms7';'ms8 ';'std_ms8';'ms9 ';'std_ms9'};
+%        % ( bad for dz) sustituimos s0 s1 de la medida por m2 m3
+%        dz(:,4:5)=[m2dz,m3dz*pr/1013];
+%        dz(:,3)=tst_dz;
+%        MS9=dz(:,15)-0.5*dz(:,16)-1.7*dz(:,17); % o3 double ratio ==MS(9)
+%        MS8=dz(:,14)-3.2*dz(:,17);              %:REM SO2 ratio MS(8)       
+%           
+%        o3.dz_raw0=[timedz(:,1:3),dz_temp,dz,MS8,MS9];
+%        o3.dz_raw0_legend={'date';'hgflag';'ndz';'tmp';'fl1';'fl2';'tim';'m2 ';'m3*pressure corr';'cy ';...
+%                         'F0 ';'F1 ';'F2 ';'F3 ';'F4 ';'F5 ';'F6 '; 'F7 ';'r1 ';'r2 ';'r3 ';'r4 ';'MS8 ';'MS9 '};    
+% 
+%     %% dz re-calculation: Pendiente. TODO
+%     %o3.ozone_raw=[timeds(:,1:9),ds(:,2),ds_temp,ds(:,7:13),F,F];
+%     %o3.ozone_raw_legend={'date'	'hg'    'idx'   'sza'	'm2'	'm3'	'sza'	'saz'	'tst'  'flt'  'temp'...
+%     %                        'OS0'  'OS1'	'OS2'	'OS3'	'OS4'	'OS5'	'OS6' 	...  % cuentas brutas
+%     %                        'iS0'  'iS1'	'iS2'	'iS3'	'iS4'	'iS5'	'iS6' 	 ...  % count-rates recalculadas 1 (Rayleight uncorrected !!)
+%     %                        'fs0'	'fs1'	'fs2'	'fs3'	'fs4'	'fs5'	'fs6'	...  % count-rates recalculadas 2 (Rayleight uncorrected !!)
+%     %                        };
+%   else
+%     disp('(error in dz measurements)');
+%     o3.dzsum=[]; o3.dzsum_legend=[];
+%     o3.dz_raw0=[]; o3.dz_raw0_legend=[];
+%    end
+% else
+%     %disp('(no dz measurements)');
+%     o3.dzsum=[]; o3.dzsum_legend=[];
+%     o3.dz_raw0=[]; o3.dz_raw0_legend=[];
+% end
+% 
+% 
 %% SUN SCAN
 if ~isempty(jco)
     co=l(jco);

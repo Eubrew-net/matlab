@@ -21,8 +21,10 @@ function [tabla_dsp,dsp_quad,dsp_cubic]=report_dispersion(Cal,varargin)
 % 
 % - fpath      : (String). Path a los ficheros dsp. Por defecto, Cal.path_root\DSP 
 % 
-% - date_range  : (Float). PERIODO de analisis. Por defecto, Cal.Date.CALC_DAYS 
+% - date_range : (Float). PERIODO de analisis. Por defecto, Cal.Date.CALC_DAYS 
 %                 (notar que date_range, al contrario de lo usual, se trata de un periodo, no de sus  extremos)
+% 
+% - process    : 
 % 
 %
 % OUTPUT
@@ -76,6 +78,8 @@ aux=NaN*ones(size(dsp_quad,1),16);
 aux(:,[1 2])=cat(2,dsp_quad(:,1),matadd(dsp_quad(:,17),-dsp_quad(:,16)));
 aux(:,3:14)=matadd(dsp_quad(:,4:15),-dsp_cubic(:,4:15));
 aux(:,15:16)=cat(1,-O3W*abs(dsp_quad(:,18:23))',-O3W*abs(dsp_cubic(:,18:23))')';
+
+aux(isnan(aux(:,1)),:)=[];
 
 %% Table, por periodos
  lbl_dsp={'CSN','wl_0','wl_2','wl_3','wl_4','wl_5','wl_6',...

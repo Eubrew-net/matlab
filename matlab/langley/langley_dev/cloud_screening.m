@@ -74,7 +74,10 @@ for i=1:l1
     DATA1=cell2mat(bsrn([1 col_sza,col_minuto,col_GLB,col_DIF])); DATA1(:,1)=datenum(year(DATA0(i,1)),1,dayj,0,DATA1(:,3),0);
     DATA2=DATA1(DATA1(:,2)<70.0,:);% Valores con sza<80
     DATA2(DATA2(:,4)<0,:)=[]; DATA2(DATA2(:,5)<0,:)=[]; DATA2(isnan(DATA2(:,4)),:)=[];
-
+    if isempty(DATA2)
+       continue
+    end
+    
     % Definición de parametros
     sza = DATA2(:,2); mu0 = cos(deg2rad(sza)); ldata = size(DATA2,1);              
     [szanoon j_szanoon] = min(sza); mu0noon = cos(deg2rad(szanoon));  
