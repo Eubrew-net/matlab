@@ -245,18 +245,18 @@ sl_median(:,2)=[]; sl_median=sortrows(sl_median,1);
     ha=tight_subplot(2,1,.05,[.1 .1],[.1,.1]);   
 
     axes(ha(1)); gs=gscatter(sls(:,13),sls(:,22),5*fix(diaj(sls(:,1))/5),'','.',10,'off');
-    set(gs,'HandleVisibility','Off'); hold on; plot(sls(:,13),sls(:,22),'.');
-    rl=rline; set(rl,'LineWidth',2);
-    set(findobj(gca,'Marker','.'),'Marker','None');
+    set(gs,'LineStyle','-'); hold on; p1=plot(sls(:,13),sls(:,22),'.');
+    rl=rline; set(rl,'LineWidth',2); set(p1,'Marker','None');
+    set(gs,'LineStyle','None');
     set(gca,'XtickLabel',[]); xlabel(' '); ylabel('SL R6 ratios'); grid;
     title(['Standard Lamp ratios vs temperature: Brw id. ',brw_name{idx_inst}]); 
     set(findobj(gca,'Type','Text'),'BackgroundColor','w','Color','r','FontSize',10,'FontWeight','Bold');
 
     axes(ha(2)); gs=gscatter(sls(:,13),sls(:,21),5*fix(diaj(sls(:,1))/5),'','.',10,'on');
-    set(gs,'HandleVisibility','Off'); hold on; plot(sls(:,13),sls(:,21),'.'); 
-    rl=rline; set(rl,'LineWidth',2);
+    set(gs,'LineStyle','-'); hold on; p1=plot(sls(:,13),sls(:,21),'.'); 
+    rl=rline; set(rl,'LineWidth',2); set(p1,'Marker','None');
     set(findobj(gca,'Type','Text'),'BackgroundColor','w','Color','r','FontSize',10,'FontWeight','Bold');
-    set(findobj(gca,'Marker','.'),'Marker','None');
+    set(gs,'LineStyle','None');
     xlabel('PMT Temperature (C\circ)'); ylabel('SL R5 ratios'); grid;
     set(findobj(gcf,'Tag','legend'),'FontSize',7); linkprop(ha,'XLim');
     
