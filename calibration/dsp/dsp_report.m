@@ -18,7 +18,7 @@ ozonepos=cfg(14)+cfg(44);% ozone pos-> from icf / or passed directly to function
  else
     fprintf('lines_dsp_%03d%02d_%s%03d\n',day(1),year,'_',brewnb);
     h1=gcf;
-    for i=h0:h1
+    for i=double(h0):double(h1)
        figure(i)
        set(i,'Tag',['DSP_LINES_',num2str(i)]);
     end
