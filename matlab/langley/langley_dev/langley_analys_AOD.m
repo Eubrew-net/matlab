@@ -72,7 +72,8 @@ for dd=1:length(lgl_data{brw})
            continue
         end
 
-        P_brw{ampm,1}=lgl(jk{ampm},[5 10 14:18]); P_brw{ampm,2}=lgl(jk{ampm},[5 10 28:32]); 
+        P_brw{ampm,1}=cat(2,lgl(jk{ampm},[5 10]),10.^(lgl(jk{ampm},14:18)/1e4)); 
+        P_brw{ampm,2}=cat(2,lgl(jk{ampm},[5 10]),10.^(lgl(jk{ampm},28:32)/1e4)); 
         for ncfg=1:2 
             try
 %             Brewer method
@@ -80,7 +81,7 @@ for dd=1:length(lgl_data{brw})
                   r_orig{slit}=[NaN NaN]; 
                   jk_idx{ampm}=jk{ampm}; 
                   X=[ones(size(P_brw{ampm,2},1),1),P_brw{ampm,2}(:,1)];% matriz de diseño
-                  [c1_brw,ci,r,ri,st]=regress(P_brw{ampm,ncfg}(:,slit+2),X);
+                  [c1_brw,ci,r,ri,st]=regress(log(P_brw{ampm,ncfg}(:,slit+2)),X);
                   if arg.Results.res_filt
 %                    we keep original 
                      r_orig{slit}=[X(:,2) r]; 
@@ -92,7 +93,7 @@ for dd=1:length(lgl_data{brw})
                            jk_idx{ampm}(find(idx)+length(find(jam)))=0;                          
                         end
                      end
-                     [c1_brw,ci,r,ri,st]=regress(P_brw{ampm,ncfg}(~idx,slit+2),X(~idx,:));
+                     [c1_brw,ci,r,ri,st]=regress(log(P_brw{ampm,ncfg}(~idx,slit+2)),X(~idx,:));
                   end
                   if ampm==1
                      idx_=ampm+2;
@@ -157,19 +158,19 @@ for dd=1:length(lgl_data{brw})
               end
               a=[];
               a(1)=subaxis(2,1,1); hold all;
-              g1=gscatter(P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),1),P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),1+2),...
+              g1=gscatter(P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),1),log(P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),1+2)),...
                           P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),2),'','.',{},'off'); set(g1,'MarkerSize',6);        
                  plot(m_oz(jk_idx{ampm}),polyval(resp_brw(dd,[indx+10+1 indx+1],1),m_oz(jk_idx{ampm})),'m-'); 
-              g2=gscatter(P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),1),P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),2+2),...
+              g2=gscatter(P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),1),log(P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),2+2)),...
                           P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),2),'','*',{},'off');
                  plot(m_oz(jk_idx{ampm}),polyval(resp_brw(dd,[indx+10+2 indx+2],2),m_oz(jk_idx{ampm})),'m-'); set(g2,'MarkerSize',4);  
-              g3=gscatter(P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),1),P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),3+2),...
+              g3=gscatter(P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),1),log(P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),3+2)),...
                           P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),2),'','s',{},'off');
                  plot(m_oz(jk_idx{ampm}),polyval(resp_brw(dd,[indx+10+3 indx+3],2),m_oz(jk_idx{ampm})),'m-'); set(g3,'MarkerSize',4);  
-              g4=gscatter(P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),1),P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),4+2),...
+              g4=gscatter(P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),1),log(P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),4+2)),...
                           P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),2),'','d',{},'off');
                  plot(m_oz(jk_idx{ampm}),polyval(resp_brw(dd,[indx+10+4 indx+4],2),m_oz(jk_idx{ampm})),'m-'); set(g4,'MarkerSize',4);  
-              g5=gscatter(P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),1),P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),5+2),...
+              g5=gscatter(P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),1),log(P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),5+2)),...
                           P_brw{ampm,1}(jk_idx{ampm}(jk_idx{ampm}==1),2),'','p',{},'off');        
                  plot(m_oz(jk_idx{ampm}),polyval(resp_brw(dd,[indx+10+5 indx+5],2),m_oz(jk_idx{ampm})),'m-');  set(g5,'MarkerSize',4);  
 

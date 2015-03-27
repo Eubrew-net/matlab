@@ -136,7 +136,8 @@ if ~isempty(arg.Results.F_corr_AOD)
     f_corr_aod=arg.Results.F_corr_AOD;
     
     for dd=1:size(data,1)
-        slits=data{dd}(:,[10 14:18 28:32]);
+        slits=cat(2,data{dd}(:,10),data{dd}(:,[14:18 28:32])); 
+        
         for slit=1:5
             for filtro=1:6
                 idx_flt=slits(:,1)==64*(filtro-1);
@@ -177,8 +178,8 @@ j_=cellfun(@(x) x(:,9)/60>12  ,data     ,'UniformOutput',false);% 0=AM, 1=PM
 data_AM=cellfun(@(x,y) x(~y,:),data,j_  ,'UniformOutput',false);
 data_PM=cellfun(@(x,y) x(y,:) ,data,j_  ,'UniformOutput',false);
 
-[s_am,n_am]=cellfun(@(x,y) grpstats(x(:,33),fix(x(:,1)),{'std','numel'}),data_AM,'UniformOutput',false);
-[s_pm,n_pm]=cellfun(@(x,y) grpstats(x(:,33),fix(x(:,1)),{'std','numel'}),data_PM,'UniformOutput',false);
+[s_am,n_am]=cellfun(@(x,y) grpstats(x(:,19),fix(x(:,1)),{'std','numel'}),data_AM,'UniformOutput',false);
+[s_pm,n_pm]=cellfun(@(x,y) grpstats(x(:,19),fix(x(:,1)),{'std','numel'}),data_PM,'UniformOutput',false);
 
 if ~arg.Results.summ
    N_hday=arg.Results.N_hday*5;
@@ -190,7 +191,7 @@ j_pm=cellfun(@(x,y) x<y,n_pm,repmat({N_hday},length(n_pm),1),'UniformOutput',fal
 
 data_AM(cell2mat(j_am))={[]}; data_PM(cell2mat(j_pm))={[]};
 
-%% AM,PM O3std < 2 Half-day constant ozone (default NaN -> no filter)
+%% AM,PM O3std < 2 Half-day constant ozone (default NaN -> no filter) 1st config. (operational)!!
 if ~isnan(arg.Results.O3_hday)
    j_am=cellfun(@(x,y) x>y,s_am,repmat({arg.Results.O3_hday},length(n_am),1),'UniformOutput',false); j_am(cellfun(@(x) isempty(x),j_am))={false};
    j_pm=cellfun(@(x,y) x>y,s_pm,repmat({arg.Results.O3_hday},length(n_pm),1),'UniformOutput',false); j_pm(cellfun(@(x) isempty(x),j_pm))={false};
@@ -371,7 +372,7 @@ end
                             'Parent',get(ax(ampm),'Parent'));
                set(ax_(2),'YAxisLocation','right','XAxisLocation','Top','Color','none', ...
                          'XLim',get(ax(ampm),'XLim'),'XTickLabel','','FontSize',7);
-               m_o3=grpstats(lgl_orig(jk_orig,[1 5 33]),fix(lgl_orig(jk_orig,3)/10),{'mean'});
+               m_o3=grpstats(lgl_orig(jk_orig,[1 5 19]),fix(lgl_orig(jk_orig,3)/10),{'mean'});
                hold on; plot(m_o3(:,2),m_o3(:,3),'.');
                ylabel('O3 (DU)'); set(gca,'YLim',[min(m_o3(:,3))-15 max(m_o3(:,3))+15],'HandleVisibility','Off'); 
                text([.75,.75,.75,.75],[0.05,0.05*3,0.05*5,0.05*7] ,...

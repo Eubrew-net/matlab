@@ -56,7 +56,7 @@ arg.addRequired('Cal', @isstruct);
 
 arg.addParamValue('grp', '', @(x)any(strcmpi(x,{'events','month','week','month+events'})));
 arg.addParamValue('grp_custom', [], @isstruct);    
-arg.addParamValue('fpath', fullfile(Cal.path_root,'DSP'), @ischar);    
+arg.addParamValue('fpath', fullfile(Cal.path_root,'..','DSP'), @ischar);    
 arg.addParamValue('date_range', Cal.Date.CALC_DAYS, @isfloat);    
 arg.addParamValue('process'   , 0  ,  @(x)(x==0 || x==1));      % por defecto, no reprocessing
 

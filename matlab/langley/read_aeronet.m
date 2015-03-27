@@ -37,7 +37,8 @@ function [aod,aod_m,aeronet]=read_aeronet(filename,varargin)
     AOD870=aeronet{1,10};
     AOD1020=aeronet{1,9};
     AOD1640=aeronet{1,8};
-
+    
+    alfa340_440=aeronet{1,46};
     alfa440_870=aeronet{1,42};
     water_cm=aeronet{1,24};
     aodL2_340=[date,AOD340];
@@ -60,6 +61,7 @@ function [aod,aod_m,aeronet]=read_aeronet(filename,varargin)
     AOD870,...
     AOD1020,...
     AOD1640,...
+    alfa340_440,...
     alfa440_870,...
     water_cm];
 

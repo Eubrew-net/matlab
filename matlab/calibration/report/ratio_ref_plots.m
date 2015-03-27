@@ -21,8 +21,10 @@ if length(Cal.analyzed_brewer)+2 ==size(ratio_ref,2)
     errorbar(X,m(:,2:end-1),sem(:,2:end-1),'*'); 
     set(gca,'YLim',[-1.5 1.5]); legend(Cal.brw_name{Cal.analyzed_brewer}); grid
     datetick('x','mm/dd/yy','Keepticks','keeplimits');
-    title(sprintf('Daily ratios with respect to reference and standard error\nDay %d to %d of %d',...
-                   diaj([min(ratio_ref(:,1)),max(ratio_ref(:,1))]),Cal.Date.cal_year));
+    title(sprintf('Daily ratios with respect to reference and standard error\n %s (%d) to %s (%d)',...
+                   datestr(min(ratio_ref(:,1)),1),diaj(min(ratio_ref(:,1))),...
+                   datestr(max(ratio_ref(:,1)),1),diaj(max(ratio_ref(:,1)))));
+    ylabel('Ozone deviation [%]');
     set(f_ev,'Tag','time_ev');
     
  %% scatterhist 
