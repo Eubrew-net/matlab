@@ -78,8 +78,9 @@ for dd=1:length(lgl_data{brw})
         if ~any(jk{ampm})
            continue
         end
-
-        P_brw{ampm,1}=lgl(jk{ampm},[5 10 14:18]); P_brw{ampm,2}=lgl(jk{ampm},[5 10 28:32]); 
+                
+        P_brw{ampm,1}=cat(2,lgl(jk{ampm},[5 10]),10.^(lgl(jk{ampm},14:18)/1e4)); 
+        P_brw{ampm,2}=cat(2,lgl(jk{ampm},[5 10]),10.^(lgl(jk{ampm},28:32)/1e4)); 
         for ncfg=1:2 
             try
 %             Brewer method
@@ -88,7 +89,7 @@ for dd=1:length(lgl_data{brw})
                   X=[P_brw{ampm,2}(:,1),P_brw{ampm,2}(:,2)==0 | P_brw{ampm,2}(:,2)==64 | P_brw{ampm,2}(:,2)==128,...
                              P_brw{ampm,2}(:,2)==192,P_brw{ampm,2}(:,2)==256];                 
                   
-                  [c1_brw,ci,r,ri,st]=regress(P_brw{ampm,ncfg}(:,slit+2),X);
+                  [c1_brw,ci,r,ri,st]=regress(log(P_brw{ampm,ncfg}(:,slit+2)),X);
                   % No ND#0,#1 & #2 |  ND#3 |  ND#4 
                   c1_brw(c1_brw==0)=NaN;                  
                   if arg.Results.res_filt
@@ -101,7 +102,7 @@ for dd=1:length(lgl_data{brw})
                            jk_idx{ampm}(find(idx)+length(find(jam)))=0;                          
                         end
                      end
-                     [c1_brw,ci,r,ri,st]=regress(P_brw{ampm,ncfg}(~idx,slit+2),X);
+                     [c1_brw,ci,r,ri,st]=regress(log(P_brw{ampm,ncfg}(~idx,slit+2)),X);
                      c1_brw(c1_brw==0)=NaN;                  
                   end
                   % Index to create output. Just ETC & Slope, no stats !!
@@ -110,9 +111,9 @@ for dd=1:length(lgl_data{brw})
                   else
                      id=5;
                   end
-                  resp_brw(dd,id+1,slit,ncfg) = c1_brw(2); % 1st ETC (ND#0,#1 & #2)
-                  resp_brw(dd,id+2,slit,ncfg) = c1_brw(3); % 2nd ETC (ND#3)       
-                  resp_brw(dd,id+3,slit,ncfg) = c1_brw(4); % 3rd ETC (ND#4)       
+                  resp_brw(dd,id+1,slit,ncfg) = log10(exp(c1_brw(2)))*1e4; % 1st ETC (ND#0,#1 & #2) log10(exp(c1_brw(2)))*1e4
+                  resp_brw(dd,id+2,slit,ncfg) = log10(exp(c1_brw(3)))*1e4; % 2nd ETC (ND#3)       
+                  resp_brw(dd,id+3,slit,ncfg) = log10(exp(c1_brw(4)))*1e4; % 3rd ETC (ND#4)       
                   resp_brw(dd,id+4,slit,ncfg) = c1_brw(1); % Slope (we assume same for all ND)
               end                
               
@@ -151,33 +152,33 @@ for dd=1:length(lgl_data{brw})
 
        figure; 
        if ~isempty(P_brw{1,1});
-           a=[];
-           a(1)=subaxis(2,1,1); hold all;
-           g1=gscatter(P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),1),P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),1+2),...
+           a=[];  hold all;
+%            a(1)=subaxis(2,1,1);
+           g1=gscatter(P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),1),log(P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),1+2)),...
                        P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),2),'','.',{},'off'); set(g1,'MarkerSize',6);        
-              plot(m_oz(jk_idx{1}),polyval(resp_brw(dd,[1+11 1+1],1),m_oz(jk_idx{1})),'m-'); 
-           g2=gscatter(P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),1),P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),2+2),...
+%               plot(m_oz(jk_idx{1}),polyval(resp_brw(dd,[1+11 1+1],1,1),m_oz(jk_idx{1})),'m-'); 
+           g2=gscatter(P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),1),log(P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),2+2)),...
                        P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),2),'','*',{},'off');
-              plot(m_oz(jk_idx{1}),polyval(resp_brw(dd,[2+11 2+1],2),m_oz(jk_idx{1})),'m-'); set(g2,'MarkerSize',4);  
-           g3=gscatter(P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),1),P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),3+2),...
+%               plot(m_oz(jk_idx{1}),polyval(resp_brw(dd,[2+11 2+1],2),m_oz(jk_idx{1})),'m-'); set(g2,'MarkerSize',4);  
+           g3=gscatter(P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),1),log(P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),3+2)),...
                        P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),2),'','s',{},'off');
-              plot(m_oz(jk_idx{1}),polyval(resp_brw(dd,[3+11 3+1],2),m_oz(jk_idx{1})),'m-'); set(g3,'MarkerSize',4);  
-           g4=gscatter(P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),1),P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),4+2),...
+%               plot(m_oz(jk_idx{1}),polyval(resp_brw(dd,[3+11 3+1],2),m_oz(jk_idx{1})),'m-'); set(g3,'MarkerSize',4);  
+           g4=gscatter(P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),1),log(P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),4+2)),...
                        P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),2),'','d',{},'off');
-              plot(m_oz(jk_idx{1}),polyval(resp_brw(dd,[4+11 4+1],2),m_oz(jk_idx{1})),'m-'); set(g4,'MarkerSize',4);  
-           g5=gscatter(P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),1),P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),5+2),...
+%               plot(m_oz(jk_idx{1}),polyval(resp_brw(dd,[4+11 4+1],2),m_oz(jk_idx{1})),'m-'); set(g4,'MarkerSize',4);  
+           g5=gscatter(P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),1),log(P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),5+2)),...
                        P_brw{1,2}(jk_idx{1}(jk_idx{1}==1),2),'','p',{},'off');        
-              plot(m_oz(jk_idx{1}),polyval(resp_brw(dd,[5+11 5+1],2),m_oz(jk_idx{1})),'m-');  set(g5,'MarkerSize',4);  
+%               plot(m_oz(jk_idx{1}),polyval(resp_brw(dd,[5+11 5+1],2),m_oz(jk_idx{1})),'m-');  set(g5,'MarkerSize',4);  
 
            set(gca,'Xgrid','On','Ygrid','On');               
 %            legend([g1(1) g2(1) g3(1) g4(1) g5(1)],'Slit#1','Slit#2','Slit#3','Slit#4','Slit#5','Location','SouthWest');                           
            
-           a(2)=subaxis(2,1,2); hold all
-           plot(1:5,stats_brw.rs(dd,2:6,1), 'sb');    plot(1:5,stats_brw.rs(dd,7:11,1),'sr'); 
-           plot(1:5,stats_brw.rs(dd,2:6,2), '*b');    plot(1:5,stats_brw.rs(dd,7:11,2),'*r'); 
-           set(gca,'Xgrid','On','Ygrid','On','Box','On','XLim',[0.5 5.5],...
-                   'XTick',1:5,'XTickLabel',{'#1','#2','#3','#4','#5'});   ylabel('Rsquared'); 
-           legend({'Cfg1: AM','Cfg1: PM','Cfg2: AM','Cfg2: PM'},'Location','NorthEast');                
+%            a(2)=subaxis(2,1,2); hold all
+%            plot(1:5,stats_brw.rs(dd,2:6,1), 'sb');    plot(1:5,stats_brw.rs(dd,7:11,1),'sr'); 
+%            plot(1:5,stats_brw.rs(dd,2:6,2), '*b');    plot(1:5,stats_brw.rs(dd,7:11,2),'*r'); 
+%            set(gca,'Xgrid','On','Ygrid','On','Box','On','XLim',[0.5 5.5],...
+%                    'XTick',1:5,'XTickLabel',{'#1','#2','#3','#4','#5'});   ylabel('Rsquared'); 
+%            legend({'Cfg1: AM','Cfg1: PM','Cfg2: AM','Cfg2: PM'},'Location','NorthEast');                
        end
        suptitle(sprintf('%s (%d, AM)',datestr(lgl(1,1),1),diaj(lgl(1,1)))); 
        drawnow

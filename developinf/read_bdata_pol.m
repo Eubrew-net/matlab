@@ -1,4 +1,4 @@
-function [ozone,log,missing]=read_bdata(brewer,setup,fpath,spectral_setup,location)
+function [ozone,log,missing]=read_bdata_pol(brewer,setup,fpath,spectral_setup,location)
 
 % lee los ficheros del directorio bfiles
 
@@ -25,7 +25,7 @@ else
 end
 
 dsum={}; dksum={}; ozone_raw0={}; ozone_raw0_dk={};
-ozone_sum={}; ozone_dksum={}; ozone_ds={}; 
+ozone_sum={}; ozone_dksum={}; ozone_ds={}; ozone_dk={};
 ozone_raw={};  ozone_raw_dk={};
 ozone_ratios={};
 
@@ -144,7 +144,7 @@ for dd=CALC_DAYS
       dsum=[dsum;o3.dsum]; dksum=[dksum;o3.dksum];
       ozone_raw0=[ozone_raw0;o3.ds_raw0]; ozone_raw0_dk=[ozone_raw0_dk;o3.dk_raw0];
       ozone_sum=[ozone_sum;o3.ozone_s];   ozone_dksum=[ozone_dksum;o3.ozone_dks];
-      ozone_ds=[ozone_ds;o3.ozone_ds];
+      ozone_ds=[ozone_ds;o3.ozone_ds];    ozone_dk=[ozone_dk;o3.ozone_dk];
       ozone_raw=[ozone_raw;o3.ozone_raw]; ozone_raw_dk=[ozone_raw_dk;o3.ozone_raw_dk];
             
       config=[config;config_];
@@ -181,6 +181,7 @@ ozone.raw0=ozone_raw0;
 ozone.ozone_sum=ozone_sum;
 ozone.ozone_dksum=ozone_dksum;
 ozone.ozone_ds=ozone_ds;
+ozone.ozone_dk=ozone_dk;
 ozone.raw=ozone_raw;
 ozone.raw_dk=ozone_raw_dk;
 ozone.config=config;

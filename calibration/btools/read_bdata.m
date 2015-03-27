@@ -141,6 +141,11 @@ for dd=CALC_DAYS
          scf=eval(['scf',brw_str{b_idx}]);  
          sfc_flag='sfc';
          [ o3,config_,sl_,hg_,loc_]=readb_ds_develop(bfile,brw_config_files(b_idx,1:2),scf);
+         if ~isempty(o3.ozone_ds)
+            disp(['OK-> ',bfile,' ',brw_name{b_idx},' ozone obs day ',num2str(unique(diaj(o3.ozone_ds(:,1)))')]);
+         else
+            disp(['OK-> ',bfile,' ',brw_name{b_idx},' No ozone for day ',num2str(unique(diaj(sl_.sl_cr(:,1)))')]);
+         end
       else
          sfc_flag='  ';
          [a b c]=fileparts(brw_config_files{b_idx,2});
