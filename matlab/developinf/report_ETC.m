@@ -15,6 +15,7 @@ arg.addParamValue('reference_brw', Cal.n_ref, @isfloat);
 arg.addParamValue('analyzed_brw', 1:Cal.n_brw, @isfloat); 
 arg.addParamValue('grp_custom', [], @isstruct);    
 arg.addParamValue('date_range', Cal.Date.CALC_DAYS, @isfloat);    
+arg.addParamValue('plot', 0, @(x)(x==0 || x==1));    
 
 arg.parse(Cal, summary, summary_old, ETC, A, varargin{:});
 
@@ -63,7 +64,7 @@ for pp=1:length(id_period)
         try
            A_s=A.old(ismember(A.old(:,1),fix(periods_)),inst+1); A_s=unique(A_s(~isnan(A_s)));
            ETC_op{inst,ref,pp}=ETC_calibration_C(Cal,summary_old,A_s,inst,ref,...
-                                                 tsync,1.8,0.01,diaj(periods_),0); 
+                                                 tsync,1.8,0.01,diaj(periods_),arg.Results.plot); 
         catch exception
            fprintf('%s, brewer: %s\n',exception.message,Cal.brw_name{inst});
            ETC_op{inst,ref,pp}=[];
@@ -111,7 +112,7 @@ for pp=1:length(id_period)
         try
            A_s=A.new(ismember(A.new(:,1),fix(periods_)),inst+1); A_s=unique(A_s(~isnan(A_s)));
            ETC_chk{inst,ref,pp}=ETC_calibration_C(Cal,summary,A_s,inst,ref,...
-                                                  tsync,1.8,0.01,diaj(periods_),0); 
+                                                  tsync,1.8,0.01,diaj(periods_),arg.Results.plot); 
         catch exception
            fprintf('%s, brewer: %s\n',exception.message,Cal.brw_name{inst});
            ETC_chk{inst,ref,pp}=[];

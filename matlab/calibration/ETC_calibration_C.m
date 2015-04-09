@@ -194,7 +194,7 @@ ref=summary{n_ref}(jday,:);
 %        ETC_NEW_ERR=nanstd(ETC_CALC)/sqrt(length(ETC_CALC));
          ETC(1).NEW=ETC_NEW;         ETC(1).NEW_ERR=ETC_NEW_ERR;
 
- if isempty(varargin)
+ if isempty(varargin) || varargin{1}==1
          %% two point calibration
          % Metodo de calibracio clasico
          % TODO -----------> SEPARAR LAS FIGURAS DEL PROCESO
