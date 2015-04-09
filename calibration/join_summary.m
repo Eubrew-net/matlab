@@ -1,4 +1,4 @@
-function [ref,ratio_ref,sync]=join_summary(Cal,summary,reference_brw,analyzed_brewer,TSYNC)
+function [ref,ratio_ref,sync]=join_summary(Cal,summary,reference_brw,analyzed_brewer,TSYNC,varargin)
 % impunt cell of summaries, 
 % reference brewer (index of the brewer of the reference)
 % analyzed brewer (index of gthe sumaries of all the brewer to be analyzed)
@@ -19,6 +19,24 @@ function [ref,ratio_ref,sync]=join_summary(Cal,summary,reference_brw,analyzed_br
 % sync.ratio_ref=ratio_ref;
 % sync.temp=ref_flt
 
+%% Validacion de argumentos de entrada
+arg = inputParser;   % Create instance of inputParser class.
+arg.FunctionName = 'join_summary';
+
+% input obligatorio
+arg.addRequired('Cal');
+arg.addRequired('summary');
+arg.addRequired('reference_brw');
+arg.addRequired('analyzed_brewer');
+arg.addRequired('TSYNC');
+
+% input param - value
+arg.addParamValue('date_range', [], @isfloat); % por defecto, no control de fechas
+
+% validamos los argumentos definidos:
+arg.parse(Cal,summary,reference_brw,analyzed_brewer,TSYNC,varargin{:});
+
+%%
 if nargin==4
     TSYNC=10;
 elseif nargin==3
@@ -74,7 +92,26 @@ for ii=1:length(Cal.brw)
     ref_temp=scan_join(ref_temp,med_temp);
 end
 
-% building the reference
+%% Time Filter
+if ~isempty(arg.Results.date_range)
+   ref(ref(:,1)<arg.Results.date_range(1),:)=[];
+   ref_std(ref_std(:,1)<arg.Results.date_range(1),:)=[];
+   ref_sza(ref_sza(:,1)<arg.Results.date_range(1),:)=[];
+   ref_flt(ref_flt(:,1)<arg.Results.date_range(1),:)=[];
+   ref_airm(ref_airm(:,1)<arg.Results.date_range(1),:)=[];
+   ref_temp(ref_temp(:,1)<arg.Results.date_range(1),:)=[];
+
+   if length(arg.Results.date_range)>1
+      ref(ref(:,1)>arg.Results.date_range(2),:)=[];
+      ref_std(ref_std(:,1)>arg.Results.date_range(2),:)=[];
+      ref_sza(ref_sza(:,1)>arg.Results.date_range(2),:)=[];
+      ref_flt(ref_flt(:,1)>arg.Results.date_range(2),:)=[];
+      ref_airm(ref_airm(:,1)>arg.Results.date_range(2),:)=[];
+      ref_temp(ref_temp(:,1)>arg.Results.date_range(2),:)=[];
+   end
+end
+
+%% Building the reference
  ref_m=ref(:,[1 reference_brw+1]); jsim=all(~isnan(ref_m(:,2:end)),2); 
  mean_o3=nanmean(ref_m(jsim,2:end),2); 
  mean_airm=nanmean(ref_airm(jsim,reference_brw+1),2); 
