@@ -3,7 +3,7 @@
 
 %% Brewer Evaluation
 clear all;
-file_setup='arenos2013_setup';
+file_setup='arenos2015_setup';
 
 eval(file_setup);     % configuracion por defecto
 Cal.n_inst=find(Cal.brw==xxx);
