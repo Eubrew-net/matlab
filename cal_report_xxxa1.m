@@ -109,37 +109,16 @@ end
 save(Cal.file_save,'-APPEND','avg_report');
 
 %%
-ix=sort(findobj('Type','figure'));
+ix=sort(double(findobj('Type','figure')));
 printfiles_report(ix',Cal.dir_figs);
 
-ix=sort([findobj('tag','SLAVG_F5') findobj('tag','HGOAVG')])';
+ix=sort([double(findobj('tag','SLAVG_F5')) double(findobj('tag','HGOAVG'))])';
 printfiles_report(ix',Cal.dir_figs,'LockAxes',0,'no_export');
 
-figure(max(findobj('tag','RSAVG')));
+figure(double(findobj('tag','RSAVG')));
 printfiles_report(gcf,Cal.dir_figs,'Width',12.5,'Height',17);
 
 close all;
-
-%% DZ
- Cal.Date.CALC_DAYS=CALC_DAYS;
- dz=read_bdata_dz(Cal.n_inst,Cal);
- 
- if ~isempty(dz.dzsum)
-    dt=dz_process(dz);
-    data=cell2mat(dz.dz_raw0); check=cell2mat(dt);
-    figure; set(gcf,'Tag','DZ');
-    gscatter(data(:,1),check,data(:,6)); grid; datetick('x','keeplimits','keepticks');
-    set(gca,'YLim',[2*10^-8 4.5*10^-8]); box on;
-    title(sprintf('Dead Time constant derived from DZ measurements\r\nBrewer %s',Cal.brw_name{Cal.n_inst}));
-    ylabel('DT constant (seconds)');
- end
-
-%%
-try
-   set(findobj(gcf,'Tag','legend'),'Orientation','Horizontal','Location','South');
-   printfiles_report(gcf,fullfile(Cal.path_root,Cal.dir_figs),'Width',14,'LockAxes',0);
-end
-close all
 
 %% CZ REPORT
 br=sprintf('%03d',Cal.brw(Cal.n_inst));
@@ -152,7 +131,8 @@ end
 
 %%
 try
-    figure(max(findobj('tag','CZ_Report')));
+    figure(max(double(findobj('tag','CZ_Report'))));
+%    ax=findobj(gcf,'Type','axes'); set(ax(end-1),'YLim',[-0.3 1.5]);
     printfiles_report(gcf,fullfile(Cal.path_root,Cal.dir_figs));
 catch exception
       fprintf('Error: %s, brewer %s\n',exception.message,Cal.brw_name{Cal.n_inst});
@@ -169,7 +149,8 @@ catch exception
 end
 %%
 try
-    figure(max(findobj('tag','CZ_Report')));
+    figure(max(double(findobj('tag','CZ_Report'))));
+%    ax=findobj(gcf,'Type','axes'); set(ax(end-1),'YLim',[-0.3 1.5]);
     printfiles_report(gcf,Cal.dir_figs,'aux_pattern',{'HL'});
 catch exception
     fprintf('Error: %s, brewer %s\n',exception.message,Cal.brw_name{Cal.n_inst});
@@ -187,7 +168,8 @@ end
 
 %%
 try
-    figure(max(findobj('tag','CZ_Report')));
+    figure(max(double(findobj('tag','CZ_Report'))));
+%    ax=findobj(gcf,'Type','axes'); set(ax(end-1),'YLim',[-0.3 8.5]);
     printfiles_report(gcf,Cal.dir_figs,'aux_pattern',{'HS'});
 catch exception
     fprintf('Error: %s, brewer %s\n',exception.message,Cal.brw_name{Cal.n_inst});
@@ -198,7 +180,8 @@ close all
 close all; br=sprintf('%03d',Cal.brw(Cal.n_inst));
 try
     [LRatPFHT Error]=analyzeCI(fullfile(Cal.path_root,['bdata',br],['CI*.',br]),...
-                           fullfile(Cal.path_root,['bdata',br],'CI18711.xxx'),'depuracion',0,...
+                           fullfile(Cal.path_root,['bdata',br],'CI18711.xxx'),...
+                          'depuracion',1,'outlier_flag',0,...
                           'date_range',datenum(Cal.Date.cal_year,1,[Cal.Date.day0-30 Cal.Date.dayend]));
 catch exception
       fprintf('Error: %s, brewer %s\n',exception.stack.name,Cal.brw_name{Cal.n_inst});
@@ -206,7 +189,7 @@ end
 
 %%
 try
-    figure(findobj('tag','CI_Report'));
+    figure(double(findobj('tag','CI_Report')));
     printfiles_report(gcf,fullfile(Cal.path_root,Cal.dir_figs),'LockAxes',0,'no_export');
 catch exception
       fprintf('Error: %s, brewer %s\n',exception.message,Cal.brw_name{Cal.n_inst});
@@ -225,33 +208,9 @@ end
 
 %%
 try
-    figure(findobj('tag','FV_Report'));
+    figure(double(findobj('tag','FV_Report')));
     printfiles_report(gcf,fullfile(Cal.path_root,Cal.dir_figs),'LockAxes',0,'no_export');
 catch exception
       fprintf('Error: %s, brewer %s\n',exception.message,Cal.brw_name{Cal.n_inst});
 end
 close all
-
-%% TEMP REPORT from AVG
-% close all;
-% for ii=Cal.n_inst
-%     f0=figure;
-%     disp(Cal.brw_str{Cal.n_inst})
-%     config_temp.n_inst=Cal.n_inst;
-%     config_temp.brw_name=Cal.brw_str{Cal.n_inst};
-%     config_temp.final_days=Cal.Date.FINAL_DAYS(1);
-%
-%     [NTCN,tabla]=temp_coeff_report(config_temp,sl_data,config_def,...
-%                                       'date_range',[datenum(Cal.Date.cal_year-2,7,15),datenum(Cal.Date.cal_year,Cal.Date.cal_month+1,5)],...
-%                                       'outlier_flag',0);
-%     R6TEMP=sprintf('MS9: %5.0f +/-%2.0f  %3.1f +/- %3.2f  ',tabla(7,[1 3 2 4]));
-%     disp(R6TEMP);
-%
-%     try
-%         cat(1,tabla{7,:})
-%         snapnow;
-%         close all;
-%     catch
-%         disp('rrr');
-%     end
-% end
