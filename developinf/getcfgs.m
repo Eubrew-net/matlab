@@ -68,11 +68,13 @@ if ischar(config)                 % Path a fichero de configuracion
       if ~isempty(arg.Results.events) % Configuraciones asociadas a los eventos
          cfg.data=repmat(cal(cal_id),1,length(arg.Results.events));          
       else                            % Configuraciones asociadas al periodo de analisis (solo 1)
-         cfg.data=NaN*ones(length(cfg.legend),length(arg.Results.events));
-         icf_id=group_time(arg.Results.events,config(2,3:end));
-         cfg.data(:,icf_id~=0)=config(cal_id,icf_id(icf_id~=0)+2);
-
-         cfg.data=cal(cal_id,:);
+         icf_id=unique(group_time(period',cal(1,:))); icf_id=icf_id(icf_id~=0);
+         if any(icf_id==0)  
+            cfg.data=NaN*ones(length(cfg.legend),length(icf_id));
+            cfg.data(:,icf_id~=0)=cal(cal_id,icf_id(icf_id~=0));  cfg.data(1,1)=period(1);          
+         else
+            cfg.data=cal(cal_id,icf_id); cfg.all_data=cal(:,icf_id);
+         end                             
       end
    else
       cal=load(config);     cal_id=[1 2:6 8 11 13 14 17:22 27:28 29:31];
@@ -86,7 +88,7 @@ if ischar(config)                 % Path a fichero de configuracion
             cfg.data=NaN*ones(length(cfg.legend),length(icf_id));
             cfg.data(:,icf_id~=0)=cal(cal_id,icf_id(icf_id~=0));  cfg.data(1,1)=period(1);          
          else
-            cfg.data=cal(cal_id,icf_id);
+            cfg.data=cal(cal_id,icf_id); cfg.all_data=cal(:,icf_id);
          end                    
       end   
    end
