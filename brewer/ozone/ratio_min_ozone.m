@@ -219,23 +219,22 @@ if  nargin~=3 && ~strcmp(name_a,name_b)
      f=figure;      set(f,'Tag','RATIO_SMOOTH'); 
      aux2=(matadd(osc_smooth(:,[6,7]),-osc_smooth(:,2)));
      jk=find(~isnan(osc_smooth(:,1)));
-     errorfill(osc_smooth(jk,1)',osc_smooth(jk,2)',osc_smooth(jk,3)','b.')
-     hold on
-     errorfill(osc_smooth(jk,1)',osc_smooth(jk,2)',abs([aux2(jk,1),aux2(jk,2)])','r.-')
+     errorfill(osc_smooth(jk,1)',osc_smooth(jk,2)',osc_smooth(jk,3)','b.');
+     hold on;
+     errorfill(osc_smooth(jk,1)',osc_smooth(jk,2)',abs([aux2(jk,1),aux2(jk,2)])','r.-');
      box on;
      grid;
      set(gca,'Xlim',OSC_lim,'YLim',[-3,3]);
      xlabel('Ozone slant path (DU)'); ylabel('Ozone Relative Difference (%)');
-     title(sprintf('(%s - %s) / %s',name_a,name_b,name_b))
+     title(sprintf('(%s - %s) / %s',name_a,name_b,name_b));
      grid on;
      
-     figure
-     set(f,'Tag','RATIO_ERRORBAR');
+     figure;     set(f,'Tag','RATIO_ERRORBAR');
      
        errorbar(aux_x,m,2*s,'s-');
        set(gca,'Xlim',OSC_lim,'YLim',[-3,3]);
        xlabel('Ozone slant path (DU)'); ylabel('Ozone Relative Difference (%)');
-       title(sprintf('(%s - %s) / %s',name_a,name_b,name_b))
+       title(sprintf('(%s - %s) / %s',name_a,name_b,name_b));
        grid; box on;
    
     %figure by filter 
@@ -272,9 +271,9 @@ if  nargin~=3 && ~strcmp(name_a,name_b)
     %figure by temp 
     f=figure;    set(f,'Tag','RATIO_TEMP_INST');    
        P=gscatter(osc,rp(:,2),data(:,8),'','o',5);  %,data(:,end-data_l+1)],'','+o');
-       set(gca,'Ylim',[-3 3]); grid
+       set(gca,'Ylim',[-3 3]); grid;
        set(findobj(gca,'Type','Line'),'MarkerSize',5);
-       set(findobj(gcf,'Tag','legend'),'Location','EastOutside')
+       set(findobj(gcf,'Tag','legend'),'Location','EastOutside');
     opts.selected.Marker='x';     opts.selected.Color='k';
     if verLessThan('Matlab','8.4')  %interactivelegen do not work in hg2
     interactivelegend(P,cellstr(num2str(unique(diaj(data(:,1))))),opts);
