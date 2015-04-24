@@ -107,13 +107,15 @@ if ~isempty(fecha)
     ozo_c=cellfun(@(x) x(:,15),ozone,'UniformOutput',false);
     ozo_o=cellfun(@(x) x(:,8),ozone,'UniformOutput',false);    
     if isstruct(flag_sl_corr)
+       RC_new_=RC_new;
        idx=isnan(flag_sl_corr.new(:,ninst+1)); flag_sl_corr.new(idx,ninst+1)=0;
-       RC_new(~flag_sl_corr.new(:,ninst+1))=0; 
-       ozo_c=cellfun(@(x,y) x(:,15)+y./x(:,5),ozone,num2cell(RC_new),'UniformOutput',false);
+       RC_new_(~flag_sl_corr.new(:,ninst+1))=0; 
+       ozo_c=cellfun(@(x,y) x(:,15)+y./x(:,5),ozone,num2cell(RC_new_),'UniformOutput',false);
        
+       RC_old_=RC_old;
        idx=isnan(flag_sl_corr.old(:,ninst+1)); flag_sl_corr.old(idx,ninst+1)=0;
-       RC_old(~flag_sl_corr.old(:,ninst+1))=0; 
-       ozo_o=cellfun(@(x,y) x(:,8)+y./x(:,5),ozone,num2cell(RC_old),'UniformOutput',false);       
+       RC_old_(~flag_sl_corr.old(:,ninst+1))=0; 
+       ozo_o=cellfun(@(x,y) x(:,8)+y./x(:,5),ozone,num2cell(RC_old_),'UniformOutput',false);       
     end    
     
     % flag_sl dominará sobre la corrección aplicada por periodos, en su caso

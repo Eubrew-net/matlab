@@ -26,11 +26,16 @@ comp=sortrows([nchoosek(1:Cal.n_brw,2);nchoosek(fliplr(1:Cal.n_brw),2)]);
 comp=comp(ismember(comp(:,1),arg.Results.analyzed_brw) & ismember(comp(:,2),arg.Results.reference_brw),:);
 
 %% Periods, if any
+if ~isempty(arg.Results.grp_custom)
     event_info=arg.Results.grp_custom;
     if isempty(event_info)
        fprintf('\rDebes definir una variable de eventos valida (help report_ETC)\n');
+       ETC_Op=[]; ETC_Chk=[];
        return
     end
+else
+    event_info=getevents(Cal,'grp','events');    
+end
  
 y=group_time(arg.Results.date_range',event_info.dates); id_period=unique(y);
 if any(id_period==0)
@@ -70,6 +75,7 @@ for pp=1:length(id_period)
            ETC_op{inst,ref,pp}=[];
         end
     end
+    snapnow
 end
 
 % Resumen con parámetros de interés. 
@@ -98,8 +104,8 @@ end
 fprintf('\nETC Transfer: Operative Config.\n');
 displaytable(ETC_Op(:,2:end),{'Inst','Ref','Cfg. ETC','Cfg. A1','1P','2P','2P A1'},...
              8,{'d','d','d','.4f','.1f','.1f','.4f'},...
-             reshape(repmat(arg.Results.grp_custom.labels,size(comp,1),1),1,...
-             length(arg.Results.grp_custom.labels)*size(comp,1))'); 
+             reshape(repmat(event_info.labels(id_period),size(comp,1),1),1,...
+             length(event_info.labels(id_period))*size(comp,1))'); 
 
          
 %% Alternative (chk)
@@ -118,6 +124,7 @@ for pp=1:length(id_period)
            ETC_chk{inst,ref,pp}=[];
         end
     end
+    snapnow    
 end
 
 % Resumen con parámetros de interés
@@ -146,6 +153,6 @@ end
 fprintf('\nETC Transfer: Alternative Config.\n');
 displaytable(ETC_Chk(:,2:end),{'Inst','Ref','Cfg. ETC','Cfg. A1','1P','2P','2P A1'},...
              8,{'d','d','d','.4f','.1f','.1f','.4f'},...
-             reshape(repmat(arg.Results.grp_custom.labels,size(comp,1),1),1,...
-             length(arg.Results.grp_custom.labels)*size(comp,1))'); 
+             reshape(repmat(event_info.labels(id_period),size(comp,1),1),1,...
+             length(event_info.labels(id_period))*size(comp,1))'); 
                            
