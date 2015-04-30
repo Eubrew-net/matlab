@@ -11,6 +11,7 @@ arg.addRequired('comp');
 % input param - value
 arg.addParamValue('icf_op' , {}, @(x)iscell(x)); %
 arg.addParamValue('icf_chk', {}, @(x)iscell(x)); %
+arg.addParamValue('summary', {}, @(x)iscell(x)); %
 
 % validamos los argumentos definidos:
 arg.parse(Cal,comp, varargin{:});
@@ -18,18 +19,16 @@ arg.parse(Cal,comp, varargin{:});
 %% setup
 osc_interval=[400,700,1000,1200];
 
+if isempty(arg.Results.summary)
+    
 %% READ Brewer Summaries
-%  ozone_sum=cell(1,length(brws));  config    =cell(1,length(brws)); 
-%  ozone_raw=cell(1,length(brws));  ozone_raw0=cell(1,length(brws));  
-%  ozone_ds =cell(1,length(brws));  sl        =cell(1,length(brws));         
-%  sl_cr    =cell(1,length(brws));      
  for i=comp.brws_idx
     ozone_sum{i}={};  config{i}={}; 
     ozone_raw{i}={};  ozone_raw0{i}={};  
     ozone_ds{i}={};   sl{i}={};          
     sl_cr{i}={};      
 
-    [ozone,log_,missing_]=read_bdata(i,Cal,fullfile(Cal.path_root,'bdata'));
+    ozone=read_bdata(i,Cal,fullfile(Cal.path_root,'bdata'));
 
     % depuramos datos (ver incidencias en config. matrix)
     ozone=dep_data(Cal.incidences_text{i},ozone);
@@ -42,7 +41,6 @@ osc_interval=[400,700,1000,1200];
     sl{i}=ozone.sl; %first calibration/ bfiles
     sl_cr{i}=ozone.sl_cr; %recalculated with 2? configuration
  end  
- save(Cal.file_save);
  
 %% Configs
 for i=comp.brws_idx
@@ -92,8 +90,6 @@ for ii=comp.brws_idx
                  {'R6','std','R5','std','N'},15,'.4f',data_tab.evnts);
     snapnow
 end
-save(Cal.file_save,'-APPEND','sl_mov_o','sl_median_o','sl_out_o','R6_o',...
-                             'sl_mov_n','sl_median_n','sl_out_n','R6_n');
 
 %% Creating Summaries
 close all
@@ -105,8 +101,6 @@ for i=comp.brws_idx
                                       'flag_sl',1,'plot_sl',0,'flag_sl_corr',SL_corr_flag);
    [summary_old{i} summary{i}]=filter_corr(summary_orig,summary_orig_old,i,A,F_corr{i});
 end
-save(Cal.file_save,'-APPEND','A','ETC','F_corr','SL_B','SL_R','cfg',...
-                             'summary_old','summary_orig_old','summary','summary_orig');
 
 %% ETC Transfer
 close all
@@ -117,19 +111,16 @@ close all
 [ETC_Op ETC_Chk]=report_ETC(Cal,summary,summary_old,ETC,A,...
                     'reference_brw',comp.reference,'analyzed_brw',comp.instrument,'plot',0);
 
+else
+ summary_old=arg.Results.summary;    
+end
+
 %% Sync data
 close all
 Cal_work.brw=Cal.brw; Cal_work.sl_c=repmat(1,50,1)';
 [ref,ratio_ref_SL]=join_summary(Cal_work,summary_old,comp.reference,comp.brws_idx,10);
 Cal_work.sl_c=repmat(0,50,1)';
 [ref,ratio_ref]=join_summary(Cal_work,summary_old,comp.reference,comp.brws_idx,10);
-
-figure; set(gcf,'Tag','ozone');
-ploty(ref,'.'); grid
-legend(gca,Cal.brw_name{comp.brws_idx},'Location','NorthEast','Orientation','Horizontal'); 
-datetick('x',6,'Keeplimits','Keepticks'); title('DS Ozone'); ylabel('Ozone (DU)');
-
-snapnow
 
 %% Data
 events_data=getevents(Cal,'grp','events'); date_range=Cal.Date.CALC_DAYS;

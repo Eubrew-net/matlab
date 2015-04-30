@@ -93,7 +93,12 @@ arg.parse(data, varargin{:});
 
 %% Preparing data
 % one-data days removed
-j_unique=cellfun(@(x) size(x,1)==1,data); data=data(~j_unique);
+j_unique=cellfun(@(x) size(x,1)==1,data); 
+if size(data,1)==1
+    data=data(~j_unique)';
+else
+    data=data(~j_unique);
+end    
 
 %% Date Filter
 if ~isempty(arg.Results.date_range)
