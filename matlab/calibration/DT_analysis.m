@@ -65,7 +65,12 @@ IT=0.1147;
 %       [c, ia] = intersect(fech,date_select);    
 %       raw=raw(ia);
 %    end
+
 raw=ozone_raw0{Cal.n_inst};   
+% Eliminamos dias "vacios"
+IDX=cellfun(@(x) ~isempty((x)),raw,'UniformOutput',true);  
+raw=raw(IDX);
+
 if ~isempty(date_select)
    fech=cellfun(@(x) fix(x(1,1)),raw);
    raw=raw(fech>date_select(1)); fech=fech(fech>date_select(1));
