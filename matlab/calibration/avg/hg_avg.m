@@ -6,6 +6,8 @@
 %     disp('OUTLIERS HG');
 %     disp(datestr(hga(dx,1)))
 % 12/11/2010 Isabel  Introducido nuevo output para los outliers.
+% 06/2015 ALBERTO Added severall columns
+
 
 %%
 function [hga,OutHG]=hg_avg(file,varargin)
@@ -21,11 +23,15 @@ arg.addParamValue('date_range', [], @isfloat); % por defecto, no control de fech
 % Validamos los argumentos definidos:
 arg.parse(file, varargin{:});
 %%
+a2=[];
 try
     a=textread(file,'');
 catch
     try
-        a=read_avg_line(file,4);
+        [a,a2]=read_avg_line(file,[4,7]);
+        if ~isempty(a2)
+            a=[a;a2(:,1:4)];
+        end
     catch
         disp(file);
         aux=lasterror;

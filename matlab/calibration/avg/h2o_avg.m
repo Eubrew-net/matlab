@@ -1,5 +1,5 @@
 function [h2o,Outliers]=h2o_avg(file,varargin)
-
+% 06/2015 ALBERTO Added severall columns
 % 1. Julian day (jjjyy)
 % 2. Temperature at the PMT (°C)
 % 3. ‘Fan’ Temperature in °C - used in the absolute humidity calculation.
@@ -20,8 +20,13 @@ arg.parse(file, varargin{:});
 mmv2struct(arg.Results);
 
 %%
+a2=[];
 try
-  a=read_avg_line(file,1000);
+  %a=read_avg_line(file,6);
+   [a,a2]=read_avg_line(file,[6,4]);
+        if ~isempty(a2)
+            a=[[a2,NaN*a2(:,1:2)];a];
+        end
 catch
   disp(file);  aux=lasterror;  disp(aux.message)
   return;
