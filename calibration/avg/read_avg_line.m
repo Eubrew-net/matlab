@@ -1,11 +1,16 @@
-function [avg,ERR]=read_avg_line(file_input,NCOLS)
+function [avg,avg2,ERR]=read_avg_line(file_input,NCOLS)
 
 
 avg=[];
+avg2=[];
 ERR=[];
 jerr=1;
-if nargin==1 NCOLS=18; end
-
+if nargin==1 NCOLS=18; 
+else
+if length(NCOLS)==1
+    NCOLS(2)=NCOLS(1);
+end
+end
 % leemos el fichero fuente
     fid=fopen(file_input,'rt');
    
@@ -17,10 +22,13 @@ idx=1; count_=[]; avg_={};
 while ~feof(fid)
    s=fgets(fid);
    try
-      [A,COUNT,ERRMSG,NEXTINDEX]=sscanf(s,'%f\r\n',Inf);   count_=[count_,COUNT];
+      [A,COUNT,ERRMSG,NEXTINDEX]=sscanf(s,'%f\r\n',Inf);
+      count_=[count_,COUNT];
       avg_{idx}=A;  idx=idx+1;
-      if COUNT==NCOLS  
+      if COUNT==NCOLS(1)  
          avg=[avg;double(A)'];
+      elseif COUNT==NCOLS(2)
+         avg2=[avg2;double(A)'];
       end
    catch
      ERR{jerr}={s,ERRMSG,COUNT};
