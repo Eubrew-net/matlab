@@ -23,13 +23,18 @@ elseif nargin==2
 elseif nargin==3
     outlier_flag=0;
 end
-    
+a=[];
+a2=[];
+
 try
     a=textread(file,'');
 catch
     try
         %% DT file has 3 columns
-        a=read_avg_line(file,3);
+        [a,a2]=read_avg_line(file,[3,7]);
+        if ~isempty(a2)
+          a=[a;a2(:,1:3)];
+        end
     catch
         disp(file);
         aux=lasterror;
@@ -81,7 +86,7 @@ end
 f=figure; set(f,'tag','DTAVG');
 num_lab=10;         labs=linspace(dta(1,1),dta(end,1),num_lab);
 plot(dta(:,1),dta(:,4),'ks',dta(:,1),dta(:,5),'bo');
-if nargin>1
+if nargin>2
 set(gca,'XLim',[date_range(1)-4 dta(end,1)+4]);
 end
 p3=hline(ref(1).*1e9,'r-',num2str(ref(1)));
