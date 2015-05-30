@@ -50,8 +50,8 @@ axes(ha(1)); sampl1=cell2mat(cellfun(@(x) x(:,5),att,'UniformOutput',0));
 ploty([att{1}(:,1),100*matdiv(matadd(sampl1(:,2:end),-nanmean(sampl1(:,2:end))),nanmean(sampl1(:,2:end)))],'*-'); 
 set(gca,'XTicklabel',[],'YTickLabelMode','auto','box','on'); grid;
 title(sprintf('%s\r\nND attenuations vs. time (sample slits #3, top, and #5, bottom)',Cal.brw_name{Cal.n_inst}));
-legendflex(label_filter(2:end),'ref', ha(1),'anchor', {'sw','sw'},'buffer',[6 0],...
-                         'nrow',1,'fontsize',8,'box','off','xscale',.5);                   
+%legendflex(label_filter(2:end),'ref', ha(1),'anchor', {'sw','sw'},'buffer',[6 0],...
+%                         'nrow',1,'fontsize',8,'box','off','xscale',.5);                   
 % slit#5
 axes(ha(2)); sampl1=cell2mat(cellfun(@(x) x(:,7),att,'UniformOutput',0));
 ploty([att{1}(:,1),100*matdiv(matadd(sampl1(:,2:end),-nanmean(sampl1(:,2:end))),nanmean(sampl1(:,2:end)))],'*-'); 

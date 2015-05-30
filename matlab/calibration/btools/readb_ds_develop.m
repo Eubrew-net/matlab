@@ -116,7 +116,12 @@ jsc=strmatch('sc',l);
 %read header
 
 buf=l{1}; % get first line, should be version...
+%wrong with new version ??
+
 if any(strmatch('version',buf))==1, %then OK
+    if size(buf)<20
+        buf=[l{1}(1:end-1),l{2}]; 
+    end
     ind=find(buf==char(13));
     lat=str2num(buf(ind(6):ind(7)));
     long=str2num(buf(ind(7):ind(8)));

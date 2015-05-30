@@ -383,7 +383,8 @@ if ~isempty(x)
     h0=plot(X,a(:,8).*a(:,11),'s'); set(gca,'LineWidth',1);
     hold on;
     hconf=confplot(x,y,delta); set(hconf(1),'Marker','none')
-    ylim([300 1700]); xlim(xlims);
+    ylim([300 1700]);
+    %xlim(xlims);
     hold on;
     h1=plot(X,a(:,8).*a(:,11),'o');
     

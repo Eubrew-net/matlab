@@ -327,7 +327,7 @@ if  nargin~=3 && ~strcmp(name_a,name_b)
     
     %figure by day
   if plot_flag     
-    f=figure;
+    f=double(figure);
     set(f,'Tag','RATIO_DAY');
     
     dias=unique(diaj(data(:,1)));
