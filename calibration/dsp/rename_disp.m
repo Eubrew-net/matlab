@@ -37,7 +37,11 @@
  
 origen=pwd;
 [pathstr,name,ext]=fileparts(path_a_brewer); 
-cd(pathstr); s=dir(cat(2,name,ext));
+if isempty(pathstr)
+    pathstr='.';
+end
+cd(pathstr);
+s=dir(cat(2,name,ext));
 
 disp_lines=[
 % wl(A)     Line no.    Lamp type    Line no.       Slits
@@ -111,7 +115,9 @@ toc
 rename(origen)
 
 function rename(dir_cal)
-cd ./renamed ; s=dir('W*');
+%mkdir renamed
+cd ./renamed ;
+s=dir('W*');
 tic
 for i=1:length(s)
     % problema con la extension;

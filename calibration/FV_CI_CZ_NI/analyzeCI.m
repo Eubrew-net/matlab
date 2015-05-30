@@ -30,6 +30,7 @@ function [LRatPFHT ErrorRaCI]=analyzeCI(path,nameb,varargin)
 %                     Se comenta el que muestre los outliers,CIFiles=dir(path);
 % 16/03/2013 Juanjo:  Modificado para aceptar diferentes años, siempre con la estructura del
 %                     repositorio !! yyyy/bdata###
+% 05/2015 Alberto  iteractive legend removed by compatibility issues 
 
 %% Validacion de argumentos de entrada
 arg = inputParser;   % Create instance of inputParser class.
@@ -250,7 +251,7 @@ hold on;
 plot(CLongRatiosPFiles(:,1),nanmean(CLongRatiosPFiles(:,3:end)'),'r-','LineWidth',1.5);
 if depuracion
     legend(P,cellstr(datestr(FHj)),-1);
-    interactivelegend(P,cellstr(num2str(diaj(FHj))));
+    %interactivelegend(P,cellstr(num2str(diaj(FHj))));
 end
 
 figure;

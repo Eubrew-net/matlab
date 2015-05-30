@@ -11,7 +11,7 @@ function [sl_mov,sl_median,oulier,R6]=sl_report_jday(idx_inst,sl,brw_name,vararg
 %                    fplot=0, no ploteo
 %                    Se muestran al final del script los parametros que han tomado un valor por defecto
 %
-% Juanjo 09/02/2011: Se añade nuevo input opcional: diaj_flag (por defecto 1)
+% Juanjo 09/02/2011: Se a?ade nuevo input opcional: diaj_flag (por defecto 1)
 %                    Valores posibles:
 %                    1-> se trabaja con dia juliano
 %                    0-> se trabaja con fecha matlab
@@ -19,9 +19,9 @@ function [sl_mov,sl_median,oulier,R6]=sl_report_jday(idx_inst,sl,brw_name,vararg
 %                    comentando la salida de valores por defecto para limpiar los report html
 %                    TODO: redirigir esta salida a una variable log
 % 
-% Juanjo 14/09/2011: Se añade condicional del tipo if isempty() return 
+% Juanjo 14/09/2011: Se a?ade condicional del tipo if isempty() return 
 %                    para salir en caso de no data
-% Juanjo 18/02/2013: Se añade R5 vs Temp. plot
+% Juanjo 18/02/2013: Se a?ade R5 vs Temp. plot
 
 %% Validacion de argumentos de entrada
 arg = inputParser;   % Create instance of inputParser class.
@@ -115,24 +115,28 @@ ncols=[22,21,13,23,24];
 try
     [m,s]=grpstats(sls(:,[1,ncols]),fix(sls(:,1)),{@median,'std'});
 catch
-
+   if size(sls,1)>1 
     [m,s]=grpstats(sls(:,[1,ncols]),fix(sls(:,1)),{'mean','std'});
     
     for i=1:5
         med=grpstats(sls(:,ncols(i)),fix(sls(:,1)),{@nanmedian});
         m(:,i+1)=med;
     end
+   else
+    m=NaN*ones(1,11);
+    s=NaN*ones(1,11);
+   end
 end
 sl_median=orgavg([m,s]); %time and (median,std ) of 'R6','R5','T','F1','F5';
 sl_median(:,2)=[]; sl_median=sortrows(sl_median,1);
 
-% sl_mov contiene los valores suavizados (media móvil de 7 días). Entonces,
-% ¿por que el if?. Aunque tengamos menos de 5 días podemos seguir
-% calculando valores suavizados. Por eso he comentado (si no, cuando size(sl_median,1)<5 entonces no tendríamos una media
-% móvil, sino que seguiriamos teniando las medias diarias, sl_median. Además, con sl_mov(:,1)=sl_mov(:,1)+.5; los dos ploteos, 
-% aunque idénticos, salen desfasados en medio día)
+% sl_mov contiene los valores suavizados (media m?vil de 7 d?as). Entonces,
+% ?por que el if?. Aunque tengamos menos de 5 d?as podemos seguir
+% calculando valores suavizados. Por eso he comentado (si no, cuando size(sl_median,1)<5 entonces no tendr?amos una media
+% m?vil, sino que seguiriamos teniando las medias diarias, sl_median. Adem?s, con sl_mov(:,1)=sl_mov(:,1)+.5; los dos ploteos, 
+% aunque id?nticos, salen desfasados en medio d?a)
 % Los valores suavizados se calculan, por ejemplo para una ventana de 5,
-% según
+% seg?n
 % 
 % yy(1) = y(1)
 % yy(2) = (y(1) + y(2) + y(3))/3
@@ -140,9 +144,9 @@ sl_median(:,2)=[]; sl_median=sortrows(sl_median,1);
 % yy(4) = (y(2) + y(3) + y(4) + y(5) + y(6))/5
 % ...
 % 
-% o sea, a partir de una vecindad del punto considerado. Entonces, ¿por qué
-% N_dat=15 por defecto? Si interesa una media móvil a 7 días, creo que
-% sería mejor N_dat=7 (tres pa`lante y trs pa´trás)
+% o sea, a partir de una vecindad del punto considerado. Entonces, ?por qu?
+% N_dat=15 por defecto? Si interesa una media m?vil a 7 d?as, creo que
+% ser?a mejor N_dat=7 (tres pa`lante y trs pa?tr?s)
 
  if size(sl_median,1)>5 
   sl_mov=interp_sm(sl_median,7);
@@ -308,7 +312,7 @@ end
 
 
    %la interpolacion no permite nan
-   % el suavizado si ï¿½?
+   % el suavizado si ????
    j=find(isnan(data_avg(:,1)));
    if ~isempty(j)
      data_avg(j,:)=[];

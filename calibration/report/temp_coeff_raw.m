@@ -418,7 +418,7 @@ set(gca,'LineWidth',1);
 ylabel('R6');
 xlabel('temperature (ºC)')
 % mmplotyy('shrink');
-suptitle(brw_name{n_inst})
+title(brw_name{n_inst})
 % legend(gca,{'R6','R6 new','R5','R5 new'},'Location','NorthEast','HandleVisibility','Off');
 legend(gca,{'R6','R6 new'},'Location','Best','HandleVisibility','Off');
 orient portrait;
@@ -540,7 +540,7 @@ end
           xlabel('PMT Temperature (ºC)');
       end
      end
-     suptitle(sprintf('%s: %s',brw_name{n_inst},'Temperature coeff new.'));
+     title(sprintf('%s: %s',brw_name{n_inst},'Temperature coeff new.'));
 end
 if chk
     % Se muestran los argumentos que toman los valores por defecto

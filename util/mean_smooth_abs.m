@@ -22,10 +22,14 @@ if nargin >=3
       aux=y_sort;
       aux(isnan(aux(:,end)),:)=[];
       aux2=(matadd(aux(:,[6,7]),-aux(:,2)));
-    errorfill(aux(:,1)',aux(:,2)',aux(:,3)','b');
-    hold on
-    f=errorfill(aux(:,1)',aux(:,2)',abs([aux2(:,1),aux2(:,2)])','r');
-    box on; grid;
+     try
+      errorfill(aux(:,1)',aux(:,2)',aux(:,3)','b');
+       hold on
+      f=errorfill(aux(:,1)',aux(:,2)',abs([aux2(:,1),aux2(:,2)])','r');
+       box on; grid;
+     catch
+       disp('Error plot');
+     end
     end
 end
         

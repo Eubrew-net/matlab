@@ -20,6 +20,9 @@ l=mmstrtok(s,char(10));
 
 buf=l{1}; % get first line, should be version...
 if any(strmatch('version',buf))==1, %then OK
+    if size(buf)<20
+        buf=[l{1}(1:end-1),l{2}]; 
+    end
     ind=find(buf==char(13));
     lat=str2num(buf(ind(6):ind(7)));
     long=str2num(buf(ind(7):ind(8)));
@@ -51,7 +54,7 @@ if any(strmatch('inst',buf))==1, %then OK
     TC=[TC(:)',cfg(25)]; % temperature coef for lamda1
     cfg(51)=NaN; % UV zenith no in header
     cfg(52:end)=[]; % no suport for extended config
-    config=[NaN;cfg]; % añadimos la fecha
+    config=[NaN;cfg]; % a?adimos la fecha
 
 else
     % chapuza para el b171-------------------REVISAR
@@ -88,7 +91,7 @@ else
     cfg(24:25)=[]; %com port
     TC=[TC(:)',cfg(25)]; % temperature coef for lamda1
     cfg(51)=NaN; % UV zenith no in header
-    config=[NaN;cfg]; % añadimos la fecha
+    config=[NaN;cfg]; % a?adimos la fecha
 end
 
 

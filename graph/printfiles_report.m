@@ -96,6 +96,7 @@ end
 cwd=pwd; cd(patern);
 naux=0; % contador de figuras
 figuras={};
+figura='figura';
 try
  for i=n0
      set(findobj(gcf,'Tag','legend'),'HandleVisibility','Off');
