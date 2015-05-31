@@ -2,16 +2,16 @@
  function rename_disp(path_a_brewer)
  
 % Renombra los ficheros de dispersion W en longitudes de onda crecientes 
-% (ver abajo, linea 32), moviéndolos al directorio renamed creado 
-% dentro del señalado por path_a_brewer.
+% (ver abajo, linea 32), movi?ndolos al directorio renamed creado 
+% dentro del se?alado por path_a_brewer.
 % 
-% path_a_brewer será el patrón de búsqueda, INCLUIDO el path al directorio
-% donde están los ficheros W. 
+% path_a_brewer ser? el patr?n de b?squeda, INCLUIDO el path al directorio
+% donde est?n los ficheros W. 
 %  
 %       Ejemplo:  rename_disp('.\bdata205\205\W*.205')
 % 
-% En el caso de estar trabajando en el propio directorio donde están los W,
-% habrá que escribir, por ejemplo, '.\W*.205'
+% En el caso de estar trabajando en el propio directorio donde est?n los W,
+% habr? que escribir, por ejemplo, '.\W*.205'
 %
 % 
 % lineas  orden    lamp           tom_granar
@@ -20,18 +20,18 @@
 %  ...     ...      ......
 % 
 % TODO: reescribir el fichero con la longitud de onda correcta ?
-%      ¿longitud de onda 3080.822?
+%      ?longitud de onda 3080.822?
 % 
-% Modificado: 30/11/2009 Juanjo: Corregido el patrón de busqueda de brewer
-%             05/03/2010 Juanjo: Se redefine el patrón de búsqueda (ver arriba).
-%                        Se añade información a la variable disp_lines, 
+% Modificado: 30/11/2009 Juanjo: Corregido el patr?n de busqueda de brewer
+%             05/03/2010 Juanjo: Se redefine el patr?n de b?squeda (ver arriba).
+%                        Se a?ade informaci?n a la variable disp_lines, 
 %                        segun "Investigation of the wavelength accuracy of
-%                        Brewer spectrophotometers", J. Gröbner. Slits
-%                        tomadas de A. Redondas. Se modifican líneas 113 a
+%                        Brewer spectrophotometers", J. Gr?bner. Slits
+%                        tomadas de A. Redondas. Se modifican l?neas 113 a
 %                        121. Ahora, para dia ddd, se crea el
 %                        directorio ###_yy_ddd+1 donde se llevaran los
 %                        ficheros correspondientes a ddd, ddd+1 y ddd+2. Se
-%                        garantiza así el buen funcionamiento de dsp_report
+%                        garantiza as? el buen funcionamiento de dsp_report
 %                        (ver linea 10, day=day-1:day+1;). Testado con
 %                        brewer #201 y #205
  
@@ -69,7 +69,9 @@ disp_lines=[
 tic
 for i=1:length(s)
      name_old=sscanf(upper(s(i).name),'W%01d%01d%03d%02d.%03d');
-
+     if isempty(name_old)  %% new volodya software
+        name_old=sscanf(upper(s(i).name),'W%01c%01d%03d%02d.%03d');
+     else
      if length(name_old)<=1
         name_old=sscanf(s(i).name,'%02d%01d%03d%02d.%03d');
      end
@@ -79,6 +81,7 @@ for i=1:length(s)
        name_old=sscanf(upper(s(i).name),'W%01d%01d%03d%02d%*03c.%03d');
        end  
      end
+     end
     try 
      line=fileread(s(i).name);
      line_no=sscanf(line,'%f');
@@ -86,14 +89,14 @@ for i=1:length(s)
      j=find(disp_lines(:,1)==line_no(1));
      if ~isempty(j)
          j=disp_lines(j,2);% orden asignado a la long. de onda
-         name_old(1)=j;% cambiamos línea por orden asignado
+         name_old(1)=j;% cambiamos l?nea por orden asignado
 
          if j<=9
            name_new=sprintf('W%01d%01d%03d%02d.%03d',name_old);
          else
            name_new=sprintf('W%02d%01d%03d%02d.%03d',name_old);
          end
-
+         disp(s(i).name)
          disp(name_new)
          if exist('renamed','dir')~=7 % si no es un directorio lo creamos
             mkdir('renamed')
@@ -115,7 +118,7 @@ toc
 rename(origen)
 
 function rename(dir_cal)
-%mkdir renamed
+mkdir renamed
 cd ./renamed ;
 s=dir('W*');
 tic
