@@ -111,6 +111,10 @@ end
     buf=l{1}; % get first line, should be version...
 
     if any(strmatch('version',buf))==1, %then OK
+        
+         if size(buf)<20
+          buf=[l{1}(1:end-1),l{2}]; 
+          end
         ind=find(buf==char(13));
         lat=str2num(buf(ind(6):ind(7)));
         long=str2num(buf(ind(7):ind(8)));
@@ -224,7 +228,7 @@ if ~isempty(sls) && ~isempty(timesl) %controla si no hay sl
     F=ds_counts(F_,sl(:,2),sl_temp,sl(:,6),DT(1,:),zeros(size(TC(1,:))),AT(1,:)); % correccion 0 de temperatura
     
     
-    sl_raw.sl=[timesl,sl(:,1:13),F,sl(:,14:end),sls(idx_sl,19:22)]; % añadimos r5 r6 f1 f5 del sumario
+    sl_raw.sl=[timesl,sl(:,1:13),F,sl(:,14:end),sls(idx_sl,19:22)]; % a?adimos r5 r6 f1 f5 del sumario
     sl_raw.sls=[timesls,sls];
    
     
