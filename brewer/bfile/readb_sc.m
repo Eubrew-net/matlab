@@ -2,7 +2,7 @@ function [sc,sc_raw,co,o3]=readb_sc(bfile,config_file,varargin)
 %function [sc,sc_meas,co]=readb_sc(bfile,config_file)
 %  Input : fichero B, configuracion (ICF en formato ASCII)
 %  Output:
-%          sc: [ fecha, año, diaj, hh,mm,dd, steps revolution]
+%          sc: [ fecha, a?o, diaj, hh,mm,dd, steps revolution]
 %          sc_d  : siting TODO
 %          co  : cell array co todos los comentarios
 %
@@ -18,8 +18,8 @@ function [sc,sc_raw,co,o3]=readb_sc(bfile,config_file,varargin)
 % revisar linea 77
 % 
 %  MODIFICADO:  
-%  Juanjo 08/02/2012: Añadido condicional para evitar problemas cuando se detiene el sc
-%                    (HOME key pressed) -> líneas 120:122
+%  Juanjo 08/02/2012: A?adido condicional para evitar problemas cuando se detiene el sc
+%                    (HOME key pressed) -> l?neas 120:122
 %  Alberto 2014: Suppresed correctes
 
 sc=[];
@@ -58,6 +58,10 @@ try
     if isunix
        c=(strrep(strtrim(mmcellstr(l{jloc(1)},char(13))),' ','_')); 
        %c=mmstrtok(strrep(l{jloc(1)},char(13),','),','); 
+        if size(c,1)<20  % version 3
+         c2=(strrep(strtrim(mmcellstr(l{jloc(1)+1},char(13))),' ','_'));  
+         c=[c(1);c2];
+        end
        loc=c{6};
        c([1:2,6,10])=[];
        c=cellfun(@str2num,c);
@@ -88,7 +92,7 @@ else
 end
 
 
-    time_hg=sort(hg(1,:)*60+hg(2,:)+hg(3,:)/60); %a minutos. Lo de sort es un APAÑO
+    time_hg=sort(hg(1,:)*60+hg(2,:)+hg(3,:)/60); %a minutos. Lo de sort es un APA?O
     flaghg=abs(hg(5,:)-config(14))<2; % more than 2 steps change
     if size(hg,2)>1
         flag_hg=find(diff(flaghg)==-1);   %
@@ -237,7 +241,7 @@ end
                 j=find(hgscan(:,1)>time_end,1,'first');
                 hg_end=hgscan(j,:);
 
-                %añadir al avg---> completar
+                %a?adir al avg---> completar
                 if ~isempty(hg_end) & ~isempty(hg_start)
                     sc_flag=hg_end(6)-hg_start(6);
                 else

@@ -1,30 +1,30 @@
 function [sl_raw,TC,slraw_c]=readb_sl_rawl(path,varargin)
 % MODIFICADO:
-%  Juanjo 21/01/2011: Redefino los inputs de la función (Chequeada con la sintaxis original)
+%  Juanjo 21/01/2011: Redefino los inputs de la funci?n (Chequeada con la sintaxis original)
 %                     Obligatorio; path a ficheros B (normalmente bfile)
 %                     Otros dos opcionales;
 %                       - 'date_range' -> array de uno o dos elementos (fecha matlab)
 %                                         Lo interesante es que se aplica al directorio !!
 %                       - 'f_plot' -> 1=ploteo, 0=no ploteo 
 % 
-%  Juanjo 19/04/2011: Si f_plot=1 se plotean los summarios leídos de ficheros B. Dos gráficos:
-%                     1) sectores con número de sumarios por día (curiosidad)
+%  Juanjo 19/04/2011: Si f_plot=1 se plotean los summarios le?dos de ficheros B. Dos gr?ficos:
+%                     1) sectores con n?mero de sumarios por d?a (curiosidad)
 %                     2) ploteo de R6 sumario + temperatura sumario
 % 
-%  Juanjo 10/05/2011: Si existe en bdata### un B*_dep, lo leerá 
+%  Juanjo 10/05/2011: Si existe en bdata### un B*_dep, lo leer? 
 % 
 %
-% Juanjo 14/09/2011: Se añade condicional del tipo if isempty() return 
+% Juanjo 14/09/2011: Se a?ade condicional del tipo if isempty() return 
 %                    para salir en caso de no data
 %
-% Juanjo 22/09/2011: Se añade depurador de ficheros: los ficheros que no cumplan la sintaxis
+% Juanjo 22/09/2011: Se a?ade depurador de ficheros: los ficheros que no cumplan la sintaxis
 %                    Bdddyy.### son descartados
 % 
-% 16/03/2013 Juanjo: Modificado para aceptar diferentes años, siempre con la estructura del
+% 16/03/2013 Juanjo: Modificado para aceptar diferentes a?os, siempre con la estructura del
 %                    repositorio !! yyyy/bdata###
 
 
-%%%%%%%   VALIDACIÓN DE ARGUMENTOS DE ENTRADA    %%%%%%%%%%%%
+%%%%%%%   VALIDACI?N DE ARGUMENTOS DE ENTRADA    %%%%%%%%%%%%
 arg = inputParser;   % Create instance of inputParser class.
 arg.FunctionName = 'readb_sl_rawl';
 
@@ -54,7 +54,7 @@ catch % compatibilidad con version original
   end
 %   chk=0;
 end
-%%%%%%%   FIN DE VALIDACIÓN   %%%%%%%%%%%%%%%
+%%%%%%%   FIN DE VALIDACI?N   %%%%%%%%%%%%%%%
 
 %% FILES search
 sl_avg=[]; sl_raw=[]; TC=[];
@@ -105,7 +105,7 @@ end
     
 % control de fechas
 if ~isempty(date_range)
-%                  Año    Dia
+%                  A?o    Dia
    dates=datejuli(A(:,2),A(:,1));    
    FilesB(dates<date_range(1))=[]; paths(dates<date_range(1))=[]; dates(dates<date_range(1))=[]; 
    if length(date_range)>1
@@ -132,7 +132,8 @@ for i=1:length(FilesB)
          file=fullfile(paths{i},[nam,'_dep',ext]); 
       else
          file=fullfile(paths{i},FilesB{i});
-      end      
+      end 
+      
       [slraw,TC_]=readb_sl_raw(file);
       %sl_raw=[sl_raw;slraw.sl];
       %TC=[TC,[slraw.sls_dep,TC_(3,:)]'];
