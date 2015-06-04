@@ -35,8 +35,8 @@ ql=[NaN*zeros(nlin(1),length(l0)+2)];
 
 for i=1:nlin(1)
     if length(lin{i})>100
-        l=sscanf(lin{i},'%f');% nos queda por leer min y seg del ql (último campo de cada registro)
-        [aux,time]=strtok(lin{i},':');% aquí lo hacemos
+        l=sscanf(lin{i},'%f');% nos queda por leer min y seg del ql (?ltimo campo de cada registro)
+        [aux,time]=strtok(lin{i},':');% aqu? lo hacemos
         time=sscanf(time,':%02d:%02d');
         if length(l)==length(l0)
            ql(i,:)=[l;time];
@@ -45,15 +45,16 @@ for i=1:nlin(1)
         end
     end
 end
-% ya tenemos leído el archivo ql
+% ya tenemos le?do el archivo ql
 ql(find(isnan(ql(:,1))),:)=[];
 
 %fecha en formato matlab
-fecha=brewer_date(ql(:,2)); fecha(:,1)=fecha(:,1) + ql(:,end-2)/24 + ql(:,end-1)/24/60;
+fecha=brewer_date(ql(:,2)); 
+fecha(:,1)=fecha(:,1) + ql(:,end-2)/24 + ql(:,end-1)/24/60;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    j=find(datenum(fecha(:,2),fecha(:,3),fecha(:,4))<dateref | ...
-           datenum(fecha(:,2),fecha(:,3),fecha(:,4))>dateref);
+    j=find(datenum(fecha(:,2),fecha(:,3),fecha(:,4))<dateref)% | ...
+           %datenum(fecha(:,2),fecha(:,3),fecha(:,4))>dateref);
 
 ql(j,:)=[];
 fecha(j,:)=[];
@@ -66,11 +67,11 @@ meas=ql(:,8:2:end-3);           % solo cuentas
 [path_,file_,ext]=fileparts(file);
 file=[file_,ext];
 qfile=strrep(file,'_','');      % nombre
-lamp=sscanf(qfile,'%*2c%d.%d'); % extraemos el nombre de la lámpara 
+lamp=sscanf(qfile,'%*2c%d.%d'); % extraemos el nombre de la l?mpara 
 inst=lamp(2);                   % intrumento
 lamp=lamp(1);                   % lampara                
 
-% intentamos cargar el fichero de la lámpara
+% intentamos cargar el fichero de la l?mpara
 % ponerlo en el path del matlab
 ir=[];
 try
@@ -124,9 +125,10 @@ if ~isempty(qlamp)
     % PLOTEO MEDIA/ SIGMA -> generado por grpstats
     % deteccion de outlier experimental
         figure;     orient landscape
-        suptitle(sprintf('%s%s %s',file,': SCAN´S',' (dif. rel. al promedio, %)'));
+        
         subplot(3,1,1:2);
-%         referencia: promedio de los scans
+       
+        %referencia: promedio de los scans
 
         plot(lamda(1,:),(ql_data.ql-repmat(med_d,size(ql,1),1))./repmat(med_d,size(ql,1),1).*100);
 %         referencia: scan particular 
@@ -135,6 +137,7 @@ if ~isempty(qlamp)
         set(gca,'XTickLabel',[],'YLim',[-2 2]); set(findobj(gca,'Type','Line'),'Linewidth',2);
         leg=strcat(datestr(ql_data.date(:,1),15),' T=',num2str(ql(:,4)));
         legend(leg,'Location','SouthEast');  set(gca,'FontWeight','Bold');
+        title(sprintf('%s%s %s',file,': SCAN?S',' (dif. rel. al promedio, %)'));
         grid;
 
         subplot(3,1,3);    
