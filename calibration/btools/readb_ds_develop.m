@@ -558,8 +558,11 @@ if ~isempty(sls)
 % cuentas recalculadas con las ctes del fichero/config1
 
      [sls_m,sls_std]=grpstats(ratios,idx_sl,{'mean','std'});
-     sls(:,15:22)=sls_m;
-     sls(:,23:30)=sls_std;
+     % warning
+     if size(sls_m,1)==size(sls,1)
+       sls(:,15:22)=sls_m;
+       sls(:,23:30)=sls_std;
+     end
      sl_data.sls_c=[timesls,sls];
      sl_data.sl_c=[timesl,DS,ratios];
      % time cuentas/sec ratios
@@ -571,8 +574,10 @@ if ~isempty(sls)
       %      figure   plot(sls_m./sls(:,15:22))    legend('ms4','ms5','ms6','ms7','ms8','ms9','w1','w5');
      % Sumario
      [sls_m,sls_std]=grpstats(ratios2,idx_sl,{'mean','std'});
+     if size(sls_m,1)==size(sls,1)
      sls(:,15:22)=sls_m;
      sls(:,23:30)=sls_std;
+     end
      sl_data.sls_cr=[timesls,sls];
    end
 
