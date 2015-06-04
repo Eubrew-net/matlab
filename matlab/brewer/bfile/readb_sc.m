@@ -69,9 +69,14 @@ try
        %c=textscan(strrep(strrep(strtrim(l{jloc(1)}),' ','_'),char(13),' '),fmt_head);
     elseif ispc
        c=textscan(l{jloc(1)},fmt_head,'delimiter',char(10));
+       if size(c,1)<20  % version 3
+          x=[l{jloc(1)}(1:end-1),l{jloc(1)+1}];  
+          c=textscan(x,fmt_head,'delimiter',char(10));  
+       end
        loc=c{5};
        c(5)=[];
        c=cell2num(c);
+       
     end
     
     datebfile=datenum(c(4)+2000,c(3),c(2));
