@@ -62,12 +62,12 @@ ozone_dzraw0={};
 ozone=[];
 
 if nargin<=2
-    bfile_p='BFILES'; fpath='';
+    bfile_p='bfiles'; fpath='';
 else
     bfile_p=fpath;
 end
 %default
-if isempty(fpath) bfile_p='BFILES'; end 
+if isempty(fpath) bfile_p='bfiles'; end 
 
 index_day=1;
 for dd=CALC_DAYS
