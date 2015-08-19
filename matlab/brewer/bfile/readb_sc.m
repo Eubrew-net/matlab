@@ -58,8 +58,9 @@ try
     if isunix
        c=(strrep(strtrim(mmcellstr(l{jloc(1)},char(13))),' ','_')); 
        %c=mmstrtok(strrep(l{jloc(1)},char(13),','),','); 
-        if size(c,1)<20  % version 3
-         c2=(strrep(strtrim(mmcellstr(l{jloc(1)+1},char(13))),' ','_'));  
+        if size(c,1)<6  % version 3
+         c2=(strrep(strtrim(mmcellstr(l{jloc(1)+1},char(13))),' ','_'));
+         c3=(strrep(strtrim(mmcellstr(l{jloc(1)+2},char(13))),' ','_'))
          c=[c(1);c2];
         end
        loc=c{6};
@@ -265,7 +266,8 @@ end
                 sc_raw=[sc_raw;sc_aux];
 
                else % error measure.
-                  disp( char(l{ini_med+1:fin_med-1})' )
+                   disp('Error in measure')
+                   %disp( char(l{ini_med+1:fin_med-1})' )
                end
 
             end
