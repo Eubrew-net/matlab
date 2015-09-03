@@ -101,7 +101,7 @@ else
     jok=ones(size(sls(:,2)));    jok=find(jok==1);     jok_no=[];
 end
 sls_outhg=sls(jok_no,:);
-sls=sls(jok,:); R6=sls(:,[1,22,13]);
+sls=sls(jok,:); R6=sls(:,[1,22,21,13,23,24]);
 
 
 %   jok(dx)=0;
