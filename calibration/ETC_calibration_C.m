@@ -1,5 +1,4 @@
 function [ETC,o3_c,m_netc]=ETC_calibration_C(file_setup,summary,A,instrumento,referencia,tsync,oscmax,szasync,C_DAYS,varargin)
-
 %function [ETC_NEW,o3c,m_netc]=ETC_calibration_C(file_setup,summary,instrumento,refernecia,tsync,oscmax,szasync,C_DAYS)
 %% Parametros de configuracion de momeno harcoded
 % alberto: introducido oscmax para 2p y 1p calibration
@@ -32,7 +31,7 @@ function [ETC,o3_c,m_netc]=ETC_calibration_C(file_setup,summary,A,instrumento,re
 % 
 % o3_c: datos simultaneos usados en el calculo
 % Columnas  1  y 2
-% date,dif_date,
+% date 1,date 2,
 % Ref->3-14
 %  sza,airm, temp,filter,ozono_r sigma_r  ms9 sm9  ozone_1 sigma_1, ozone_sl sigma_sl
 % Inst to calibrate->15-26
@@ -61,8 +60,9 @@ function [ETC,o3_c,m_netc]=ETC_calibration_C(file_setup,summary,A,instrumento,re
 %                     Poder elegir los dias
 %
 % MODIFICATIOS:
-% 01/10/2011 (Juanjo): Redefino m_netc. Además del campo 10 de inst (campo 23  de o3_c), 
-%                      uso el campo 6 (campo 19 de o3_c) (línea 325). Necesario para tablas correctas 
+% 2015 : output modified.
+% 01/10/2011 (Juanjo): Redefino m_netc. Adem?s del campo 10 de inst (campo 23  de o3_c), 
+%                      uso el campo 6 (campo 19 de o3_c) (l?nea 325). Necesario para tablas correctas 
 %
 %function [ETC,o3_c,m_netc,cal_data]=ETC_calibration(file_setup,summary,A,...
 %    instrumento,referencia,tsync,oscmax,szasync,C_DAYS)
@@ -131,7 +131,7 @@ ref=summary{n_ref}(jday,:);
          n_min=T_SYNC;
          %OSC_MAX=1.5;
          [aa,bb]=findm_min(ref(:,1),inst(:,1),n_min/MIN);
-         o3_c=[ref(aa,1),ref(aa,1)-inst(bb,1),ref(aa,2:end),inst(bb,2:end)];
+         o3_c=[ref(aa,1),inst(bb,1),ref(aa,2:end),inst(bb,2:end)];
          
          
  % o3_c simultaneous data;
@@ -146,7 +146,7 @@ ref=summary{n_ref}(jday,:);
          
      
 % eliminanos los nan (filtros no contemplados)
-         o3_c=o3_c(~isnan(o3_c(:,21)),:);
+        o3_c=o3_c(~isnan(o3_c(:,21)),:);
 % diferencia en angulo zenital en %  
         % este parameetro es determinante sobretodo con tiempos de
         % sincronizacion grandes
@@ -349,7 +349,7 @@ ref=summary{n_ref}(jday,:);
 
  end   
 
-% evaluation with the new ETC (sólo el rango seleccionado)
+% evaluation with the new ETC (s?lo el rango seleccionado)
          o3_new=(ms9(j)-ETC_NEW)./(o3_c(j,16)*10*A);
          o3_c=[o3_c(j,:),o3_new];
          
@@ -359,7 +359,7 @@ ref=summary{n_ref}(jday,:);
 %             si summary_old -> O3 original sin SL) 
 %   4-> inst: si summary     -> O3 recalculado + SL correct 
 %             si summary_old -> O3 original + SL correct)  
-%   5-> inst  O3 recalculado con nueva ETC (ver ariba, líneas 287-8)  
+%   5-> inst  O3 recalculado con nueva ETC (ver ariba, l?neas 287-8)  
          [m,s,n,grpn]=grpstats(o3_c(:,[1,13,19,23,25,end]),{diaj(o3_c(:,1))},{'mean','std','numel','gname'});         
          m_netc=round([m(:,1),m(:,2),s(:,2),n(:,2),...%ref + sl
                        m(:,3),s(:,3),...% campo 6 de inst
