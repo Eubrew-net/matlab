@@ -1,10 +1,14 @@
 function [res,detail,DSP_QUAD,QUAD_SUM,QUAD_DETAIL,CUBIC_SUM,CUBIC_DETAIL,SALIDA...
-    ]=dsp_report(day,year,brewnb,path,cfg,comment,uvr)
+    ]=dsp_report(day,year,brewnb,path,cfg,comment,uvr,wvlim)
 
 % Modificaciones:
-% 05/11/2009 Juanjo: modificada la línea 361 para mostrar las WL con 2
+% 05/11/2009 Juanjo: modificada la l?nea 361 para mostrar las WL con 2
 % decimales
 % 
+
+if nargin==7
+     wvlim=3400 ; 
+end
 day=day-1:day+1;
 polynb=3;% polinomial order
 ozonepos=cfg(14)+cfg(44);% ozone pos-> from icf / or passed directly to function
@@ -29,7 +33,7 @@ fprintf('saving alldsp to %s\r\n',fullfile(path,fnamealldsp));
 
   % Brewer ozone lines
   % for ozone only use wv <3340
-  jnul=wl>=3410;
+  jnul=wl>=wvlim;
   dsp(jnul,:)=[];
   wl(jnul,:)=[];
   dspstd(jnul,:)=[];
@@ -135,8 +139,8 @@ orient('portrait');
 %set(f1,'Tag','DSP')
 %plot(wl(j),fwl,'o-');
 %title(['Normaldsp ' path fnameN '-' datestr(now)]);
-%ylabel('Residuals [ï¿½]');
-%xlabel('wavelength [ï¿½]');
+%ylabel('Residuals [???]');
+%xlabel('wavelength [???]');
 %legend('slit #0','slit #1','slit #2','slit #3','slit #4','slit #5');
 
 
@@ -187,6 +191,10 @@ nslit=min(sum(~isnan(dsp)));
 if nslit<=polynb
    polynb=nslit-1;
 end
+if polynb<0
+    polynb=[];
+    warning('no measures for one slit using nb=0');
+end
 dsp(isnan(dsp))=0;
 fname7=sprintf('dsp_%03d%02d_%s.%03d',day(1),year,comment,brewnb);
 fprintf('saving powfiu7 to %s\n',fullfile(path,fname7));
@@ -215,8 +223,8 @@ ind=fstd==0;fstd(ind)=nan;
 %set(f2,'Tag','DSP')
 %plot(wl,fstd(:,:,end),'o-');
 %title(['Powfiu7 RMS=' sprintf('%.4f',(min(rmsf/10))) ' ' fname7 '-' datestr(now)]);
-%ylabel('Residuals  [ï¿½]');
-%xlabel('wavelength [ï¿½]');
+%ylabel('Residuals  [???]');
+%xlabel('wavelength [???]');
 %legend('slit #0','slit #1','slit #2','slit #3','slit #4','slit #5');
 f2=figure;
 plot(wl,fstd(:,:,end),'o-'); set(gca,'FontSize',11,'FontWeight','bold');
@@ -263,7 +271,7 @@ set(gca,'Xlim',[2850,3450]);
 %set(f3,'Tag','DSP')
 %plot(testwl1,quad1-testwl1);%,testwl5,quad5-testwl5);
 %title('Normaldsp versus powfiu7 using slit 1 (3000:3500) and 5 (3500:3650)')
-%ylabel('normaldsp-powfiu7 [ï¿½]');
+%ylabel('normaldsp-powfiu7 [???]');
 %hline([-0.1,0.1]);
 
 %%
