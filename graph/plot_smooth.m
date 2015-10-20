@@ -1,4 +1,4 @@
-function h=plot_smooth(osc_smooth_a,osc_smooth_b,osc_smooth_c)
+function h=plot_smooth4(osc_smooth_a,osc_smooth_b,osc_smooth_c,osc_smooth_d)
 
      aux2=(matadd(osc_smooth_a(:,[6,7]),-osc_smooth_a(:,2)));
      jk=find(~isnan(osc_smooth_a(:,1)));
@@ -11,6 +11,11 @@ function h=plot_smooth(osc_smooth_a,osc_smooth_b,osc_smooth_c)
        
        jk=find(~isnan(osc_smooth_c(:,1)));
        h(3)=boundedline(osc_smooth_c(jk,1)',osc_smooth_c(jk,2)',osc_smooth_c(jk,3)','-.k','alpha');
+     end
+      if nargin==4
+       
+       jk=find(~isnan(osc_smooth_d(:,1)));
+       h(3)=boundedline(osc_smooth_d(jk,1)',osc_smooth_d(jk,2)',osc_smooth_d(jk,3)','-.g','alpha');
      end
      
      box on;

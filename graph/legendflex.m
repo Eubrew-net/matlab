@@ -67,6 +67,31 @@ function varargout = legendflex(varargin)
 %
 % This function should support all types of plot objects.
 %
+% Updates to labeled line and patch properties should be reflected in the
+% legend.  In pre-R2014b versions of Matlab (those that use the old
+% non-object graphics handles), properties of more complex legend labels,
+% such as contours, quivers, bars, etc.) will also be synced to the legend;
+% however, at this time, the code doesn't update properties for anything
+% other than lines and patches in R2014b+ (haven't found a good way to
+% listen for changes to the properties of the other graphics object types).
+%
+% A note on resizing: This function assigns a resize function to the parent
+% figure to maintain the position of the legend (in terms of anchor
+% location and buffer) as the figure size changes.  If you manually resize
+% the legend, this function will respect changes to height, width, and
+% units (though I don't recommend changing the units to 'normalized', as
+% this can cause the text and symbols to overflow the legend box on
+% resize).  It will not respect manual repositioning when resizing, since
+% it assumes you want to maintain the anchor/buffer prescription used to
+% create it.  Overall, I've tried to make this resize as unobtrusive as
+% possible; if your figure already has a resize function at the time you
+% apply it, that behavior is inherited, with the legend-resize called
+% afterward.  If you plan to further modify the figure's resize function
+% post-legendflex and want to maintain repositioning of the legends,
+% retrieve the resize function via hfun = get(hfig, 'ResizeFcn'), pass it
+% to the new resize function, and invoke it via feval(oldfun, h, ed), where
+% h and ed are the default variables passed by a callback function.
+%
 % Input variables:
 %
 %   M:          cell array of strings, labels for legend
@@ -78,12 +103,12 @@ function varargout = legendflex(varargin)
 %
 % Optional input variables (passed as parameter/value pairs): [default]
 %
-%   ncol:       number of columns, or NaN to indicate as many as necessary
-%               given the # of labeled objects [1 if nrow is NaN, NaN
+%   ncol:       number of columns, or 0 to indicate as many as necessary
+%               given the # of labeled objects [1 if nrow is 0, 0
 %               otherwise] 
 %
-%   nrow:       number of rows, or NaN to indicate as many as necessary
-%               given the # of labeled objects [NaN]
+%   nrow:       number of rows, or 0 to indicate as many as necessary
+%               given the # of labeled objects [0]
 %
 %   ref:        handle of object used to position the legend. This can be
 %               either a figure or a child object of a figure (and does not
@@ -135,6 +160,14 @@ function varargout = legendflex(varargin)
 %               cell array of strings; the latter will produce a multi-line
 %               title. If empty, no title is added.  ['']
 %
+%   padding:    1 x 3 array, pixel spacing added to beginning of each
+%               column (before symbol), between symbol and text, and after
+%               text, respectively.  Usually, the default provides the
+%               spacing typical of a regular legend, but occassionally the
+%               extent properties wrap a little too close to text, making
+%               things look crowded; in these cases you can try unsquishing
+%               things via this parameter. [2 1 1]    
+%
 %   In addition to these legendflex-specific parameters, this function will
 %   accept any parameter accepted by the original legend function (e.g.
 %   font properties) except 'location', 'boxon', 'boxoff', or 'hide'.
@@ -177,24 +210,30 @@ function varargout = legendflex(varargin)
 %                        'nrow',2, ...
 %                        'fontsize',8);
 
-% Copyright 2011 Kelly Kearney
+% Copyright 2011-2014 Kelly Kearney
 
+% Detemine whether HG2 is in use
+
+hg2flag = ~verLessThan('matlab', '8.4.0');
 
 %-------------------
 % Parse input
 %-------------------
-
-allinput = varargin; % Save for callback later
-
-islegin = false(size(varargin));
+% 
+% allinput = varargin; % Save for callback later
+% 
+% islegin = false(size(varargin));
 
 % First inputs must be either:
 % (M, ...)
 % (h, M, ...)
 
-% Look for handle array
+narginchk(1,Inf);
 
-handlepassed = isnumeric(varargin{1}) & all(ishandle(varargin{1}));
+% Split input into the variables that will be passed to legend (handles and
+% labels) and everything else
+
+handlepassed = all(ishandle(varargin{1})); % for HG1/HG2 
 
 if handlepassed
     legin = varargin(1:2);
@@ -216,16 +255,23 @@ end
 
 % Parse my optional properties
 
+if hg2flag
+    defref = gobjects(0);
+else
+    defref = NaN;
+end
+
 p = inputParser;
 p.addParamValue('xscale',     1,         @(x) validateattributes(x, {'numeric'}, {'nonnegative','scalar'}));
-p.addParamValue('ncol',       NaN,       @(x) validateattributes(x, {'numeric'}, {'scalar', 'integer'}));
-p.addParamValue('nrow',       NaN,       @(x) validateattributes(x, {'numeric'}, {'scalar', 'integer'}));
-p.addParamValue('ref',        NaN,       @(x) validateattributes(x, {'numeric'}, {'scalar'}));
+p.addParamValue('ncol',       0,         @(x) validateattributes(x, {'numeric'}, {'scalar', 'integer'}));
+p.addParamValue('nrow',       0,         @(x) validateattributes(x, {'numeric'}, {'scalar', 'integer'}));
+p.addParamValue('ref',        defref,    @(x) validateattributes(x, {'numeric','handle'}, {'scalar'}));
 p.addParamValue('anchor',     [3 3],     @(x) validateattributes(x, {'numeric','cell'}, {'size', [1 2]}));
 p.addParamValue('buffer',     [-10 -10], @(x) validateattributes(x, {'numeric'}, {'size', [1 2]}));
 p.addParamValue('bufferunit', 'pixels',  @(x) validateattributes(x, {'char'}, {}));
 p.addParamValue('box',        'on',      @(x) validateattributes(x, {'char'}, {}));
 p.addParamValue('title',      '',        @(x) validateattributes(x, {'char','cell'}, {}));
+p.addParamValue('padding',    [2 1 1],   @(x) validateattributes(x, {'numeric'}, {'nonnegative', 'size', [1 3]}));
 
 p.KeepUnmatched = true;
 
@@ -267,19 +313,39 @@ if nobj == 0
     return
 end
 
-if ~handlepassed % For figure resize, can't assume the current axis will still be current
-    tmp = get(h.leg, 'UserData');
-    allinput = [{tmp.PlotHandle} allinput];
+% There's a bug in R2014b-R2015a that causes rendering issues if a contour
+% object is included in a legend and legend is called with more than one
+% output. For some reason, the rendering issues disappear only if the
+% contour object(s) is listed last in the legend.  So for now, my
+% workaround for this is to change the order of the legend labels as
+% necessary.
+
+iscont = strcmp(get(h.labeledobj, 'type'), 'contour');
+cbugflag = ~verLessThan('matlab', '8.4.0') && any(iscont);
+if cbugflag
+    
+    if length(legin) == 1
+        legin = {h.labeledobj legin{1}};
+    end
+        
+    delete(h.leg);
+    
+    [srt, isrt] = sort(iscont);
+    legin{1} = legin{1}(isrt);
+    legin{2} = legin{2}(isrt);
+    
+    [h.leg, h.obj, h.labeledobj, h.textstr] = legend(legin{:}, extra{:}, 'location', 'northeast');
+
 end
 
 % # rows and columns
 
-if isnan(Opt.ncol) && isnan(Opt.nrow)
+if (Opt.ncol == 0) && (Opt.nrow == 0)
     Opt.ncol = 1;
     Opt.nrow = nobj;
-elseif isnan(Opt.ncol)
+elseif (Opt.ncol == 0)
     Opt.ncol = ceil(nobj./Opt.nrow);
-elseif isnan(Opt.nrow)
+elseif (Opt.nrow == 0)
     Opt.nrow = ceil(nobj./Opt.ncol);
 end
 if Opt.ncol*Opt.nrow < nobj
@@ -288,9 +354,27 @@ end
 
 % Reference object
 
-if isnan(Opt.ref)
-    tmp = get(h.leg, 'UserData');
-    Opt.ref = tmp.PlotHandle;
+if hg2flag
+
+    if isempty(Opt.ref)
+    
+        if all(ishandle(legin{1}))
+            tmp = ancestor(legin{1}, 'axes');
+            if iscell(tmp)
+                Opt.ref = tmp{1}; 
+            else
+                Opt.ref = tmp(1);
+            end
+        else
+            Opt.ref = gca;
+        end
+
+    end
+else
+    if isnan(Opt.ref)
+        tmp = get(h.leg, 'UserData');
+        Opt.ref = tmp.PlotHandle; 
+    end
 end
 if ~ishandle(Opt.ref)
     error('Input ref must be a graphics handle');
@@ -356,7 +440,7 @@ symbolWidthNm = textExtent(1,1);
 % Calculate column width needed for 2px-symbol-1px-text-1px
 
 colWidth = zeros(Opt.ncol*Opt.nrow,1);
-colWidth(1:nobj) = textWidthPx + symbolWidthPx + 4;
+colWidth(1:nobj) = textWidthPx + symbolWidthPx + sum(Opt.padding);
 colWidth = reshape(colWidth, Opt.nrow, Opt.ncol);
 colWidth = max(colWidth,[],1);
 
@@ -383,13 +467,13 @@ end
 
 % Locate bottom left corner of each legend symbol, text box, and title
 
-xsymbnew = [0 cumsum(colWidth(1:end-1))]+2;
+xsymbnew = [0 cumsum(colWidth(1:end-1))]+Opt.padding(1);
 ysymbnew = (rowHeight*Opt.nrow + vmarginPx)-(1:Opt.nrow)*rowHeight;
 [xsymbnew, ysymbnew] = meshgrid(xsymbnew, ysymbnew);
 xsymbnew = xsymbnew(1:nobj);
 ysymbnew = ysymbnew(1:nobj);
 
-xtext = xsymbnew + 1 + symbolWidthPx;
+xtext = xsymbnew + Opt.padding(2) + symbolWidthPx;
 ytext = ysymbnew;% + 1;
 
 xsymbold = zeros(nobj,1);
@@ -431,7 +515,11 @@ hnew.leg = axes('units', 'pixels', ...
 textProps = {'FontAngle','FontName','FontSize','FontUnits','FontWeight','Interpreter','HorizontalAlignment','VerticalAlignment'};
 textVals = get(h.obj(1:nobj), textProps);
 
-hnew.obj = zeros(size(h.obj));
+if hg2flag
+    hnew.obj = gobjects(size(h.obj));
+else
+    hnew.obj = zeros(size(h.obj));
+end
 for it = 1:nobj
     props = [textProps; textVals(it,:)];
     hnew.obj(it) = text(xtext(it), ytext(it), h.textstr{it}, props{:}, ...
@@ -472,18 +560,20 @@ for ii = 1:nsymbol
         hnew.obj(nobj+ii) = copyobj(h.obj(nobj+ii), hnew.leg);
         
         tag = get(h.obj(nobj+ii),'Tag');
-        if ~isempty(tag)
+        if ~isempty(tag) % assumes empty tags indicate repetition of previous tag (true pre-2014b)
             [blah, idx] = ismember(tag,h.textstr);
         end
-        xy = get(h.obj(nobj+ii), {'xdata', 'ydata'});
         
+        xy = get(h.obj(nobj+ii), {'xdata', 'ydata'});
+
         xnorm = xy{1}./symbolWidthNm;
         ynorm = (xy{2}- (1-idx*rowHeightNm))./rowHeightNm;
-        
+
         xnew = xnorm * symbolWidthPx + xsymbnew(idx);
         ynew = ynorm * rowHeight     + ysymbnew(idx);
-        
+
         set(hnew.obj(nobj+ii), 'xdata', xnew, 'ydata', ynew);
+ 
     end
     
 end
@@ -509,13 +599,14 @@ delete(h.leg);
 % Return focus to previously-current axis
 
 set(figh, 'currentaxes', currax);
+drawnow; % Not sure why this is necessary for the currentaxes to take effect, but it is
 
 %-------------------
-% Resize callback
+% Callbacks and 
+% listeners
 %-------------------
 
-% figh = ancestor(hnew.leg, 'figure');
-rsz = get(figh, 'ResizeFcn');
+% Save some relevant variables in the new legend axis's application data
 
 Lf.ref        = Opt.ref;
 Lf.w          = wnewleg;
@@ -527,24 +618,46 @@ Lf.bufferunit = Opt.bufferunit;
 Lf.plotobj    = h.labeledobj;
 Lf.legobj     = hnew.obj;
 
-% Lf.in = allinput;
-
-if isequal(rsz, @resizefig)
-    Lf.oldrsz = [];
-else
-    Lf.oldrsz = rsz;
-end
-
-if isappdata(figh, 'legflexchildren')
-    ch = getappdata(figh, 'legflexchildren');
-    setappdata(figh, 'legflexchildren', [ch hnew.leg]);
-else
-    setappdata(figh, 'legflexchildren', hnew.leg);
-end
-
 setappdata(hnew.leg, 'legflex', Lf);
-set(figh, 'ResizeFcn', @resizefig);
 
+% Resize listeners
+
+addlistener(hnew.leg, 'Position', 'PostSet', @(src,evt) updatelegappdata(src,evt,hnew.leg));
+if hg2flag && strcmp(Lf.ref.Type, 'figure')
+    addlistener(Lf.ref, 'SizeChanged', @(src,evt) updatelegpos(src,evt,hnew.leg));
+else
+    addlistener(Lf.ref, 'Position', 'PostSet', @(src,evt) updatelegpos(src,evt,hnew.leg));
+end
+rsz = get(figh, 'ResizeFcn'); 
+if isempty(rsz) % No previous resize function
+    set(figh, 'ResizeFcn', @updatelegfigresize);
+else 
+    if ~iscell(rsz)
+        rsz = {rsz};
+    end
+    hasprev = cellfun(@(x) isequal(x, @updatelegfigresize), rsz);
+    if ~hasprev
+        rsz = {rsz{:} @updatelegfigresize};
+        set(figh, 'ResizeFcn', {@wrapper, rsz});
+    end
+end
+
+% Run the resync function if anything changes with the labeled objects
+
+objwatch = findall(h.labeledobj, 'type', 'line', '-or', 'type', 'patch');
+
+for ii = 1:length(objwatch)
+    switch lower(get(objwatch(ii), 'type'))
+        case 'line'
+            triggerprops = {'Color','LineStyle','LineWidth','Marker','MarkerSize','MarkerEdgeColor','MarkerFaceColor'};
+            addlistener(objwatch(ii), triggerprops, 'PostSet', @(h,ed) resyncprops(h,ed,hnew.leg));
+        case 'patch'
+            triggerprops = {'CData','CDataMapping','EdgeAlpha','EdgeColor','FaceAlpha','FaceColor','LineStyle','LineWidth','Marker','MarkerEdgeColor','MarkerFaceColor','MarkerSize'};
+            addlistener(objwatch(ii), triggerprops, 'PostSet', @(h,ed) resyncprops(h,ed,hnew.leg));
+    end
+end
+
+    
 %-------------------
 % Output
 %-------------------
@@ -606,93 +719,107 @@ shift = [...
 corner = refxy(anchor(1),:) + buffer + shift(anchor(2),:);
 legpos = [corner w h];
 
-
 %------------------------
-% Resize function
+% Listener functions
 %------------------------
 
-function resizefig(hfig, ed, oldrsz)
+% If user manually resizes the legend, update the app data
 
-% Not really sure why, but when adding multiple flex-legends to one figure,
-% I sometimes lose objects unless I flush the event queue first.
-
-% drawnow; % Think I've fixed this now
-
-% Find legendflex axes
-
-ax = getappdata(hfig, 'legflexchildren');
-
-for ia = 1:length(ax)
-    
-    if ishandle(ax(ia)) % if axis has been deleted, ignore this
-    
-        Lf = getappdata(ax(ia), 'legflex');
-
-        % ResizeFcn unassociated w/ legendflex (if applicable)
-
-        if ~isempty(Lf.oldrsz)
-            if iscell(Lf.oldrsz)
-                feval(Lf.oldrsz{1}, hfig, ed, Lf.oldrsz{2:end});
-            else
-                feval(Lf.oldrsz, hfig, ed);
-            end
-        end
-
-        % Redraw legend with updated position
-
-        legpos = positionleg(Lf.ref, Lf.w, Lf.h, Lf.anchor, Lf.buffer, Lf.bufunit);
-        tmpax = axes('units', Lf.bufferunit, 'position', legpos,'visible','off');
-        legpos = getpos(tmpax, 'px');
-        delete(tmpax);
-        set(ax(ia), 'position', legpos); 
-
-        % Check for changed properties of all lines and patches
-
-        str = cellstr(num2str(Lf.plotobj));
-        [htmp.leg, htmp.obj, htmp.labeledobj, htmp.textstr] = legend(Lf.plotobj, str);
-
-        objtype = get(Lf.legobj, 'type');
-        isline = strcmp(objtype, 'line');
-        ispatch = strcmp(objtype, 'patch');
-        ishg = strcmp(objtype, 'hggroup');
-        hgidx = find(ishg);
-
-        lobj = [Lf.legobj(isline) htmp.obj(isline)];
-        pobj = [Lf.legobj(ispatch) htmp.obj(ispatch)];
-
-        if ~isempty(hgidx)
-            for ih = hgidx
-                chldln1 = findall(Lf.legobj(ih), 'type', 'line');
-                chldln2 = findall(htmp.obj(ih), 'type', 'line'); 
-
-                lobj = [lobj; [chldln1 chldln2]];
-
-                chldpa1 = findall(Lf.legobj(ih), 'type', 'patch');
-                chldpa2 = findall(htmp.obj(ih), 'type', 'patch'); 
-
-                pobj = [pobj; [chldpa1 chldpa2]];
-
-            end
-        end
-
-        lprops = {'color','linestyle','linewidth','marker','markersize','markeredgecolor','markerfacecolor'};
-        for il = 1:size(lobj,1)
-            lvals = get(lobj(il,2), lprops);
-            pv = [lprops; lvals];
-            set(lobj(il,1), pv{:});
-        end
-
-        pprops = {'cdata','cdatamapping','edgealpha','edgecolor','facealpha','facecolor','linestyle','linewidth','marker','markeredgecolor','markerfacecolor','markersize'};
-        for ip = 1:size(pobj,1)
-            pvals = get(pobj(ip,2), pprops);
-            pv = [pprops; pvals];
-            set(pobj(ip,1), pv{:});
-        end
-
-        delete(htmp.leg);
-    end
-        
+function updatelegappdata(src, evt, legax)
+if ishandle(legax)
+    Lf = getappdata(legax, 'legflex');
+    pos = getpos(legax, 'px');
+    Lf.w = pos(3);
+    Lf.h = pos(4);
+    setappdata(legax, 'legflex', Lf);
 end
+% If reference object moves or resizes, reposition the legend appropriately
+
+function updatelegpos(src, evt, legax)
+if ishandle(legax) 
+    Lf = getappdata(legax, 'legflex');
+    legpos = positionleg(Lf.ref, Lf.w, Lf.h, Lf.anchor, Lf.buffer, Lf.bufunit);
+    set(legax, 'Units', Lf.bufferunit, 'Position', legpos);
+end
+
+% Since figure resize can change axis size without actually triggering a
+% listener, force this
+
+function updatelegfigresize(src, evt)
+
+allax = findall(src, 'type', 'axes');
+for ii = 1:length(allax)
+    isleg = ~isempty(getappdata(allax(ii), 'legflex'));
+    if ~isleg
+        pos = get(allax(ii), 'Position');
+        set(allax(ii), 'Position', pos); % No change, just trigger PostSet
+    end
+end
+
+% If plotted object changes, resync with legend
+
+function resyncprops(src, evt, legax)
+
+if ishandle(legax) % In case it's been deleted
+    
+    Lf = getappdata(legax, 'legflex');
+
+    str = cellstr(num2str((1:length(Lf.plotobj))'));
+    [htmp.leg, htmp.obj, htmp.labeledobj, htmp.textstr] = legend(Lf.plotobj, str);
+
+    objtype = get(Lf.legobj, 'type');
+    isline = strcmp(objtype, 'line');
+    ispatch = strcmp(objtype, 'patch');
+    ishg = strcmp(objtype, 'hggroup');
+    hgidx = find(ishg);
+
+    lobj = [Lf.legobj(isline) htmp.obj(isline)];
+    pobj = [Lf.legobj(ispatch) htmp.obj(ispatch)];
+
+    if ~isempty(hgidx)
+        for ih = hgidx
+            chldln1 = findall(Lf.legobj(ih), 'type', 'line');
+            chldln2 = findall(htmp.obj(ih), 'type', 'line'); 
+
+            lobj = [lobj; [chldln1 chldln2]];
+
+            chldpa1 = findall(Lf.legobj(ih), 'type', 'patch');
+            chldpa2 = findall(htmp.obj(ih), 'type', 'patch'); 
+
+            pobj = [pobj; [chldpa1 chldpa2]];
+
+        end
+    end
+
+    lprops = {'color','linestyle','linewidth','marker','markersize','markeredgecolor','markerfacecolor'};
+    for il = 1:size(lobj,1)
+        lvals = get(lobj(il,2), lprops);
+        pv = [lprops; lvals];
+        set(lobj(il,1), pv{:});
+    end
+
+    pprops = {'cdata','cdatamapping','edgealpha','edgecolor','facealpha','facecolor','linestyle','linewidth','marker','markeredgecolor','markerfacecolor','markersize'};
+    for ip = 1:size(pobj,1)
+        pvals = get(pobj(ip,2), pprops);
+        pv = [pprops; pvals];
+        set(pobj(ip,1), pv{:});
+    end
+
+    cmap = colormap(htmp.leg);
+    colormap(legax, cmap);
+
+    delete(htmp.leg);
+end
+
+% Wrapper to add multiple callback functions to resize
+
+function wrapper(ObjH, EventData, fcnList)
+for ii = 1:length(fcnList)
+    feval(fcnList{ii}, ObjH, EventData);
+end
+
+
+
 
 
 
