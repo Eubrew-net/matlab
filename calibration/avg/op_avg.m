@@ -1,7 +1,7 @@
 % plotea el fichero OPAVG
 % Isa, modificado del de Juanjo dt Juanjo 02/11/2009
 %% Modificaciones
-%  añandido flag de depuracion;
+%  a?andido flag de depuracion;
 
 
 %%
@@ -111,8 +111,12 @@ s=mmplotyy('Horizont correction (black dots)');
 set(s,'FontWeight','bold');
 % Izqu:North correcion (b)
 % Der: Horinzont (k)
-set(gca,'XLim',[arg.Results.date_range(1)-4 opa(end,1)+4]);
-% set(gca,'XLim',[op(1,1)-4 op(end,1)+4]);
+try
+ set(gca,'XLim',[arg.Results.date_range(1)-4 opa(end,1)+4]);
+catch
+  disp('no data on date range');
+end
+ % set(gca,'XLim',[op(1,1)-4 op(end,1)+4]);
 grid;
 datetick('x',25,'keeplimits','keepticks');
 rotateticklabel(gca,20);

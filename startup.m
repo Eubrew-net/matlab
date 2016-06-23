@@ -13,7 +13,7 @@ global Meses
 global Month_str
 c=fix(clock);
 
-%diary(datestr(date));
+diary(datestr(date));
 lotus_date=datenum(1899,12,30);
 format compact;
 format shortG;
@@ -65,7 +65,7 @@ MK=set(plot(1),'Marker');MK{14}='x';MK(15)=MK(2);MK{16}='p';MK(17)=MK(3);
 
 % set(0,'DefaultFigureWindowStyle','Normal');
 % set_figure_toscreen(2)
-% set(0,'DefaultFigureWindowStyle','Docked');
+set(0,'DefaultFigureWindowStyle','Docked');
 %pub.format='latex';
 pub.imageFormat='eps' ;
 pub.figureSnapMethod='print';% | 'getframe'
