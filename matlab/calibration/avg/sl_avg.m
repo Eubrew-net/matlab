@@ -1,5 +1,5 @@
 %   Alberto 24/09/2009
-%  añandido flag de depuracion;
+%  a?andido flag de depuracion;
 %  TODO cuando cambia el sl durante la calibracion los toma como outlier.
 %       reportar tambien los outlier
 %% Modificaciones
@@ -21,7 +21,7 @@
 %     disp('OUTLIERS R5, sigma');
 
 % 12/11/2010 Isabel  Introducido nuevo output para los outliers.
-% 18/02/2013 Juanjo  Añadida regression para R5 vs Temp.
+% 18/02/2013 Juanjo  A?adida regression para R5 vs Temp.
 
 %%
 function [sla,OutR6R5F5]=sl_avg(file,date_range,ref,outlier_flag)
@@ -55,7 +55,7 @@ else
     sla=sl;
 end
 
-%% DEPURACIÖN DE OUTLIERS
+%% DEPURACI?N DE OUTLIERS
 if ~isempty(outlier_flag)
     % Outliers R6
     [ax,bx,cx,dx1]=outliers_bp(sla(:,12),3.5);    
@@ -102,6 +102,7 @@ if ~isempty(outlier_flag)
     end
 else
     OutR6R5F5=NaN*ones(1,9);  OutR6R5F5(1)=fix(now);
+    ref=NaN;
 end
     
 %% SLOAVG ploteos
@@ -111,6 +112,11 @@ labs=linspace(sla(1,1),sla(end,1),num_lab);
 f=figure; set(f,'tag','SLAVG_R6');
 p1=errorbard(sla(:,[1,12,19]),'ks');
 set(p1,'MarkerEdgeColor','k','color','g');
+% es incompatible 
+if isempty(date_range)
+    date_range(1)=sla(1,1)-4;
+end
+    
 set(gca,'XLim',[date_range(1)-1 sla(end,1)+4]);
 if length(ref)==2
     hline(ref(1),'r-',num2str(ref(1)));
@@ -158,7 +164,7 @@ datetick('x',25,'keeplimits','keepticks');  rotateticklabel(gca,20);
 % subplot(2,2,4);
 temp=mean(sla(:,4:5),2);
 %   p1=plot(temp,sla(:,12),'s');hold on;
-%   legend(p1,'{\bfTemp cº}',2);
+%   legend(p1,'{\bfTemp c?}',2);
 %   xlabel('{\bfTemperature}','FontSize',11,'FontWeight','normal');
 %   ylabel('{\bfR6}','FontSize',11,'FontWeight','normal');
 %   %datetick('x',12,'keepticks','keeplimits');

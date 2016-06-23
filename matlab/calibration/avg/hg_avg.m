@@ -1,7 +1,7 @@
 % plotea el fichero HGOAVG
 % Isa, modificado del de Juanjo rs Juanjo 02/11/2009
 %% Modificaciones
-%  añandido flag de depuracion;
+%  a?andido flag de depuracion;
 % 28/10/2010 Isabel  Comentados:
 %     disp('OUTLIERS HG');
 %     disp(datestr(hga(dx,1)))
@@ -72,7 +72,12 @@ h=mmplotyy('Temperature(black dots)');            set(h,'FontWeight','bold');  h
 h=plot(hga(dx,1),hga(dx,2),'+r');                 set(h,'LineWidth',2.5);      hold off
 % Izqu:Lamp Intensity (g)
 % Dcha:Temp (k)
-set(gca,'XLim',[arg.Results.date_range(1)-4 hga(end,1)+4]);                    grid;
+try
+set(gca,'XLim',[arg.Results.date_range(1)-4 hga(end,1)+4]); 
+catch
+  disp('No data for selected date range');
+end
+grid;
 datetick('x',25,'keeplimits','keepticks');        rotateticklabel(gca,20);
 ylabel('Lamp Intensity','FontWeight','bold');
 sup=suptitle(sprintf('%s%s','Hg Test, ',file(regexp(file,'AVG')-3:regexp(file,'AVG')+6)));
