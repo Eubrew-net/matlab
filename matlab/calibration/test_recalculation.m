@@ -1,5 +1,4 @@
 function [cal,summary,summary_old]=test_recalculation(Cal,ninst,ozone_ds,A,SL_R,SL_B,varargin)
-
 %% Data recalculation for summaries  and individual observations
 % Summaries are recalculated from individual measurements
 % * SL corretion
@@ -23,7 +22,8 @@ function [cal,summary,summary_old]=test_recalculation(Cal,ninst,ozone_ds,A,SL_R,
 % 9  ozone 1  -> config 2
 % 12  ozone sl -> config 1 +   sl correction 
 % TODO: Documentar parametros de entrada
-%
+%  % flag_sl dominar? sobre la correcci?n aplicada por periodos, en su caso
+%  sobre sl_correction <- viene de la confiuracion->
 %% Validacion de argumentos de entrada
 arg = inputParser;   % Create instance of inputParser class.
 arg.FunctionName = 'test_recalculation';
@@ -42,7 +42,7 @@ arg.addParamValue('flag_sl_corr', 0, @isstruct)      % por defecto no SL corr
 arg.addParamValue('FC', [0 0 0 0 0 0], @isfloat); % por defecto, [0 0 0 0 0 0]
 arg.addParamValue('plot_sl', 0, @(x)(x==0 || x==1)); % por defecto no plotea
 arg.addParamValue('O3_std', 2.5, @isfloat); % por defecto 2.5 O3 std. filter
-
+arg.addParamValue('hg_dep',1, @(x)(x==0 || x==1)); % por defecto hg flag SL corr
 % validamos los argumentos definidos:
 try
   arg.parse(Cal,ninst,ozone_ds,A,SL_R,SL_B, varargin{:});
@@ -54,9 +54,9 @@ catch exception
 end
 
   if any(Cal.Date.CALC_DAYS>366) % fecha matlab
-     fecha_days=fix(Cal.Date.CALC_DAYS);                          % todos los días considerados     
+     fecha_days=fix(Cal.Date.CALC_DAYS);                          % todos los d?as considerados     
   else % dia juliano
-     fecha_days=Cal.Date.CALC_DAYS+datenum(Cal.Date.cal_year,1,0);% todos los días considerados
+     fecha_days=Cal.Date.CALC_DAYS+datenum(Cal.Date.cal_year,1,0);% todos los d?as considerados
   end
   
   if ninst>length(ozone_ds) || isempty(ozone_ds{ninst})
@@ -70,9 +70,9 @@ end
   IDX=cellfun(@(x) ~isempty((x)),ozone_ds{ninst},'UniformOutput',true);  
   ozone_ds{ninst}=ozone_ds{ninst}(IDX);
 
-  % Si hay dos fechas en el fichero B esto dará error. Manejarlo 
+  % Si hay dos fechas en el fichero B esto dar? error. Manejarlo 
   fecha=cellfun(@(x) unique(fix(x(:,1))),ozone_ds{ninst},'UniformOutput',false);  
-  fecha=unique(cat(1,fecha{:}));% ficheros cargados con éxito
+  fecha=unique(cat(1,fecha{:}));% ficheros cargados con ?xito
  
   % Rehacemos ozone_ds para que tenga igual dimensiones que SL_B, esto es, length(CALC_DAYS)
   % Es importante para garantizar que cada dia de SL_B (con dimensiones las de cALC_DAYS)  
@@ -80,7 +80,7 @@ end
   d_=length(Cal.Date.CALC_DAYS);
   ozone=num2cell(repmat(NaN*ones(1,21),d_,1),2);  % 21 para cuando hay SL pero no ozono (p/e LAB)
   [idx loc]=ismember(fecha_days,fecha); % EN ESTE ORDEN !!!!
-  if ~any(idx) % Algún brewer no tiene datos en el rango CALC_DAYS. Skipped
+  if ~any(idx) % Alg?n brewer no tiene datos en el rango CALC_DAYS. Skipped
      cal=[]; summary=NaN*ones(1,13); summary_old=NaN*ones(1,13); 
      summary(1)=nanmean(fecha_days); summary_old(1)=nanmean(fecha_days);
      fprintf('Brewer %s data is out of CALC DAYS range. Skipped\n',Cal.brw_name{ninst});
@@ -118,23 +118,26 @@ if ~isempty(fecha)
        ozo_o=cellfun(@(x,y) x(:,8)+y./x(:,5),ozone,num2cell(RC_old_),'UniformOutput',false);       
     end    
     
-    % flag_sl dominará sobre la corrección aplicada por periodos, en su caso
+    % flag_sl dominar? sobre la correcci?n aplicada por periodos, en su caso
     if flag_sl       
        ozo_c=cellfun(@(x,y) x(:,15)+y./x(:,5),ozone,num2cell(RC_new),'UniformOutput',false);
        ozo_o=cellfun(@(x,y) x(:,8) +y./x(:,5),ozone,num2cell(RC_old),'UniformOutput',false);       
     end    
     idx=cellfun(@(x) fix(x(:,3)/10) ,ozone,'UniformOutput',false);
 
-    % y ahora quitamos las filas con NaN, para que no dé problemas el grpstats
+    % y ahora quitamos las filas con NaN, para que no d? problemas el grpstats
     myf=@(x)size(x,1)==1;  widx=cellfun(myf,idx);  
     idx(widx==1)=[]; ozone(widx==1)=[]; ozo_o(widx==1)=[]; ozo_c(widx==1)=[];
       
     [m,s,n]=cellfun(@(a,b,c,d) grpstats([a(:,[1,4,5,6,7,2,15,21,8]),b,a(:,14),c],d,{'mean','std','numel'}),...
                                       ozone,ozo_c,ozo_o,idx,'UniformOutput',false);  
-                                  
-    j=cellfun(@(a,b,c) (a(:,5+2)<=arg.Results.O3_std & b(:,5+2)>100 & b(:,5+2)<600 & b(:,5+1)>0 & c(:,5+1)==5),...
+    if arg.Results.hg_dep                              
+      j=cellfun(@(a,b,c) (a(:,5+2)<=arg.Results.O3_std & b(:,5+2)>100 & b(:,5+2)<600 & b(:,5+1)>0 & c(:,5+1)==5),...
                         s,m,n,'UniformOutput',false);
-                    
+    else    
+      j=cellfun(@(a,b,c) (a(:,5+2)<=arg.Results.O3_std & b(:,5+2)>100 & b(:,5+2)<600 & b(:,5+1)>-1 & c(:,5+1)==5),...
+                        s,m,n,'UniformOutput',false);
+    end
     summary    =cellfun(@(a,b,y) cat(2,a(y,1:5),a(y,5+2),b(y,5+2),a(y,5+3),b(y,5+3),...
                                    a(y,5+4),b(y,5+4),a(y,5+5),b(y,5+5)),m,s,j,'UniformOutput',false);
     summary_old=cellfun(@(a,b,y) cat(2,a(y,1:5),a(y,5+4),b(y,5+4),a(y,5+6),b(y,5+6),...
