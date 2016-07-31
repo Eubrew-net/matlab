@@ -72,8 +72,19 @@ end
 
   % Si hay dos fechas en el fichero B esto dar? error. Manejarlo 
   fecha=cellfun(@(x) unique(fix(x(:,1))),ozone_ds{ninst},'UniformOutput',false);  
-  fecha=unique(cat(1,fecha{:}));% ficheros cargados con ?xito
- 
+  % hay dos fechas ?
+  [a,b]=cellfun(@size,fecha);
+  j=find(a>1);
+  if isempty(j)
+    fecha=unique(cat(1,fecha{:}));% ficheros cargados con ?xito
+  else
+    disp(' Warnging files with more than one date, only 1st are analyez')
+    disp(datestr(fecha{j}))
+    for i=1:length(j)
+    fecha{j(i)}=fecha{j(i)}(1);
+    end
+    fecha=cell2mat(fecha);
+  end
   % Rehacemos ozone_ds para que tenga igual dimensiones que SL_B, esto es, length(CALC_DAYS)
   % Es importante para garantizar que cada dia de SL_B (con dimensiones las de cALC_DAYS)  
   % se corresponde con la fecha de ozono
