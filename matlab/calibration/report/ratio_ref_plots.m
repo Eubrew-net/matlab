@@ -44,7 +44,7 @@ if length(Cal.analyzed_brewer)+2 ==size(ratio_ref,2)
     
  %% scatterhist 
     f_sc=figure;  hold all
-    h=scatterhist(ratio_ref(:,end),nanmean(ratio_ref(:,end-1),2)); set(findobj(gcf,'Type','Line'),'MarkerSize',5);
+    h=scatterhist(ratio_ref(:,end),nanmean(ratio_ref(:,end-1),2)); set(findobj(gcf,'Type','Line'),'MarkerSize',15);
     h=plot(ratio_ref(:,end),ratio_ref(:,2:end-1),'.'); 
     title(sprintf('Ozone deviations to the reference: day %d to %d of %d',...
                    diaj([min(ratio_ref(:,1)),max(ratio_ref(:,1))]),Cal.Date.cal_year));
