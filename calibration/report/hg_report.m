@@ -66,7 +66,7 @@ if arg.Results.outlier_flag==1
 
    figure; set(gcf,'Tag','Hg_Dep');
    ha=tight_subplot(2,1,.075,[.1 .085],[.1 .1]);
-   axes(ha(1)); plot(hg1(:,1),hg1(:,5),'.','MarkerSize',5);
+   axes(ha(1)); plot(hg1(:,1),hg1(:,5),'.','MarkerSize',15);
    set(gca,'Ylim',[0.991 1]);
    hold on;    plot(hg1(out,1),hg1(out,5),'rx','MarkerSize',15);
    ylabel('Correlation'); title(Cal.brw_name{n_inst});
