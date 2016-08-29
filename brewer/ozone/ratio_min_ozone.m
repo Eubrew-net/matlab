@@ -181,7 +181,7 @@ if  nargin~=3 && ~strcmp(name_a,name_b)
     f=figure;    set(f,'Tag','RATIO_day');
     try        
      P=gscatter(osc,rp(:,2),diaj(data(:,1)));
-     set(findobj(gca,'Type','Line'),'MarkerSize',5);
+     set(findobj(gca,'Type','Line'),'MarkerSize',15);
      set(findobj(gcf,'Tag','legend'),'Location','EastOutside')
     opts.selected.Marker='x';     opts.selected.Color='k';
     if verLessThan('Matlab','8.4')
