@@ -1,5 +1,4 @@
-function [tabla_fi filter]=report_filter(Cal,varargin)
-
+function [tabla_fi, filter]=report_filter(Cal,varargin)
 % function tabla_fi=report_filter(Cal,varargin)
 % 
 % Analisis de los filtros de atenuacion (FIOAVG). Promedios por eventos
@@ -62,13 +61,15 @@ config_orig=read_icf(Cal.brw_config_files{Cal.n_inst,1},mean(arg.Results.date_ra
                         'date_range',arg.Results.date_range([1 end]));
                     
 filter.ETC_FILTER_CORRECTION=ETC_FILTER_CORRECTION;
-filter.media_fi=media_fi;  filter.fi=fi; filter.fi_avg=fi_avg;
-
-filt{Cal.n_inst}=filter; o3f=filters_data(filt,Cal);
+filter.media_fi=media_fi; 
+filter.fi=fi; filter.fi_avg=fi_avg;
+filt{Cal.n_inst}=filter; 
+o3f=filters_data(filt,Cal);
+filter.o3f=o3f;
 
 %% Table, por periodos 
-lbl_fi={'FW#21 corr','std','FW#22 corr','std','FW#23 corr','std',...
-         'FW#24 corr','std','FW#25 corr','std','N'};
+lbl_fi={'F#1 corr','se','F#2 corr','se','F#3 corr','se',...
+         'F#4 corr','se','F#5 corr','se','N'};
 
  if isempty(arg.Results.grp)
     event_info=arg.Results.grp_custom;
@@ -80,12 +81,20 @@ lbl_fi={'FW#21 corr','std','FW#22 corr','std','FW#23 corr','std',...
     tabla_fi=NaN;
     return
  end
+ 
+ 
  data_tab=meanperiods(o3f, event_info);
 
-aux=NaN*ones(size(data_tab.m,1),12);
-aux(:,[1 2:2:10])=data_tab.m(:,[1 3:end]);
-aux(:,3:2:end)=data_tab.std(:,3:end);
-aux(:,end)=data_tab.N(:,end);
-
-tabla_fi.data=aux; tabla_fi.events=data_tab.evnts; tabla_fi.data_lbl=lbl_fi;
+  aux=NaN*ones(size(data_tab.m,1),12);
+  aux(:,[1 2:2:10])=data_tab.m(:,[1 3:end]);
+  aux(:,3:2:end)=data_tab.std(:,3:end);
+  aux(:,end)=data_tab.N(:,end);
+  try
+      matdiv(data_tab.std(:,3:end),sqrt(data_tab.std(:,3:end)));
+  catch
+      disp('error std error');
+  end
+tabla_fi.data=aux;
+tabla_fi.events=data_tab.evnts;
+tabla_fi.data_lbl=lbl_fi;
 
