@@ -1,5 +1,5 @@
 function o3f=filters_data(fi_data,Cal,varargin)
-
+%  Sin documentar
 %%
 arg = inputParser;   % Create instance of inputParser class.
 arg.FunctionName = 'filter_data';
@@ -15,7 +15,9 @@ arg.addParamValue('date_range', [], @isfloat); % por defecto, no control de fech
 arg.parse(fi_data, Cal, varargin{:});
 mmv2struct(arg.Results);
 
-fi=fi_data{Cal.n_inst}.fi;  fi_avg=fi_data{Cal.n_inst}.fi_avg; 
+
+fi=fi_data{Cal.n_inst}.fi;
+fi_avg=fi_data{Cal.n_inst}.fi_avg; 
 % control de fechas
 if ~isempty(date_range)
     fi(fi_avg(:,1)<date_range(1),:,:)=[]; fi_avg(fi_avg(:,1)<date_range(1),:)=[];   
@@ -36,14 +38,20 @@ for ii=1:size(fi,1)
 end
 o3f=cell2mat(o3w);
 
+
+
 %% Atts. vs Time: every nd for 2 sample wls (slit#3 & slit#5)
 att={}; att_std={}; att_n={};
 for ii=1:6 
     [a b c]=grpstats([fech,temp(:,1),fi(:,4:2:end,ii)],{year(fech),month(fech)},{'mean','sem','numel'});
-    att{ii}=a; att_std{ii}=b; att_n{ii}=c;
+    att{ii}=a;
+    att_std{ii}=b; 
+    att_n{ii}=c;
 end
 
-figure; set(gcf,'tag','FI_TIME_atts'); 
+%%
+figure;
+set(gcf,'tag','FI_TIME_atts'); 
 ha=tight_subplot(2,1,.07,[.1 0.1],[.1 .1]);    
 % slit#3
 axes(ha(1)); sampl1=cell2mat(cellfun(@(x) x(:,5),att,'UniformOutput',0));
@@ -52,6 +60,7 @@ set(gca,'XTicklabel',[],'YTickLabelMode','auto','box','on'); grid;
 title(sprintf('%s\r\nND attenuations vs. time (sample slits #3, top, and #5, bottom)',Cal.brw_name{Cal.n_inst}));
 %legendflex(label_filter(2:end),'ref', ha(1),'anchor', {'sw','sw'},'buffer',[6 0],...
 %                         'nrow',1,'fontsize',8,'box','off','xscale',.5);                   
+
 % slit#5
 axes(ha(2)); sampl1=cell2mat(cellfun(@(x) x(:,7),att,'UniformOutput',0));
 ploty([att{1}(:,1),100*matdiv(matadd(sampl1(:,2:end),-nanmean(sampl1(:,2:end))),nanmean(sampl1(:,2:end)))],'*-'); 
@@ -63,7 +72,6 @@ set(yl,'Units','Normalized','Position',[-.05,1,0])
 
 %% F corr. vs Time
 [a b c]=grpstats([fech,temp(:,1),o3f],{year(fech),month(fech)},{'mean','sem','numel'});
-
 fh=figure; set(fh,'tag','FI_TIME_ETC2');
 errorbar(a(:,1),a(:,3),b(:,3),'Color','k','Marker','s'); 
 hold on
