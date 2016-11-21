@@ -1,5 +1,4 @@
-function [tabla_tc sl_rw]=report_temperature(Cal,icf,varargin)
-
+function [tabla_tc sl_rw]=report_temperature(Cal,icf_1,icf_2,varargin)
 % function tabla_tc=report_temperature(Cal,icf,varargin)
 %  
 % Analisis de la dependencia con la temperatura a partir de SL individual 
@@ -46,24 +45,27 @@ arg = inputParser;   % Create an instance of the inputParser class
 arg.FunctionName='report_temperature';
 
 arg.addRequired('Cal', @isstruct);
-arg.addRequired('icf', @(x)isfloat(x) || ischar(x));
+arg.addRequired('icf_1', @(x)isfloat(x) || ischar(x));
+arg.addRequired('icf_2', @(x)isfloat(x) || ischar(x));
 
 arg.addParamValue('grp', '', @(x)any(strcmpi(x,{'events','month','week','month+events'}))); 
 arg.addParamValue('grp_custom', [], @isstruct);    
 arg.addParamValue('fpath', Cal.path_root, @ischar);    
 arg.addParamValue('date_range', Cal.Date.CALC_DAYS, @isfloat);    
 
-arg.parse(Cal, icf, varargin{:});
+arg.parse(Cal, icf_1, icf_2,varargin{:});
 
 %% Todos los datos en date_range
-config_temp.n_inst=Cal.n_inst;  config_temp.brw_name=Cal.brw_name{Cal.n_inst};        
-% if ~exist('sl_rw.mat','file')
+config_temp.n_inst=Cal.n_inst; 
+config_temp.brw_name=Cal.brw_name{Cal.n_inst};        
+
+if ~exist([config_temp.brw_name,'_sl_rw.mat'],'file')
    sl_rw=readb_sl_rawl(fullfile(arg.Results.fpath,['bdata',Cal.brw_str{Cal.n_inst}],['B*.',Cal.brw_str{Cal.n_inst}]),...
                                                    'date_range',arg.Results.date_range([1 end]),'f_plot',1);
-%     save('sl_rw.mat','sl_rw');
-% else
-%      load('sl_rw.mat');
-% end
+     save([config_temp.brw_name,'_sl_rw.mat'],'sl_rw');
+ else
+      load([config_temp.brw_name,'_sl_rw.mat']);
+  end
 
 %% Determinamos los periodos de analisis + configs a aplicar
 % periodos
@@ -79,7 +81,9 @@ config_temp.n_inst=Cal.n_inst;  config_temp.brw_name=Cal.brw_name{Cal.n_inst};
  end
 
 % configuraciones (necesitamos tantas como eventos)
-icf_=getcfgs(arg.Results.date_range,icf,'events',event_info.dates);    
+icf_op=getcfgs(arg.Results.date_range,icf_1,'events',event_info.dates);    
+icf_alt=getcfgs(arg.Results.date_range,icf_2,'events',event_info.dates);    
+
                                         
 %% Table, por periodos 
 tabl_TC=[]; tabl_TC_std=[]; NTC={}; ajuste={}; 
@@ -94,17 +98,25 @@ for pp=1:length(id_period)
     %%
     try       
      periods_=date_range(y==id_period(pp));
-     [NTC{pp},ajuste{pp},Args,Fraw,Fnew]=temp_coeff_raw(config_temp,sl_rw,'outlier_flag',1,...
+     [NTC{pp},ajuste{pp},Args,Fraw,Fop]=temp_coeff_raw(config_temp,sl_rw,'outlier_flag',1,'N_TC',icf_op.data(2:6,pp)',...
                                          'date_range',periods_([1,end]),'plots',0); 
-     [NTCx,ajustex,Argsx,Fraw,Forig]    =temp_coeff_raw(config_temp,sl_rw,'outlier_flag',1,'N_TC',icf_.data(2:6,pp)',...
-                                         'date_range',periods_([1,end]),'plots',0); Forig(isnan(Forig(:,1)),:)=[];
+                                     
+     [NTCx,ajustex,Argsx,Fraw,Falt]    =temp_coeff_raw(config_temp,sl_rw,'outlier_flag',1,'N_TC',icf_alt.data(2:6,pp)',...
+                                         'date_range',periods_([1,end]),'plots',1); 
+     
+     Forig=Fop;                                
+     Forig(isnan(Forig(:,1)),:)=[];
+     Forigx= Fop; %Forig;
+     Fn=Falt;
+                                
                                                           
      tabl_TC=[tabl_TC; cat(2,nanmean(Forig(:,1)),min(Forig(:,2)),max(Forig(:,2)),ajuste{pp}.orig(7,1),ajuste{pp}.orig(7,2),ajuste{pp}.new(7,1),ajuste{pp}.new(7,2),...
                            -matadd(ajuste{pp}.cero(1:5,2),-ajuste{pp}.cero(1,2))')];
      tabl_TC_std=[tabl_TC_std; cat(2,nanmean(Forig(:,1)),ajuste{pp}.orig(7,3),ajuste{pp}.orig(7,4),ajuste{pp}.new(7,3),ajuste{pp}.new(7,4),...
                         sqrt(ajuste{pp}.cero(1:5,end).^2+ajuste{pp}.cero(1,end)^2)')];   
                     
-     figure;  set(gcf,'Tag',sprintf('TEMP_COMP_%s',Cal.brw_str{Cal.n_inst}));
+     figure; 
+     set(gcf,'Tag',sprintf('TEMP_COMP_%s_%d',Cal.brw_str{Cal.n_inst},pp));
      ha=tight_subplot(2,1,.08,.1,.075); hold all;
      axes(ha(1)); set(gca,'box','on','XTickLabelMode','auto','YTickLabelMode','auto'); grid; hold on;
      axes(ha(2)); set(gca,'box','on','XTickLabelMode','auto','YTickLabelMode','auto'); grid; hold on;
@@ -126,6 +138,37 @@ for pp=1:length(id_period)
      [g h]=rline; set(g,'LineWidth',2,'Color','r','Marker','None'); set(findobj(gcf,'Type','Text'),'Visible','Off');
      lg=legend(g,sprintf('%d \\pm %.2f \\times T',round(h(2)),round(h(1)*10)/10));
      pos_yl=get(yl,'Position'); set(yl,'Position',[pos_yl(1) pos_yl(2)+0.6 pos_yl(3)]);
+     
+     
+
+      figure; 
+      set(gcf,'Tag',sprintf('TEMP_COMP_DATE_%s_%d',Cal.brw_str{Cal.n_inst},pp));
+      plot(Forigx(:,1),Forigx(:,2),'b.','MarkerSize',6); 
+      ylabel('Temperature','Color','b'); ax(1)=gca; set(ax(1),'YAxisLocation','right','XTicklabels',{' '}); 
+[mn,sn]=grpstats(Forigx(:,[1,end,2]),{year(Forigx(:,1)),fix(Forigx(:,1))},{'mean','sem'});
+[mt,st]=grpstats(Fn(:,[1,end]),{year(Fn(:,1)),fix(Fn(:,1))},{'mean','sem'}); 
+ax(2) = axes('YAxisLocation','left','Color','none'); 
+hold all; errorbar(mn(:,1),mn(:,2),sn(:,2),'Color','k','Marker','s');
+errorbar(mt(:,1),mt(:,2),st(:,2),'Color','g','Marker','s');
+errorbar(mt(:,1),mt(:,2),st(:,2),'Color','g','Marker','s');
+title(['R6 Temperature dependence Brewer#', Cal.brw_str{Cal.n_inst}]); ylabel('Standard Lamp R6 ratio');
+datetick('x',6,'KeepTicks','KeepLimits'); grid on; 
+lg=legend(ax(2),'Operative temperature coeff','Alternative temperature coeff','Location','best'); 
+set(lg,'HandleVisibility','Off');  set(findobj(lg,'Type','text'),'FontSize',7,'HandleVisibility','Off');    
+linkprop(ax,{'Position','XTick'}); 
+
+figure; 
+set(gcf,'Tag',sprintf('TEMP_COMP_TEMP_%s_%d',Cal.brw_str{Cal.n_inst},pp))
+[mn,sn]=grpstats(Forigx(:,[2,end]),Forigx(:,2),{'mean','sem'});
+[mt,st]=grpstats(Fn(:,[2,end]),Fn(:,2),{'mean','sem'});
+hold on; errorbar(mn(:,1),mn(:,2),sn(:,2),'Color','k','Marker','s');
+errorbar(mt(:,1),mt(:,2),st(:,2),'Color','g','Marker','s'); grid;
+lg=legend('Operative temperature coeff','Alternative temperature coeff','Location','best');
+set(lg,'HandleVisibility','Off'); set(findobj(lg,'Type','text'),'FontSize',7,'HandleVisibility','Off');    
+title(['R6 Temperature dependence Brewer#', Cal.brw_str{Cal.n_inst}]);
+
+     
+     
      
      catch exception
        tabl_TC=[tabl_TC; cat(2, mean(periods_), NaN*ones(1,11))];
