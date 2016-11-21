@@ -21,8 +21,8 @@ function [Options,figuras]=printfiles_report(n0,patern,varargin)
 Options.Format='eps';   %'Format'  a string specifies the output format. Defaults to 'eps'. For 
 Options.Preview='tiff'; %'Preview' one of the strings 'none', 'tiff' specifies a preview for EPS files. Defaults to 'none'.  
 
-Options.Width=12;  %cm a positive scalar specifies the width in the figure's PaperUnits
-Options.Height=6.5;  %a positive scalar  specifies the height in the figure's PaperUnits
+Options.Width=18;  %cm a positive scalar specifies the width in the figure's PaperUnits
+Options.Height=13;  %a positive scalar  specifies the height in the figure's PaperUnits
                    %Specifying only one dimension sets the other  dimension so that the exported aspect ratio is the same as the
                    %figure's or reference axes' current aspect ratio. 
 Options.Bounds='loose';  %'Bounds' one of the strings 'tight', 'loose'  specifies a tight or loose bounding box. Defaults to 'tight'.
@@ -39,12 +39,12 @@ Options.FontSize=.9;     %'scaled' mode multiplies with the font size of each  t
                            %'fixed' mode specifies the font size of all text objects in points
                            %If FontMode is 'scaled' but FontSize is not specified then a  scaling factor is computed from the ratio of the size of the
                            %exported figure to the size of the actual figure. The default 'FontMode' setting is 'scaled'.
-Options.DefaultFixedFontSize=15; %a positive scalar in 'fixed' mode specified the default font size in points
+Options.DefaultFixedFontSize=14; %a positive scalar in 'fixed' mode specified the default font size in points
 Options.FontSizeMin=5;           %a positive scalar specifies the minimum font size allowed after scaling
 Options.FontSizeMax=18;          %a positive scalar specifies the maximum font size allowed after scaling
 
 Options.LineMode='fixed';
-Options.Linewidth=1;         
+Options.Linewidth=3;         
       
 Options.FontEncoding='latin1'; %one of the strings 'latin1', 'adobe' specifies the character encoding of the font
 Options.SeparateText=0 ;       %one of 0 or 1 specifies that the text objects are stored in separate
@@ -93,9 +93,11 @@ for j=1:2:(length(varargin)-1)
     end
 end
                                
-cwd=pwd; cd(patern);
+cwd=pwd;
+cd(patern);
 naux=0; % contador de figuras
 figuras={};
+figura='X';
 figura='figura';
 try
  for i=n0
@@ -115,6 +117,9 @@ try
            end
         elseif iscell(aux_pattern)
             figura=[brw{1},'_',label,'_',aux_pattern{naux+1}];
+            naux=naux+1;            
+        else
+            figura=[brw{1},'_',label,'_',aux_pattern.Number];
             naux=naux+1;            
         end
      else
@@ -141,12 +146,13 @@ try
         exportfig(h,strtok(figura,'.'),Options);
      end
      saveas(h,figura,'fig');
-%      saveas(h,figura,'png');
+     %saveas(h,figura,'pdf');
+     saveas(h,figura,'png');
     try
 %      system(['pstopdf ',figura,'.eps']);
-     %figuras{naux}=fullfile('figures',[figura,'.pdf']);
+     figuras{naux}=fullfile([figura,'.pdf']);
      %system(['pstopdf ',figura,'.eps', ' -o ',figuras{naux}])
-     
+     eps2pdf([figura,'.eps'],figuras{naux})
     catch
      figuras{naux}=fullfile([figura,'.eps']);
     end
