@@ -1607,7 +1607,7 @@ end
 % lineStyles = linspecer(N,colormap); picks the colors according to your favorite colormap, like 'jet'
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Written Jonathan Lansey March 2009, updated 2013 – Lansey at gmail.com %
+% Written Jonathan Lansey March 2009, updated 2013 ? Lansey at gmail.com %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 
@@ -1787,7 +1787,7 @@ end
 %                        not pass it a position and only if the number of
 %                        points are less than 400.
 %                        'nopoints','nodots'
-%                 'std': Set the whiskers to be the mean±standard deviation
+%                 'std': Set the whiskers to be the mean?standard deviation
 %                        The legend information will be updated
 %                        'standard'
 %              'nomean': Don't plot the mean 'plus' symbol '+'
@@ -2070,7 +2070,11 @@ end
 % remove all remenants of legends
 if forceNoLegend
     for ii=1:length(hReg2)
+        try
         set(get(get(hReg2(ii),'Annotation'),'LegendInformation'),'IconDisplayStyle','off'); % Exclude line from legend
+        catch exception
+            fprintf('%s ',exception.message)
+        end
     end
 end
 %% set the axis
@@ -2093,7 +2097,7 @@ if justOneInputFlag
 end
 %% Set the legend
 if stdFlag
-    whiskerText = '\mu ± \sigma';
+    whiskerText = '\mu ? \sigma';
 else
     whiskerText = [num2str(percentileNum2) '%-' num2str(100-percentileNum2) '%'];
 end
