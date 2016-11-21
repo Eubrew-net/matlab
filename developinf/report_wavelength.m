@@ -1,5 +1,4 @@
 function [tabla_HS tabla_HL]=report_wavelength(Cal,varargin)
-
 % function [tabla_HS tabla_HL]=report_wavelength(Cal,varargin)
 % 
 % Analisis de los CZ's. Promedios por eventos
@@ -28,8 +27,8 @@ function [tabla_HS tabla_HL]=report_wavelength(Cal,varargin)
 %              2) events  : cellstr con etiquetas para cada evento registrado
 %              3) data_lbl: cellstr con etiquetas para cada campo en tabla_HS/HL.data
 %              
-%                          'wl real','wl, método pendientes','std','Diferencia',
-%                          'wl, método centro masas','std','Diferencia','fwhm','std','N'
+%                          'wl real','wl, m?todo pendientes','std','Diferencia',
+%                          'wl, m?todo centro masas','std','Diferencia','fwhm','std','N'
 % 
 % EXAMPLE:
 %       [tabla_HS tabla_HL]=report_wavelength(Cal,'grp','month+events');
