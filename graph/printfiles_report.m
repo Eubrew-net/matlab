@@ -117,16 +117,21 @@ try
            end
         elseif iscell(aux_pattern)
             figura=[brw{1},'_',label,'_',aux_pattern{naux+1}];
-            naux=naux+1;            
+            naux=naux+1;     
         else
-            figura=[brw{1},'_',label,'_',aux_pattern.Number];
-            naux=naux+1;            
+            if i==n0(1)
+                figura=[brw{1},'_',label];
+                naux=1
+            else
+                figura=[brw{1},'_',label,'_',num2str(naux)]
+            naux=naux+1     
+            end
         end
      else
-%         if i==n0(1)
-         figura=[brw{1},'_',label]; 
-         naux=naux+1;
-%         else
+      % if i==n0(1)
+       %  figura=[brw{1},'_',label]; 
+        % naux=naux+1;
+%        else
 %          figura=[brw{1},'_',label,'_',num2str(naux)];    
 %          naux=naux+1;   
 %         end
