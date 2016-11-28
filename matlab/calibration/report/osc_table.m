@@ -23,11 +23,18 @@ function [osc_table,osc_matrix,stats]=osc_table(Cal,ratio_ref,osc_interval)
  
  table_oscs=cellfun(@(x,y) strcat(num2str(x),' +/- ',num2str(y)),...
                    num2cell(cat(1,mean_all,mean_(:,2:end-1))),num2cell(cat(1,std_all,std_(:,2:end-1))),...
-                   'UniformOutput',false);
- 
+                   'UniformOutput',false); 
+     
  osc_int_str=cellstr(num2str(osc_interval'));
- header_=[{'All'};osc_int_str;{['>',num2str(osc_interval(end))]}]';
- 
+ if aux(:,6)>1
+      header_=[{'All'};{'700'};{'1000'};{'1200'};{'>1200'}]'
+      intervalo=5
+ else
+      header_=[{'All'};{'400'};{'700'};{'1000'};{'1200'};{'>1200'}]';
+      intervalo=6
+ end
+ %header_=[{'All'};osc_int_str;{['>',num2str(osc_interval(end))]}]';
+% header_=[{'All'};osc_int_str;{'>1200'}]';
  osc_table.data=table_oscs;
  osc_table.row_header=header_;
  osc_table.col_header={Cal.brw_name{analyzed_brewer},'mean osc'};
@@ -40,20 +47,42 @@ function [osc_table,osc_matrix,stats]=osc_table(Cal,ratio_ref,osc_interval)
  
  dat_osc=aux;
  for i=1:length(osc_interval)+1;
-     dat1=NaN*aux;
-     dat1(aux(:,end)==i,:)=aux(aux(:,end)==i,:);
-     dat_osc(:,:,i+1)=dat1;
+     
+         if intervalo==5 && i>1
+             dat1=NaN*aux;
+             dat1(aux(:,end)==i,:)=aux(aux(:,end)==i,:);
+             dat_osc(:,:,i+1)=dat1;
+         end
+         if intervalo==6
+             dat1=NaN*aux;
+             dat1(aux(:,end)==i,:)=aux(aux(:,end)==i,:);
+             dat_osc(:,:,i+1)=dat1;
+         end
  end
  osc_matrix=dat_osc;
 
  %end
  
- if nargout==3
-    figure; 
-    [stats,hp,hb]=box_plot(dat_osc(:,2:size(ratio_ref,2)-1,:),'Limit','3IQR');
-    set(gca,'XtickLabel', Cal.brw_str);   
-    title('Box-Plot Ozone Deviation to reference by Ozone Slant Column');
-    legend(squeeze(hp(:,1,:)),header_);
-    box('on');
-    arrayfun(@(x,y) set(y,'FaceColor',get(x,'Color')),hp,hb)
+  if nargout==3
+     if intervalo==5 && i>1
+     figure;
+     [stats,hp,hb]=box_plot(dat_osc(:,2:size(ratio_ref,2)-1,:),'Limit','3IQR');
+     set(gca,'XtickLabel', Cal.brw_str);   
+     title('Box-Plot Ozone Deviation to reference by Ozone Slant Column');
+     legend(squeeze(hp(:,1,:)),header_);
+     box('on');
+     arrayfun(@(x,y) set(y,'FaceColor',get(x,'Color')),hp,hb)
+     end
+     if intervalo==6
+         figure;
+        [stats,hp,hb]=box_plot(dat_osc(:,2:size(ratio_ref,2)-1,:),'Limit','3IQR');
+         set(gca,'XtickLabel', Cal.brw_str);   
+     title('Box-Plot Ozone Deviation to reference by Ozone Slant Column');
+     legend(squeeze(hp(:,1,:)),header_);
+     box('on');
+     arrayfun(@(x,y) set(y,'FaceColor',get(x,'Color')),hp,hb)
+     end
+     %[stats,hp,hb]=box_plot(dat_osc(:,2:size(ratio_ref,2)-1,:),'Limit','3IQR');
+   
+  end
  end
