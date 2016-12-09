@@ -86,9 +86,9 @@ for i=1:length(s)
 
         if ~isempty(scraw )
               disp(['OK->',file]);
-%         else
-%             
-%             disp(['NOSC->',s(i).name]);
+       else
+             
+            % disp(['NOSC->',s(i).name]);
         end
         %if ~isempty(scraw )
           

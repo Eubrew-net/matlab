@@ -43,11 +43,12 @@ try
 
     jco=strmatch('co',l); 
     %jsc=strmatch('sc',l);
+    jsch=find(strncmp(l,'schedule',3));
     jsc=find(strncmp(l,'sc',2));
-    if isempty(jsc) || isempty(jco)
+    if isempty(jsc) || isempty(jco) || all(jsch==jsc)
        o3.sc_avg=[];      o3.sc_raw=[];
        sc=[];    sc_raw=[];    co='No SC';
-%        fprintf('%s: No SC''s\n',bfile);
+       %fprintf('%s: No SC''s\n',bfile);
        return
     end
     jhg=strmatch('hg',l);
@@ -128,7 +129,9 @@ end
         jsc_aux=strfind(co,'sc:');
         jsc=find(~cellfun('isempty',jsc_aux)); 
         co_aux=find(~cellfun('isempty',strfind(co,'sc: Suppressed'))); 
-        co_aux=find(~cellfun('isempty',strfind(co,'sc: Suppressed')));
+        [a b]=intersect(jsc,co_aux); 
+        jsc(b)=[];
+        co_aux=find(~cellfun('isempty',strfind(co,'sc: SC intensity too low')));
         [a b]=intersect(jsc,co_aux); 
         jsc(b)=[];
         c=find(cellfun(@(x) ~isempty(strfind(x,'Running')),co(jsc)));
@@ -267,6 +270,7 @@ end
 
                else % error measure.
                    disp('Error in measure')
+                   disp(bfile)
                    %disp( char(l{ini_med+1:fin_med-1})' )
                end
 
