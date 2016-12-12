@@ -43,8 +43,13 @@ try
 
     jco=strmatch('co',l); 
     %jsc=strmatch('sc',l);
+   
     jsch=find(strncmp(l,'schedule',3));
+    if isempty(jsch) 
+        jsch=0;
+    end
     jsc=find(strncmp(l,'sc',2));
+    
     if isempty(jsc) || isempty(jco) || all(jsch==jsc)
        o3.sc_avg=[];      o3.sc_raw=[];
        sc=[];    sc_raw=[];    co='No SC';
