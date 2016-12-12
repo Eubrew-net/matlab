@@ -128,13 +128,13 @@ try
             end
         end
      else
-      % if i==n0(1)
-       %  figura=[brw{1},'_',label]; 
-        % naux=naux+1;
-%        else
-%          figura=[brw{1},'_',label,'_',num2str(naux)];    
-%          naux=naux+1;   
-%         end
+       if i==n0(1)
+        figura=[brw{1},'_',label]; 
+        naux=naux+1;
+       else
+          figura=[brw{1},'_',label,'_',num2str(naux)];    
+          naux=naux+1;   
+         end
      end
      figura=strrep(figura,' ','_');
      
