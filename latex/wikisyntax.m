@@ -89,11 +89,13 @@ classdef wikisyntax < handle
 	methods (Access = public)
 		function syntax = getLatexSyntax(T)
 
-		    syntax.doc_begin    = @(s) ['\documentclass{article} __EOL__ \usepackage{graphicx} __EOL__ \begin{document}'];
-		    syntax.doc_end    = @(s)   ['\end{document}'];
+		    %syntax.doc_begin    = @(s) ['\documentclass{article} __EOL__ \usepackage{graphicx} __EOL__ \begin{document}'];
+		    syntax.doc_begin    = @(s) ['\documentclass[../main.tex]{subfiles}  __EOL__ \begin{document}'];
+		    
+            syntax.doc_end    = @(s)   ['\end{document}'];
 
 		    syntax.img_begin    = @(s) ['\begin{figure}__EOL__\begin{center}__EOL__'];
-		    syntax.img          = @(s) ['\includegraphics[width=0.8\columnwidth]{' s '}'];
+		    syntax.img          = @(s) ['\includegraphics[width=0.85\columnwidth]{' s '}'];
 		    syntax.img_end      = @(s) ['__EOL__\end{center}__EOL__\end{figure}'];
 
 		    syntax.caption      = @(s) ['\caption{' s '}__EOL__'];
