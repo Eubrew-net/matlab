@@ -44,12 +44,31 @@ if length(Cal.analyzed_brewer)+2 ==size(ratio_ref,2)
     
  %% scatterhist 
     f_sc=figure;  hold all
-    h=scatterhist(ratio_ref(:,end),nanmean(ratio_ref(:,end-1),2)); set(findobj(gcf,'Type','Line'),'MarkerSize',15);
+    h=scatterhist(ratio_ref(:,end),nanmean(ratio_ref(:,end-1),2));
+    %set(findobj(gcf,'Type','Line'),'MarkerSize',15);
+  
     h=plot(ratio_ref(:,end),ratio_ref(:,2:end-1),'.'); 
+      hold on
+    [m,se]=grpstats(ratio_ref,fix(ratio_ref(:,end)/100)*100,{'mean','std'});
+    plot(m(:,end),m(:,2:end-1))
+    %plot(m(:,end),m(:,2:end-1)+2*se(:,2:end-1),'-')
+    % plot(m(:,end),m(:,2:end-1)-2*se(:,2:end-1),'-')
+    grid
     title(sprintf('Ozone deviations to the reference: day %d to %d of %d',...
                    diaj([min(ratio_ref(:,1)),max(ratio_ref(:,1))]),Cal.Date.cal_year));
-    legend(h,Cal.brw_str(Cal.analyzed_brewer));
+    
     set(f_sc,'Tag','hist_osc');
+ 
+  %% nhist
+%   %% hist
+%     n_hist=figure;
+%     
+%     [a,b]=hist(ratio_ref(:,2:end-1),-3.5:.25:3.5);
+%     bar(b,matdiv(100*a,sum(a)));
+%     title('Relative differences to mean. Percentage');
+%     legend(Cal.brw_name{Cal.analyzed_brewer});
+%     set(f_hist,'Tag','hist');
+    
     
  %%
 if arg.Results.plot_smooth
