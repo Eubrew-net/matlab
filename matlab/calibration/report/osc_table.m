@@ -1,9 +1,21 @@
 function [osc_table,osc_matrix,stats]=osc_table(Cal,ratio_ref,osc_interval)
+% [osc_table,osc_matrix,stats]=osc_table(Cal,ratio_ref,osc_interval)
 % calculate the osc_table from ratio_ref
+% the last column has to be the osc
 % osc_matrix: tridimensional matrix (nobs x ratio x osc_ranges (length
 % osc_interval+1))
 % plots the box_plot if stats are outpub
- analyzed_brewer=Cal.analyzed_brewer;
+%
+
+if isempty(Cal)
+    nb=1:size(ratio_ref,2)-2;
+    Cal.analyzed_brewer=nb;
+    Cal.brw_name=cellstr(num2str(nb'));
+    Cal.brw_str=cellstr(num2str(nb'));
+end
+    
+
+analyzed_brewer=Cal.analyzed_brewer;
 
  if nargin==2
   osc_interval=[400,800,1000];
