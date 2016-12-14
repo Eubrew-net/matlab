@@ -1,4 +1,4 @@
-function [NTC,ajuste,Args,Fr,FN]=temp_coeff_raw(setup_file,sl,varargin)
+function [NTC,ajuste,Args,Fr,FN]=temp_coeff_month(setup_file,sl,varargin)
 % SL temperature analysis
 %  
 % TODO :
@@ -21,33 +21,33 @@ function [NTC,ajuste,Args,Fr,FN]=temp_coeff_raw(setup_file,sl,varargin)
 %                  nrep=ceil(ndays/20);
 %                  c=hsv(ceil(ndays/nrep));
 %  
-% Juanjo 10/11/2009: Redefino los inputs de la función. Tres son
+% Juanjo 10/11/2009: Redefino los inputs de la funci?n. Tres son
 %                    obligatorios; config_file, sl y config. Otros tres opcionales;
 %                  - 'daterange' -> array de uno o dos elementos (fecha matlab)
-%                  - 'outlier_flag' -> 1=depuración, 0=no depuración
+%                  - 'outlier_flag' -> 1=depuraci?n, 0=no depuraci?n
 % 
 % Juanjo 03/12/2009: No se depuraban las MS9 del sumario.
 %                    Modifico el indice del bucle a ii=0:6 para hacerlo (no es tan importante, 
 %                    porque se recalculan las ratios a partir de las cuentas de slit, que si se depuran)
-%                    Modifico el código que carga datos para contemplar
+%                    Modifico el c?digo que carga datos para contemplar
 %                    estructuras (la generada por readb_sll)
 % 
-% Alberto: Ya contempla mas de un año
+% Alberto: Ya contempla mas de un a?o
 % 
 % Juanjo 13/04/2010: Modificado el control de inputs. Ahora se hace uso de
 %                    clase inputParser (siguen siendo los mismos, ver modificacion del 10/11/2009)
 %                    Valores por defecto: date_range=[], no control de fechas
 %                                         outlier_flag=0, no filtrado de outliers
 %                    Se muestran al final del script los parametros que han tomado un valor por defecto
-%                    En el caso de usar la vieja forma de llamar a las funciones tambien funcionará.
+%                    En el caso de usar la vieja forma de llamar a las funciones tambien funcionar?.
 %
-% Juanjo 01/09/2010: Se añade el input opcional 'temp_flag', para seleccionar rango de T 
-%                    (por defecto empty). Además se añade como nueva salida una estructura 
-%                    con la configuración usada como entrada. Atender al
+% Juanjo 01/09/2010: Se a?ade el input opcional 'temp_flag', para seleccionar rango de T 
+%                    (por defecto empty). Adem?s se a?ade como nueva salida una estructura 
+%                    con la configuraci?n usada como entrada. Atender al
 %                    orden de salida!!!  
-% Alberto 01/11/2010: Se añade el input opcional 'intesity_flag', elimina por regresion cambios de intensidad
+% Alberto 01/11/2010: Se a?ade el input opcional 'intesity_flag', elimina por regresion cambios de intensidad
 %                     (por defecto empty).
-%                   : añadido la saida FN, cuentas recalculadas con la nueva TC  
+%                   : a?adido la saida FN, cuentas recalculadas con la nueva TC  
 %                                                                                                
 % Ejemplo:
 % [NTC,tabla_regress]=temp_coeff_report(config_temp,sl_cr,config,...
@@ -95,7 +95,7 @@ end
 if isstruct(setup_file)
      n_inst=setup_file.n_inst;
      brw_name{n_inst}=setup_file.brw_name;
-     FINAL_DAYS(1)=setup_file.final_days;
+     %FINAL_DAYS(1)=setup_file.final_days;
 else
      eval(config_file);
 end
@@ -384,7 +384,7 @@ ploty(Fr(:,[2,3:end-2]),'.');
 set(gca,'LineWidth',1);
 text(repmat(min(Fr(:,2))+1.5,5,1),nanmean(Fr(:,3:end-2)),...
             {'\itslit #2','\itslit #3','\itslit #4','\itslit #5','\itslit #6'});
-ylabel('Counts'); xlabel('temperature (ºC)');
+ylabel('Counts'); xlabel('temperature (?C)');
 
 
 subplot(2,4,7:8);
@@ -394,7 +394,7 @@ mmplotyy_temp([Fr(:,2)],[F_orig(:,end),FN(:,end)],'.',[F_orig(:,end-1),FN(:,end-
 set(gca,'LineWidth',1);
 mmplotyy('R5');
 ylabel('R6');
-xlabel('temperature (ºC)')
+xlabel('temperature (?C)')
 mmplotyy('shrink');
 suptitle(brw_name{n_inst})
 legend(gca,{'R6','R6 new','R5','R5 new'},'Location','NorthEast','HandleVisibility','Off');
@@ -462,12 +462,12 @@ for ii=0:5
     set(gca,'LineWidth',1);
     if ii==6
      title('MS9 ');       
-     xlabel('PMT Temperature (ºC)');
+     xlabel('PMT Temperature (?C)');
     else
      title(['slit #',num2str(ii+2),' ',num2str(line{ii+1}(2))]);
     end
     if ii==4
-     xlabel('PMT Temperature (ºC)');
+     xlabel('PMT Temperature (?C)');
     end
 end
 
@@ -510,14 +510,14 @@ for ii=0:5
   if ii==6
      pos_y=get(gca,'Ylim');      pos_x=get(gca,'Xlim')
      h=text( min(pos_x)+2, max(pos_y),'MS9 '); set(h,'BackgroundColor','w');       
-     xlabel('PMT Temperature (ºC)');
+     xlabel('PMT Temperature (?C)');
   else
      pos_y=get(gca,'Ylim');      pos_x=get(gca,'Xlim');
-     h=text( min(pos_x)+2,min(pos_y)+30,sprintf('slit#%d slp: %f cts/sc/ºC',(ii+2),(line{ii+1}(2))));
+     h=text( min(pos_x)+2,min(pos_y)+30,sprintf('slit#%d slp: %f cts/sc/?C',(ii+2),(line{ii+1}(2))));
      set(h,'BackgroundColor','w');
   end
  if ii==4
-     xlabel('PMT Temperature (ºC)');
+     xlabel('PMT Temperature (?C)');
  end
 end
 
