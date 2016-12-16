@@ -1,25 +1,69 @@
+% Función que coge los archivos originales del quasume y los transforma en
+% una matrix UV similar a la que se emplea para los datos del Brewer.
 
 function uv=load_quasume(file)
+
+addpath(genpath('C:\CODE\iberonesia\matlab'))
+
+addpath(genpath('G:\DATABENTHAM\matlab'))
+
+
+file='C:\Bentham_Raw_Data\Archivos extra\global'
+% El parametro de entrada file hace referencia a la carpeta donde están
+% almacenados los datos. Hay que poner la dirección entera.
+
+%    file='C:\Bentham_Raw_Data\Archivos extra\global'
+%-------------------------------------------------------------------------
+
+% Defino la matrix UV.
+
+for kk=1:1:366
+    uv(kk).l=[]; 
+    uv(kk).raw=[];  
+    uv(kk).uv=[];
+    uv(kk).time=[];
+    uv(kk).slc=[];
+    uv(kk).type=[];
+    uv(kk).dark=[];
+    uv(kk).date=[];
+    uv(kk).temp=[];
+    uv(kk).file=[];
+    uv(kk).resp=[];
+    uv(kk).inst=[];
+    uv(kk).filter=[];
+    uv(kk).duv=[];
+    uv(kk).spikes=[];
+end
+
+% Empiezo a procesar los datos del quasume...
+
+dia=ones(366,1)*0
 
 s=dir(file);
 lamda=[];rad_inst=[];rad_std=[];time=[];rtype=[];
 date_=[];       
 path=fileparts(file)
 
-for i=1:length(s)
-    try
+archivos=length(s)
 
-        filename=fullfile(path,s(i).name)
-        [info]=sscanf(s(i).name,'%04d%03d%02d%02G.quasume');
+a= exist('uvdata')
+if a==7
+    archivos=archivos-1
+end
+
+
+for i=3:archivos
+    try
+        
+        filename=fullfile(file,s(i).name)
+        [info]=sscanf(s(i).name,'uv%03d%02d%02d.quasume');
        
-        day=info(2); hour=info(3); min=info(4);
-        inst='ref';
-        type='ua';
+        day=info(1); hour=info(2); min=info(3);
+        dia(day,1)=dia(day,1)+1;
+        pl=dia(day,1);
         
         date_(i,2)=day;
-        date_(i,1)=info(1)-2000;
-        
-        
+        date_(i,1)=16; %año actual 2016-->16
         
         f=fopen(filename);
         aux=textscan(f,'', 'commentStyle','%');
@@ -27,28 +71,22 @@ for i=1:length(s)
          aux=textscan(f,'%f %f %f ', 'commentStyle','!','HeaderLines',13);
          %aux=cell2mat(aux);
         end
-         fclose(f);
+        fclose(f);
+        %pasamos los datos de formato celda a una estructura auxiliar
+        auxi.l=aux{1}
+        auxi.uv=aux{2}
+        auxi.time=aux{4}*60
         
-        lamda_    =aux{1};
-        rad_std_  =aux{2};
-        rad_inst_ =aux{2};
-        if ~isempty(lamda_)
-            if size(aux,2)==4
-              time_ =aux{4};
-            else
-             time_=linspace(hour+min/60,hour+min/60+3/24/60/60*length(lamda_),length(lamda_))';  
-            end 
+        %Guardamos los datos en la estructura UV, similar a la del Brewer.
         
-            lamda_(end)=[];
-            time_(end)=[];
-            rad_std_(end)=[];
-            rad_inst_(end)=[];
-        end
-        rad_inst=[rad_inst,rad_inst_];
-        rad_std=[rad_std,rad_std_];
-        lamda=[lamda,lamda_];
-        time=[time,time_];
-        rtype=[rtype,type];
+        uv(day).l(:,pl)=auxi.l*10 %longitudes de onda.
+        uv(day).raw(:,pl)=auxi.uv
+        uv(day).uv(:,pl)=auxi.uv % Irradiancia.
+        uv(day).time(:,pl)= auxi.time % Tiempo de la medida.
+        uv(day).inst=300;  
+        uv(day).date(2,pl)=day
+        uv(day).date(1,pl)=16
+        uv(day).temp(1,pl)=21
     catch
         %fclose(f);
         lasterr
@@ -57,15 +95,60 @@ for i=1:length(s)
     end
 end
 
+write_interchange_brewer(uv)
 
-       uv.l=lamda*10; %a A
-       uv.raw=rad_inst;
-       uv.uv=rad_std;
-       uv.ss=rad_inst;
-       uv.time=time*60;
-       uv.date=date_';
-       uv.file=file;
-       uv.inst=inst;
-       uv.type=rtype;
-       uv.spikes=[];
-       waterfall(uv.l',(uv.time)'/60,uv.uv');
+mkdir uvdata
+
+movefile('*G.300','uvdata')
+mkdir(fullfile(file,'\Matshic\'))
+for kk=1:1:366 %kk=262
+    if isempty(uv(kk).l)==0
+       % Parametros que necesito de la matriz UV para correr en matshic
+       wl=uv(kk).l(:,1)/10 ; % in and vector in nm
+       time=(uv(kk).time/60/24)+datenum(2016,0,kk); % matlab date
+       spec=uv(kk).uv; % W/sqm
+       uvs=uv(kk);
+       nombre=strcat('mat_uv',num2str(kk),'2016.300') 
+       filename=fullfile(file,'\Matshic\nombre');
+       save(filename,'wl','time','spec','uvs');
+       
+       %Aplicamos el matshic
+       
+       [s1,s2,s3]=matshic(datestr(datenum(2016,1,kk),'dd-mmm-yyyy'),...
+       datestr(datenum(2016,1,kk),'dd-mmm-yyyy'),'izana', '300');
+       
+       % save shic info
+       filename=fullfile(file,sprintf('uvanalys/2016/matshic_%03d%04d.%s',kk,2016,'300'));
+       aux=load(filename,'-mat');
+       [nwl,ns]=size(uv(kk).l);
+            
+       uv(kk).specraw=cell2mat(aux.specraw);    
+       specout=reshape(cell2mat(aux.specout),nwl,3,[]);
+       uv(kk).uv_shift=squeeze(specout(:,2,:));
+       uv(kk).uv_norm=squeeze(specout(:,3,:));
+            
+       wl_shift=reshape(cell2mat(aux.dwl),nwl,6,[]);
+            
+       uv(kk).wl=squeeze(wl_shift(:,1,:));
+       uv(kk).wl_shift_int=squeeze(wl_shift(:,2,:)); % nm
+       uv(kk).wl_shift_raw=squeeze(wl_shift(:,3,:)); % nm
+       uv(kk).wl_shift_res=squeeze(wl_shift(:,4,:));
+       uv(kk).wl_shift_dep=squeeze(wl_shift(:,5,:));
+       uv(kk).wl_shift_aflag=squeeze(wl_shift(:,6,:));
+            
+       dep=squeeze(wl_shift(:,2,:));
+       dep(~uv(kk).wl_shift_aflag)=NaN;
+       uv(kk).wl_shift=dep;
+            
+            %f=figure;
+            %waterfall(uv(ii).l,uv(ii).time,dep);
+            %title(sprintf(' Day = %03d  Inst = %03d',ii,uv(ii).inst))
+%       dep_=scan_join(dep_,[uv(kk).l(:,1),dep]);
+%             %tm_=scan_joinCI(tm_,[uv(ii).l(:,1),uv(ii).time]);
+%       dy_=[dy_,ii+uv(ii).time(1,:)/24/60];
+            
+      uvs=uv(kk);
+      save(filename,'-append','uvs')
+      
+    end
+end
