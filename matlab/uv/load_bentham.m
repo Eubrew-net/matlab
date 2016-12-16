@@ -1,6 +1,6 @@
-function uv=load_bentham(year,file,response,code)
+function uv=load_bentham(year,file,response,station,code)
 
-%% Nota: Le asignamos como número de instrumento al Bentham el nº 100.
+%% Nota: Le asignamos como número de instrumento al Bentham el nº 900.
 
 %% Función que lee los archivos Bentham y a partir de ellos genera una
 % matriz UV, similar a la que se tiene para los brewer. Tambien ejecuta el
@@ -20,6 +20,11 @@ function uv=load_bentham(year,file,response,code)
 %     Archivo respuesta Bentham
 %     Archivo Slit Bentham
 %     Archivo Matshic sobre la configuracion del Bentham 
+%     Archivo Station (indica latitud y longitud de la estación)
+% EJEMPLO
+
+% load_bentham('2016','C:\Users\sleonl\Google Drive\Bentham','resp_atmoz.bth','izana.dat',2)
+
 %% Parámetros de entrada.
 
 % YEAR: año en que se realizaron las medidas.
@@ -33,12 +38,13 @@ function uv=load_bentham(year,file,response,code)
 %% Comenzamos con el programa.
 % Año de la medida.
 ano=num2str(year)
+year=str2num(year)
 if year<=2000
     year=2000-year
 else
     year=year-2000
 end
-ano=nem2str(year)
+
 % Definimos la matrix UV.
 for kk=1:1:366
     uv(kk).l=[]; 
@@ -61,7 +67,6 @@ for kk=1:1:366
    
 end
 
-file='C:\Bentham_Raw_Data'
 s=dir(file);
 archivos=length(s)
 
@@ -70,27 +75,33 @@ archivos=length(s)
 % carpetas
 
 % Carpetas.
-a=exist('shicrivm')
+a=exist(fullfile(file,'shicrivm'))
 if a==7; archivos=archivos-1; end
-a=exist('Matshic')
+a=exist(fullfile(file,'uvdata'))
 if a==7; archivos=archivos-1; end
-% Archivos necesarios para el matshic
-a=exist('GL_.dat')
-if a>0; archivos=archivos-1; end
-a=exist('GL_.sli')
-if a>0; archivos=archivos-1; end
 
+% Archivos necesarios para el matshic
+a=exist(fullfile(file,'900.dat'))
+if a>0; archivos=archivos-1; end
+a=exist(fullfile(file,'900.sli'))
+if a>0; archivos=archivos-1; end
+a=exist(fullfile(file,station))
+if a>0; archivos=archivos-1; end
+a=exist(fullfile(file,response))
+if a>0; archivos=archivos-1; end
 % Contador de medidas realizadas en un día.
 cont=ones(366,1)*0
 
-ti=[0:1:260]' % Necesario para calcular el tiempo
+% Cargamos archivo respuesta del Bentham.  
+resp=load(fullfile(file,response))
+
 for i=3:1:archivos
     landa=[];
     medida=[];
     b=s(i).name
     dia=str2num(b(1,3:5));
     hora=str2num(b(1,7:8))*60+str2num(b(1,9:10))
-    fid=fopen(a(i).name)
+    fid=fopen(s(i).name)
     contador=1;
     tline = fgets(fid);
     while ischar(tline)
@@ -117,14 +128,15 @@ for i=3:1:archivos
     % Matrix UV.
     uv(dia).raw(pl,:)=medida;
     uv(dia).l(pl,:)=landa;
-    uv(dia).dark(pl,:)=dark;
+    uv(dia).dark(1,pl)=dark;
     paso=(uv(dia).raw(pl,:)-dark)'
     uv(dia).uv(pl,:)=paso(:,1)./resp(:,2);
-    uv(dia).temp(pl,:)=temp;
+    uv(dia).temp(1,pl)=temp;
     uv(dia).date(1,pl)=year;
     uv(dia).date(2,pl)=dia;
+    ti=[0:1:(length(medida)-1)]'
     uv(dia).time(pl,:)=hora+ti(:,1)*0.16667
-    uv(dia).slc(pl,:)=1;
+    uv(dia).slc(1,pl)=1;
     uv(dia).inst=100
 
     fclose all
@@ -145,7 +157,6 @@ copyfile('*G.100',fullfile(file,'\uvdata\',ano,'100'))
 movefile('*G.100',fullfile(file,'\shicrivm\'))
 
 % Procesamos ahora los datos con el Matshic
-mkdir(fullfile(file,'uvdata',ano,'100'))
 for kk=1:1:366 %kk=264
     if isempty(uv(kk).l)==0
        % Parametros que necesito de la matriz UV para correr en matshic
@@ -154,6 +165,7 @@ for kk=1:1:366 %kk=264
        spec=uv(kk).uv; % W/sqm
        uvs=uv(kk);
        % Salida formato .mat
+       filename=fullfile(pwd,sprintf('uvanalys/2016/GL_/matshic_%03d%04d.%s',kk,2016,'GL_'))
        nombre=strcat('mat_uv',num2str(kk),'2016.100') 
        filename=fullfile(file,'uvdata',ano,'100',nombre);
        save(filename,'wl','time','spec','uvs');
