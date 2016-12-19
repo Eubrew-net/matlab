@@ -1,18 +1,19 @@
-function uv=load_bentham(year,file,response,station,code)
+function [uv]=load_bentham(year,file,response,station,code)
 
 %% Nota: Le asignamos como número de instrumento al Bentham el nº 900.
 
 %% Función que lee los archivos Bentham y a partir de ellos genera una
 % matriz UV, similar a la que se tiene para los brewer. Tambien ejecuta el
-% matshic sobre los datos de ultravioleta. Además, esta función genera 2 
+% matshic sobre los datos de ultravioleta. Además, esta función genera 3 
 % carpetas:
 
 %   Shicrivm... donde se guardan los arvhivos en formato Write_interchange
 %   para se ejecuatamos manualmente por shicrivm
 
-%   Matshic... donde se guardan los archios de salida del matshic.
-
-
+%   uvdata... donde se guardan los archios de entrada para el matshic.
+%   (formato write_interchange)
+%   uvanalys...... donde se guardan los archios de salida del matshic.
+%   (formato .mat)
 
 % PARA QUE FUNCIONE CORRECTAMENTE SE NECESITA COLOCAR EN LA MISMA CARPETA 
 % QUE LOS ARCHIVOS BENTHAN, los siguiente archivos:
@@ -23,7 +24,7 @@ function uv=load_bentham(year,file,response,station,code)
 %     Archivo Station (indica latitud y longitud de la estación)
 % EJEMPLO
 
-% load_bentham('2016','C:\Users\sleonl\Google Drive\Bentham','resp_atmoz.bth','izana.dat',2)
+% load_bentham('2016','C:\Bentham','resp_atmoz.bth','izana.dat',2)
 
 %% Parámetros de entrada.
 
@@ -62,9 +63,6 @@ for kk=1:1:366
     uv(kk).filter=[];
     uv(kk).duv=[];
     uv(kk).spikes=[];
-    % Hasta aqui es la matrix UV clásica. A partir de aquí, se añaden otros
-    % campos para almacenar la salida del Matshic.
-   
 end
 
 s=dir(file);
@@ -79,6 +77,8 @@ a=exist(fullfile(file,'shicrivm'))
 if a==7; archivos=archivos-1; end
 a=exist(fullfile(file,'uvdata'))
 if a==7; archivos=archivos-1; end
+a=exist(fullfile(file,'uvanalys'))
+if a==7; archivos=archivos-1; end
 
 % Archivos necesarios para el matshic
 a=exist(fullfile(file,'900.dat'))
@@ -88,6 +88,8 @@ if a>0; archivos=archivos-1; end
 a=exist(fullfile(file,station))
 if a>0; archivos=archivos-1; end
 a=exist(fullfile(file,response))
+if a>0; archivos=archivos-1; end
+a=exist(fullfile(file,'matshic.cfg'))
 if a>0; archivos=archivos-1; end
 % Contador de medidas realizadas en un día.
 cont=ones(366,1)*0
@@ -137,7 +139,7 @@ for i=3:1:archivos
     ti=[0:1:(length(medida)-1)]'
     uv(dia).time(pl,:)=hora+ti(:,1)*0.16667
     uv(dia).slc(1,pl)=1;
-    uv(dia).inst=100
+    uv(dia).inst=900
 
     fclose all
 end
@@ -152,10 +154,10 @@ end
 
 write_interchange_brewer(uv) % Generamos los G-file para el Shicrivm.
 mkdir(fullfile(file,'\shicrivm\')) % ... y los guardamos en la carpeta.
-mkdir(fullfile(file,'\uvdata\',ano,'100'))
-copyfile('*G.100',fullfile(file,'\uvdata\',ano,'100'))
-movefile('*G.100',fullfile(file,'\shicrivm\'))
-
+mkdir(fullfile(file,'\uvdata\',ano,'900'))
+copyfile('*G.900',fullfile(file,'\uvdata\',ano,'900'))
+movefile('*G.900',fullfile(file,'\shicrivm\'))
+mkdir(fullfile(file,'\uvanalys\',ano,'900'))
 % Procesamos ahora los datos con el Matshic
 for kk=1:1:366 %kk=264
     if isempty(uv(kk).l)==0
@@ -164,23 +166,23 @@ for kk=1:1:366 %kk=264
        time=(uv(kk).time/60/24)+datenum(2016,0,kk); % matlab date
        spec=uv(kk).uv; % W/sqm
        uvs=uv(kk);
-       % Salida formato .mat
-       filename=fullfile(pwd,sprintf('uvanalys/2016/GL_/matshic_%03d%04d.%s',kk,2016,'GL_'))
-       nombre=strcat('mat_uv',num2str(kk),'2016.100') 
-       filename=fullfile(file,'uvdata',ano,'100',nombre);
+       % Archivo entrada en formato .mat
+       nombre=strcat('mat_uv',num2str(kk),'2016.900') 
+       filename=fullfile(file,'uvdata',ano,'900',nombre);
        save(filename,'wl','time','spec','uvs');
        
        % Aplicamos el matshic
        
        [s1,s2,s3]=matshic(datestr(datenum(2016,1,kk),'dd-mmm-yyyy'),...
-       datestr(datenum(2016,1,kk),'dd-mmm-yyyy'),'izana', '100');
+       datestr(datenum(2016,1,kk),'dd-mmm-yyyy'),'izana', '900');
        
        % save shic info
-       nombre=strcat('matshic_',num2str(kk),ano,'.100')
-       filename=fullfile(file,fullfile('uvanalys',ano,'100',nombre));
+       nombre=strcat('matshic_',num2str(kk),ano,'.900')
+       filename=fullfile(file,fullfile('uvanalys',ano,'900',nombre));
        aux=load(filename,'-mat');
        [nwl,ns]=size(uv(kk).l);
-            
+       
+       % Añadimos los resultados a la Matrix UV.
        uv(kk).specraw=cell2mat(aux.specraw);    
        specout=reshape(cell2mat(aux.specout),nwl,3,[]);
        uv(kk).uv_shift=squeeze(specout(:,2,:));
@@ -211,63 +213,3 @@ for kk=1:1:366 %kk=264
       
     end
 end
-
-
-%%  Comparamos datos Bentham vs QUASUME
-year=2016;  
-
-for i=15   
-    r_=[];
-    d_=[];
-    leg_=[];
-    f=figure;
-    filepath=fullfile(pwd,'matshic','uvanalys',num2str(year),'GL_');
-    
- 
-    uvref=ref;
-    
-    %idx=~arrayfun(@(x) isempty(x.l),ref);
-    %days=find(idx)
-    days=unique(ref.date(2,:));
-
-        
-   for ii=days
-      try
-       filename=fullfile(filepath,sprintf('matshic_%03d%04d.%03d',ii,year,Cal.brw(i)));   
-       if exist(filename)
-         uvx=load(filename,'-mat','uvs');
-         uvx=uvx.uvs;
-         uvx.uv=uvx.uv_shift;  % shic corrected and slit normalized  
-         [r,u,ti,l]=comp_scan_day(uvx,ref);
-         r_=scan_join(r_,[l(:,1),r]);
-         d_=[d_;ti(:,1)];
-         leg_=[leg_;Cal.brw_str{i}];
-       end
-      catch
-          disp('ERROR');
-          disp(ii)
-     end
-   end
-   rat=[[NaN;d_]';r_];
-   rx=rat(2:end,2:end);
-   %outliers
-   J=find(rx>100);rx(J)=NaN;
-   rat(2:end,2:end)=rx;
-   ratios{i}=rat;
-   if ~isempty(d_)
-   figure
-   ploty(rat([1,22:30:end],:)','o')
-   set(gca,'Ylim',[-20,20]);
-   grid
-   title(['Quasume Ratio',Cal.brw_str{i}]);
-   legend(cellstr(num2str(rat(22:30:end,1))))
-   datetick
-   
-   figure
-   ploty(rat,'.')
-   set(gca,'Ylim',[-20,20]);
-   grid
-   title(['Quasume Ratio %',Cal.brw_str{i}]);
-   end
-end
-   

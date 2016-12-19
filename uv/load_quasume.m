@@ -1,14 +1,43 @@
 % Función que coge los archivos originales del quasume y los transforma en
 % una matrix UV similar a la que se emplea para los datos del Brewer.
 
-function uv=load_quasume(file)
+function uv=load_quasume(year,file,station,code)
 
-addpath(genpath('C:\CODE\iberonesia\matlab'))
+%% Nota: Le asignamos como número de instrumento al Bentham el nº 500.
 
-addpath(genpath('G:\DATABENTHAM\matlab'))
+%% Función que lee los archivos qasume y a partir de ellos genera una
+% matriz UV, similar a la que se tiene para los brewer. Tambien ejecuta el
+% matshic sobre los datos de ultravioleta. Además, esta función genera 3 
+% carpetas:
 
+%   Shicrivm... donde se guardan los arvhivos en formato Write_interchange
+%   para se ejecuatamos manualmente por shicrivm
 
-file='C:\Bentham_Raw_Data\Archivos extra\global'
+%   uvdata... donde se guardan los archios de entrada para el matshic.
+%   (formato write_interchange)
+%   uvanalys...... donde se guardan los archios de salida del matshic.
+%   (formato .mat)
+
+% PARA QUE FUNCIONE CORRECTAMENTE SE NECESITA COLOCAR EN LA MISMA CARPETA 
+% QUE LOS ARCHIVOS BENTHAN, los siguiente archivos:
+
+%     Archivo Slit qasume
+%     Archivo Matshic sobre la configuracion del qasume
+%     Archivo Station (indica latitud y longitud de la estación)
+% EJEMPLO
+
+% load_qasume('2016','C:\qasume','izana.dat',2)
+
+%% Parámetros de entrada.
+
+% YEAR: año en que se realizaron las medidas.
+% FILE: Dirección donde están los archivos de medidas del bentham y el
+% archivo respuesta.
+% RESPONSE: Nombre del archivo respuesta
+% CODE: CODE=0, se generan carpetas Shicrivm y Matshic
+%       CODE=1, solo se procesa la parte del Shicrivm
+%       CODE=2, solo se procesa la parte del Matshic 
+
 % El parametro de entrada file hace referencia a la carpeta donde están
 % almacenados los datos. Hay que poner la dirección entera.
 
@@ -17,6 +46,15 @@ file='C:\Bentham_Raw_Data\Archivos extra\global'
 
 % Defino la matrix UV.
 
+ano=num2str(year)
+year=str2num(year)
+if year<=2000
+    year=2000-year
+else
+    year=year-2000
+end
+
+% Definimos la matrix UV.
 for kk=1:1:366
     uv(kk).l=[]; 
     uv(kk).raw=[];  
@@ -33,37 +71,54 @@ for kk=1:1:366
     uv(kk).filter=[];
     uv(kk).duv=[];
     uv(kk).spikes=[];
+   
 end
 
-% Empiezo a procesar los datos del quasume...
-
-dia=ones(366,1)*0
-
 s=dir(file);
+archivos=length(s)
+
+% Antes de comenzar a ejecutar el programa se busca si previamente se ha
+% ejecutado ya que si es así, existen archivos/carpetas que ya existen.
+% Nota: los archivos qasume empiezan por uvDDDHHHH, asi que si hacemos un
+% dir en la carpeta, serán los últimos archivos que se visualicen. 
+
+existe_archivo=3;
+% Carpetas.
+a=exist(fullfile(file,'shicrivm'))
+if a==7; existe_archivo=existe_archivo+1; end
+a=exist(fullfile(file,'uvdata'))
+if a==7; existe_archivo=existe_archivo+1; end
+a=exist(fullfile(file,'uvanalys'))
+if a==7; existe_archivo=existe_archivo+1; end
+
+% Archivos necesarios para el matshic
+a=exist(fullfile(file,'500.dat'))
+if a>0; existe_archivo=existe_archivo+1; end
+a=exist(fullfile(file,'500.sli'))
+if a>0; existe_archivo=existe_archivo+1; end
+a=exist(fullfile(file,station))
+if a>0; existe_archivo=existe_archivo+1; end
+a=exist(fullfile(file,'matshic.cfg'))
+if a>0; existe_archivo=existe_archivo+1; end
+
+% Contador de medidas realizadas en un día.
+cont=ones(366,1)*0
+
 lamda=[];rad_inst=[];rad_std=[];time=[];rtype=[];
 date_=[];       
 path=fileparts(file)
 
-archivos=length(s)
-
-a= exist('uvdata')
-if a==7
-    archivos=archivos-1
-end
-
-
-for i=3:archivos
+for i=existe_archivo:1:archivos
     try
-        
         filename=fullfile(file,s(i).name)
         [info]=sscanf(s(i).name,'uv%03d%02d%02d.quasume');
        
         day=info(1); hour=info(2); min=info(3);
-        dia(day,1)=dia(day,1)+1;
-        pl=dia(day,1);
+        cont(day,1)=cont(day,1)+1;
+        pl=cont(day,1);
         
         date_(i,2)=day;
-        date_(i,1)=16; %año actual 2016-->16
+        date_(i,1)=year
         
         f=fopen(filename);
         aux=textscan(f,'', 'commentStyle','%');
@@ -83,9 +138,9 @@ for i=3:archivos
         uv(day).raw(:,pl)=auxi.uv
         uv(day).uv(:,pl)=auxi.uv % Irradiancia.
         uv(day).time(:,pl)= auxi.time % Tiempo de la medida.
-        uv(day).inst=300;  
+        uv(day).inst=500;  
         uv(day).date(2,pl)=day
-        uv(day).date(1,pl)=16
+        uv(day).date(1,pl)=year
         uv(day).temp(1,pl)=21
     catch
         %fclose(f);
@@ -95,12 +150,14 @@ for i=3:archivos
     end
 end
 
-write_interchange_brewer(uv)
+write_interchange_brewer(uv) % Generamos los G-file para el Shicrivm.
+mkdir(fullfile(file,'\shicrivm\')) % ... y los guardamos en la carpeta.
+mkdir(fullfile(file,'\uvdata\',ano,'500'))
+copyfile('*G.500',fullfile(file,'\uvdata\',ano,'500'))
+movefile('*G.500',fullfile(file,'\shicrivm\'))
+mkdir(fullfile(file,'\uvanalys\',ano,'500'))
 
-mkdir uvdata
 
-movefile('*G.300','uvdata')
-mkdir(fullfile(file,'\Matshic\'))
 for kk=1:1:366 %kk=262
     if isempty(uv(kk).l)==0
        % Parametros que necesito de la matriz UV para correr en matshic
@@ -108,20 +165,22 @@ for kk=1:1:366 %kk=262
        time=(uv(kk).time/60/24)+datenum(2016,0,kk); % matlab date
        spec=uv(kk).uv; % W/sqm
        uvs=uv(kk);
-       nombre=strcat('mat_uv',num2str(kk),'2016.300') 
-       filename=fullfile(file,'\Matshic\nombre');
+       nombre=strcat('mat_uv',num2str(kk),'2016.500') 
+       filename=fullfile(file,'uvdata',ano,'500',nombre);
        save(filename,'wl','time','spec','uvs');
        
        %Aplicamos el matshic
        
        [s1,s2,s3]=matshic(datestr(datenum(2016,1,kk),'dd-mmm-yyyy'),...
-       datestr(datenum(2016,1,kk),'dd-mmm-yyyy'),'izana', '300');
+       datestr(datenum(2016,1,kk),'dd-mmm-yyyy'),'izana', '500');
        
        % save shic info
-       filename=fullfile(file,sprintf('uvanalys/2016/matshic_%03d%04d.%s',kk,2016,'300'));
+       nombre=strcat('matshic_',num2str(kk),ano,'.500')
+       filename=fullfile(file,fullfile('uvanalys',ano,'500',nombre));
        aux=load(filename,'-mat');
        [nwl,ns]=size(uv(kk).l);
-            
+       
+       % Añadimos los resultados a la Matrix UV.
        uv(kk).specraw=cell2mat(aux.specraw);    
        specout=reshape(cell2mat(aux.specout),nwl,3,[]);
        uv(kk).uv_shift=squeeze(specout(:,2,:));
