@@ -15,16 +15,20 @@ ozonepos=cfg(14)+cfg(44);% ozone pos-> from icf / or passed directly to function
 
 %% Ozone Dispersion analysis
 %function [wl,DSP,DSPstd,fwhm,fwhmstd,backlash,resup]=alldsp_(day,year,brew,lines,minslit,maxslit,usewl,dspp)
- h0=gcf;
-[wl,dsp,dspstd,fwhm,fwhmstd,backlash]=alldsp_(day,year,brewnb,1:14,[],[],[],path);
+ h0=double(gcf);
+[wl,dsp,dspstd,fwhm,fwhmstd,backlash]=alldsp_(day,year,brewnb,1:25,[],[],[],path);
  if isempty(wl)
     return;
  else
     fprintf('lines_dsp_%03d%02d_%s%03d\n',day(1),year,'_',brewnb);
-    h1=gcf;
+    try
+    h1=double(gcf);
     for i=double(h0):double(h1)
        figure(i)
        set(i,'Tag',['DSP_LINES_',num2str(i)]);
+    end
+    catch
+      disp('Tag eerror');
     end
 end
 
@@ -127,7 +131,7 @@ lamp_name=[ 'Hg';'Hg';'Zn';'Zn';'Cd';...
 f3=figure;  warning off MATLAB:tex;
 set(f3,'tag','DSP_QUAD_RES');
 plot(wl,fwl,'o-');
-set(gca,'Xlim',[2850,3450],'LineWidth',1);
+set(gca,'Xlim',[2850,wvlim],'LineWidth',1);
 % title(sprintf('%s\ndspnorm%c%03d%02d%c%s.%03d','Normaldsp','-',day(1),year,'-',comment,brewnb),'FontWeight','normal');
 title(sprintf('Normaldsp BREWER#%03d\ndspnorm %s',brewnb,path),'FontWeight','normal');
 ylabel('Residuals [A]');  xlabel('wavelength [A]');
@@ -238,7 +242,7 @@ hl=hline([-0.1,0.1]); set(hl,'Linewidth',2,'color','r');
 vl=vline(disp_lines(:,1:2),'y:',lamp_name); set(vl,'Linewidth',2);
 %vlabel=findobj('color','y'); set(vlabel,'color','k','Fontweight','bold')
 set(f2,'tag','DSP_CUBIC_RES');
-set(gca,'Xlim',[2850,3450]);
+set(gca,'Xlim',[2850,wvlim]);
 
 
 disp('Use brstps2 to calculate steps and wavelengths');
@@ -265,7 +269,7 @@ title('Normaldsp versus powfiu7 using slit 1 (3000:3500) and 5 (3500:3650)')
 ylabel('Quad - Cubic  [A]','FontSize',12,'FontWeight','bold');
 xlabel('wavelength [A]','FontSize',12,'FontWeight','bold');
 set(f1,'tag','DSP_QUAD_CUBIC');
-set(gca,'Xlim',[2850,3450]);
+set(gca,'Xlim',[2850,wvlim]);
 
 %f3=figure;
 %set(f3,'Tag','DSP')
@@ -309,12 +313,14 @@ end
 
 label_1={'slit #0','slit #1','slit #2','slit #3','slit #4','slit #5'};
 label_2={sprintf('step= %d ',res(jcal,1));'WL(A)';'Res(A)';'O3abs(1/cm)';'Ray abs(1/cm)';'SO2abs(1/cm)'};
+%resumen_=[opos-cal_ozonepos,O3Coeff,RAYCoeff*1e4,So2coeff,O34So2cc,-I0Coeff,O3Daumont,O3Bremen];
 label_r={'step  ','O3abs  ','Rayabs  ','SO2abs  ','O3SO2Abs'};
-quad_report=num2cell(res(jcal,1:end-2));
+quad_report=num2cell(res(jcal,1:end-3));
 quad_report=[label_r;quad_report];
 
 
-QUAD_DETAIL=[]; temp_res=[' ',label_r,' '];
+QUAD_DETAIL=[];
+temp_res=[label_r,'I0','Daumont','Bremen'];
 for ii=-1:1
 label_1={'slit\#0','slit\#1','slit\#2','slit\#3','slit\#4','slit\#5'};
 label_2={sprintf('step= %d ',res(jcal+ii,1));'WL(A)';'Res(A)';'O3abs(1/cm)';'Ray abs(1/cm)';'SO2abs(1/cm)'};
@@ -324,12 +330,13 @@ label_r={'step','O3abs','Rayabs','SO2abs','O3SO2Abs'};
  detail(1,:,jcal+ii)=str2num(sprintf('%7.2f %7.2f %7.2f %7.2f %7.2f %7.2f',detail(1,:,jcal+ii)));%round(detail(1,:,jcal+ii));
  step_report=num2cell(detail(1:end-1,:,jcal+ii));
  %  end -2 introducimos daumont
- quad_res=num2cell(res(jcal+ii,1:end-2));
+ %  end -3 introducimos Bremen
+ quad_res=num2cell(res(jcal+ii,1:end));
  step_report=[label_2,[label_1;step_report]];
  QUAD_DETAIL=[QUAD_DETAIL;step_report];
- temp_res=[temp_res;[' ',quad_res,' ']];
+ temp_res=[temp_res;[quad_res]];
 end
-QUAD_DETAIL=[QUAD_DETAIL;temp_res];
+QUAD_DETAIL=[QUAD_DETAIL;temp_res(:,[1:5,7:8])];
 % 
 % disp('Quadratic')
 % quad_dsp_res=printmatrix(detail(:,:,jcal),4);
