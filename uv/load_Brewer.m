@@ -75,7 +75,7 @@ if Bid==157
         copyfile('*G.157',fullfile(file,'\uvdata\',ano,Brewerid))
         movefile('*G.157',fullfile(file,'\shicrivm\'))
     end
-elseif Bid==157
+elseif Bid==183
     d=dir('*G.iz2');
     for k=1:length(d)
         fname=d(k).name;
@@ -85,14 +85,29 @@ elseif Bid==157
         copyfile('*G.183',fullfile(file,'\uvdata\',ano,Brewerid))
         movefile('*G.183',fullfile(file,'\shicrivm\'))
     end
+elseif Bid==185
+    d=dir('*G.iz3');
+    if size(d,1)>0 
+        for k=1:length(d)
+            fname=d(k).name;
+            [pathstr, name, ext] = fileparts(fname);
+            movefile(fname, fullfile(file, [name '.185']),'f')
+            mkdir(fullfile(file,'\uvdata\',ano,Brewerid))
+            copyfile('*G.185',fullfile(file,'\uvdata\',ano,Brewerid))
+            movefile('*G.185',fullfile(file,'\shicrivm\'))
+        end
+    else
+        d=dir('*G.185');
+        mkdir(fullfile(file,'\uvdata\',ano,Brewerid))
+        copyfile('*G.185',fullfile(file,'\uvdata\',ano,Brewerid))
+        movefile('*G.185',fullfile(file,'\shicrivm\'))
+    end
 else
-    
-    
-
-mkdir(fullfile(file,'\uvdata\',ano,Brewerid))
-copyfile('*G.157',fullfile(file,'\uvdata\',ano,Brewerid))
-movefile('*G.157',fullfile(file,'\shicrivm\'))
-
+    d=dir('*G.*');
+    mkdir(fullfile(file,'\uvdata\',ano,Brewerid))
+    copyfile('*G.*',fullfile(file,'\uvdata\',ano,Brewerid))
+    movefile('*G.*',fullfile(file,'\shicrivm\'))
+end   
 
 % Procesamos ahora los datos con el Matshic
 for kk=1:1:366 %kk=264
@@ -103,7 +118,7 @@ for kk=1:1:366 %kk=264
        spec=uv(kk).uv; % W/sqm
        uvs=uv(kk);
        % Salida formato .mat
-       filename=fullfile(pwd,sprintf('uvanalys/2016/GL_/matshic_%03d%04d.%s',kk,ano,Brewerid))
+       filename=fullfile(pwd,sprintf('uvanalys/2016/',Brewerid,'/matshic_%03d%04d.%s',kk,ano,Brewerid))
        nombre=strcat('mat_uv',num2str(kk),ano,'.',Brewerid) 
        filename=fullfile(file,'uvdata',nombre);
        save(filename,'wl','time','spec','uvs');
