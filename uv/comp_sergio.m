@@ -9,8 +9,8 @@ function [fig_indv,fig_day,ratio,uv,time,lamda,szar]=comp_sergio(uv1,uv2)
 % Dias que pueden compararse.
 day=[]
 for k=1:1:size(uv1,2)
-    if ~isempty(uv1(k).time(:,:)) && ~ isempty(uv2(k).time)
-          day=[k;day]
+    if ~isempty(uv1(k).time) && ~ isempty(uv2(k).time)
+          day=[day;k]
     end
 end
 
