@@ -13,9 +13,8 @@ for k=1:1:size(uv1,2)
           day=[day;k]
     end
 end
-
     
-% eleccion de candidatos
+% Eleccion de candidatos
 ratio=[];uv=[];time=[];l=[];
 fig_indv=[];fig_day=[]; 
 szar=[];
@@ -31,31 +30,44 @@ end
 %time1=uv1.time(1,c1)/60;
 %Time2=uv2.time(1,c2)/60;
 
-fecha1=uv1.date(:,1); fecha1=sprintf('%03d%02d',fecha1(2),fecha1(1));
-
-if ~isempty(uv1.time) && ~ isempty(uv2.time)
-
-    time1=uv1.time(1,:)/60;
-    time2=uv2.time(1,:)/60;
-
-    %Longitud de onda de sincronismo  --->revisar presupone que son iguales
-    [l_1,j1]=find(uv1.l==2900);
-    [l_2,j2]=find(uv2.l==2900);
-    %leyendas y titutlos
-    disp([uv1.file,' ',uv2.file]);
+for k=1:1:length(day)
+    
+    dia=day(k)
+    fecha1=uv1(dia).date(:,1); fecha1=sprintf('%03d%02d',fecha1(2),fecha1(1));
+    
+    time1=uv1(dia).time(1,:)/60;
+    time2=uv2(dia).time(1,:)/60;
+    
+    % Longitud de onda de sincronismo -> revisar presupone que son iguales.
+    [l_1,j1]=find(uv1(dia).l==2900);
+    [l_2,j2]=find(uv2(dia).l==2900);
+    
+    % Leyendas y titutos.
+    disp([uv1(dia).file,' ',uv2(dia).file]);
     inst1=uv1.inst;
-    if ~ischar(inst1)
-        inst1=num2str(inst1);
+        
+    if ~isempty(uv1(dia).time) && ~ isempty(uv2(dia).time)
+        time1=uv1.time(1,:)/60;
+        time2=uv2.time(1,:)/60;
+        
+        %Longitud de onda de sincronismo --> revisar presupone que son iguales
+        [l_1,j1]=find(uv1.l==2900);
+        [l_2,j2]=find(uv2.l==2900);
+        %leyendas y titutlos
+        disp([uv1.file,' ',uv2.file]);
+        inst1=uv1.inst;
+        if ~ischar(inst1)
+            inst1=num2str(inst1);
+        end
+        inst2=uv2.inst;
+        if ~ischar(inst2)
+            inst2=num2str(inst2);
+        end
+        
+        leg1=strtok(inst1,' ');
+        leg2=strtok(inst2,' ');
+
     end
-    inst2=uv2.inst;
-    if ~ischar(inst2)
-        inst2=num2str(inst2);
-    end
-
-    leg1=strtok(inst1,' ');
-    leg2=strtok(inst2,' ');
-
-
     % buscamos las comunes
 
     %introducimos los dias
