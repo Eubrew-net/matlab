@@ -13,16 +13,16 @@ function [config,TC,DT,extrat,absx,AT] = process_config( bfile,config_file)
 % 3 si es una variable considera que es una tabla de configuracion, config
 % 1 es la del fichero b config 2 es la de la matriz de configuraciones
 % config:
-% colunna 1 % 1º configuracion (cuando 2 configs.) o la del fichero B
-% columna 2 % 2º configuracion (o única configuración)
+% colunna 1 % 1? configuracion (cuando 2 configs.) o la del fichero B
+% columna 2 % 2? configuracion (o ?nica configuraci?n)
 % columna 3 % configuracion del fichero B
 %
 %
 % Varialbes internas
 % config_, TC_.... matriz de configuracion
 % config_B,TC_B.... Configuracion del fichero B
-% config_1,  configuracion 1º ....
-% config_2 , configuracion 2º 
+% config_1,  configuracion 1? ....
+% config_2 , configuracion 2? 
 
 % primera configuracio la del fichero B
 
@@ -37,7 +37,7 @@ config(:,1)=config_bfile;
 config(:,3)=config_bfile;
 TC_B=tc_coeff(TC_B);
 
-% la primera es la del fichero B, en el caso de una sola configuración
+% la primera es la del fichero B, en el caso de una sola configuraci?n
     TC_1=TC_B; TC_2=NaN*TC_1;
     AT_1=AT_B;AT_2=NaN*AT_1;
     DT_1=DT_B;DT_2=NaN*DT_1;
@@ -83,7 +83,7 @@ elseif nargin>1 && iscellstr(config_file) % dos configuraciones
     else
       [config_1,TC_1,DT_1,extrat_1,absx_1,AT_1]=read_icf(config_file{1});     
     end
-    config(:,1)=config_1;
+    config(:,1)=config_1(1:52); %not adapted for extra parameters
     TC_1=tc_coeff(TC_1);   
 
 %    Config2
@@ -93,7 +93,7 @@ elseif nargin>1 && iscellstr(config_file) % dos configuraciones
     else
       [config_2,TC_2,DT_2,extrat_2,absx_2,AT_2]=read_icf(config_file{2});
     end
-    config(:,2)=config_2;
+    config(:,2)=config_2(1:52);
     TC_2=tc_coeff(TC_2);   
     
 elseif nargin==1
