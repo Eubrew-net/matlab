@@ -30,7 +30,7 @@ config=readb_config(bfile);
 
 if  nargin>1 && ischar(config_file)
     [config_,TC_,DT_,extrat_,absx_,AT_]=read_icf(config_file);
-    config(:,2)=config_;
+    config(:,2)=config_(1:52); % for the extra fields
 
 end
 
