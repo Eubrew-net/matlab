@@ -292,7 +292,7 @@ if arg.Results.lgl_days
    displaytable([diaj(selected_days.data(:,1)) selected_days.data(:,2:end)], selected_days.labels, 8, fms, cellstr(datestr(cellfun(@(x) fix(x(1,1)),data))));
 end
 
-%% Tabla con condiciones para todos los días
+%% Tabla con condiciones para todos los d?as
 if arg.Results.lgl_days
 %    fprintf('\nAll days: conditions\r\n');
    j_=cellfun(@(x) x(:,9)/60>12  ,data_days     ,'UniformOutput',false);% 0=AM, 1=PM
@@ -336,7 +336,7 @@ if arg.Results.lgl_days
 %    displaytable(all_days.data(:,2:end), all_days.labels(2:end), 7, fms, cellstr(datestr(fix(aux_ampm(:,1)))));  
 end
 
-%% Ploteo de días individuales. Con / Sin filtros
+%% Ploteo de d?as individuales. Con / Sin filtros
     if arg.Results.plots
         props = {'ylabel', 'xlabel','title'}; 
         uno=cellfun(@(x) unique(fix(x(:,1))),data_orig,'UniformOutput',1);
@@ -397,7 +397,7 @@ end
            set(ax,'Xgrid','on','Ygrid','on','box','on');
            labelEdgeSubPlots('Airmass','Residuos'); 
            set(findobj(gcf,'Type','axes'),'FontSize',8); 
-           set(cell2mat(get(ax,props)),'FontSize',8);            
+           %set(cell2mat(get(ax,props)),'FontSize',8);   % error hg2         
            ylabel(ax(1),'MS9');
            snapnow                                                
        end
