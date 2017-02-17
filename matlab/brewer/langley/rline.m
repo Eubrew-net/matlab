@@ -40,7 +40,7 @@ for k = 1:length(lh)
        if nargout > 0
            h(count) = newline;
        end
-       Lr(:,count)=[beta;p(1)];
+       Lr(:,count)=[beta;p(1);i(:)];
     
        
    end
