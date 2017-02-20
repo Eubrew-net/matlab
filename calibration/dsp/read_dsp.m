@@ -110,8 +110,16 @@ for brwi=1:Cal.n_brw
                                                     dsp_sum.salida.CUBIC{end-1}.o3coeff,dsp_sum.salida.CUBIC{end-1}.raycoeff);        
             catch exception
                fprintf('%s\n',exception.message);  
-               [wv_quad wv_cubic]=no_hay_mat(dsp_dir,ldsp,indx,{arg.Results.inst,Cal.brw_str},Cal.brw_config_files);
-               wv_matrix_quad=cat(1,wv_matrix_quad,wv_quad); wv_matrix_cubic=cat(1,wv_matrix_cubic,wv_cubic);
+
+	       try
+	          fprintf('no .mat files, trying to load data from DSP. files...\n')
+                  [wv_quad wv_cubic]=no_hay_mat(dsp_dir,ldsp,indx,{arg.Results.inst,Cal.brw_str},Cal.brw_config_files);
+                  wv_matrix_quad=cat(1,wv_matrix_quad,wv_quad); wv_matrix_cubic=cat(1,wv_matrix_cubic,wv_cubic);
+	       catch
+	          fprintf('.mat and DSP. files are missing, aborting...\n')
+                  quit
+               end
+
             end
         else
             fprintf('Reprocessing all available tests\n');  
@@ -144,6 +152,9 @@ for l=1:size(dsp_quad,1)
 end
 fclose all;
 
+
+
+% --------------------------------------------------------------------------------------
 function [wv_matrix_quad wv_matrix_cubic]=no_hay_mat(path_dsp,ldsp,indx,inst_info,brw_config_files) 
                
 %% No hay .mat: procesamos el dsp
