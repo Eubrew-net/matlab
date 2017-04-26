@@ -1,5 +1,4 @@
 function data_tab=meanperiods(data,event)
-
 %   function data_tab = meanperiods(data,event)
 % 
 % Calculo de estadisticas (promedio, desviacion standard y numero de elementos) para
@@ -45,7 +44,7 @@ if isempty(data)
    return;
 end
 
-a=group_time(data(:,1),event.dates);
+a=group_time_new(data(:,1),event.dates);
 if any(a==0)
    fprintf('Removing data before 1st event as input.\n');
    data(a==0,:)=[]; a(a==0)=[]; 
