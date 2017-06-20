@@ -1,5 +1,4 @@
 function [dsp_quad dsp_cubic]=read_dsp(dsp_dir,varargin)
-
 % Este script lee las variables ###_yy_ddd.mat que se generan automaticamente cada vez que se procesa
 % un test de dispersion y produce un fichero de texto con la siguiente informacion (quad & cubic):
 % 
@@ -8,26 +7,26 @@ function [dsp_quad dsp_cubic]=read_dsp(dsp_dir,varargin)
 %     'o3_0','o3_2','o3_3','o3_4','o3_5','o3_6'
 %     'Ray_0','Ray_2','Ray_3','Ray_4','Ray_5','Ray_6'
 % 
-% En el caso de que no esté la variable .mat, entonces se procesa el test de la forma acostumbrada (dspreport)
+% En el caso de que no est? la variable .mat, entonces se procesa el test de la forma acostumbrada (dspreport)
 % 
 % INPUT
 % - dsp_dir: path al directorio de dsp's
 %         
 % INPUT OPTIONAL:
-% - brwid       : número de brewer a procesar (STRING)
+% - brwid       : n?mero de brewer a procesar (STRING)
 % - dsp         : NOMBRE del directorio a procesar (###_yy_ddd)
 % - date_range  : Filtro de fechas (fecha matlab, uno o dos elementos).
 % - process     : Reprocessing test (even when .mat exist)
 % - configs     : Not clear yet
 % 
-% Si sólo le pasamos brwid, leerá todos los dsp's para el instrumento dado. 
-% Si no pasamos ningún argumento, procesará todo lo que hay en dsp_dir.
+% Si s?lo le pasamos brwid, leer? todos los dsp's para el instrumento dado. 
+% Si no pasamos ning?n argumento, procesar? todo lo que hay en dsp_dir.
 % 
 % OUTPUT: 
 % - dsp_quad  : variable con el resultado
 % - dsp_cubic : variable con el resultado
 % 
-% Ambas variables serán escritas en un fichero de texto
+% Ambas variables ser?n escritas en un fichero de texto
 % 
 % Ejemplo de uso:
 % 
@@ -88,7 +87,7 @@ for brwi=1:Cal.n_brw
     if ~isempty(arg.Results.date_range)
        myfunc=@(x)sscanf(x,'%*3d_%2d_%3d')';    
        A=cell2mat(cellfun(myfunc,ldsp, 'UniformOutput', false));
-       %               Año    Dia
+       %               A?o    Dia
        dates=datejuli(A(:,1),A(:,2));    
        ldsp(dates<arg.Results.date_range(1))=[];    dates(dates<arg.Results.date_range(1))=[];
        if length(arg.Results.date_range)>1
@@ -110,14 +109,15 @@ for brwi=1:Cal.n_brw
                                                     dsp_sum.salida.CUBIC{end-1}.o3coeff,dsp_sum.salida.CUBIC{end-1}.raycoeff);        
             catch exception
                fprintf('%s\n',exception.message);  
-
-	       try
-	          fprintf('no .mat files, trying to load data from DSP. files...\n')
+               try
                   [wv_quad wv_cubic]=no_hay_mat(dsp_dir,ldsp,indx,{arg.Results.inst,Cal.brw_str},Cal.brw_config_files);
-                  wv_matrix_quad=cat(1,wv_matrix_quad,wv_quad); wv_matrix_cubic=cat(1,wv_matrix_cubic,wv_cubic);
-	       catch
-	          fprintf('.mat and DSP. files are missing, aborting...\n')
-                  quit
+                  wv_matrix_quad=cat(1,wv_matrix_quad,wv_quad); 
+                  wv_matrix_cubic=cat(1,wv_matrix_cubic,wv_cubic);
+               catch
+                   wv_quad  = NaN*ones(length(l_all),length(labels));
+                   wv_cubic = NaN*ones(length(l_all),length(labels));
+                   wv_matrix_quad=cat(1,wv_matrix_quad,wv_quad); 
+                   wv_matrix_cubic=cat(1,wv_matrix_cubic,wv_cubic);
                end
 
             end
@@ -180,7 +180,8 @@ end
 try
    close all;
    Cal.n_inst=inst_info{1}; Cal.Date.cal_year=year(now);
-   dspreport(Cal,'dsp_dir',fullfile(path_dsp,ldsp{indx}),'config_n',config_n,'csn',csn);
+   [res,detail,DSP_QUAD,QUAD_SUM,QUAD_DETAIL,CUBIC_SUM,CUBIC_DETAIL,SALIDA...
+    ]=dspreport(Cal,'dsp_dir',fullfile(path_dsp,ldsp{indx}),'config_n',config_n,'csn',csn);
              
    load(fullfile(path_dsp,ldsp{indx},strcat(ldsp{indx},'.mat')));
    wv_matrix_quad =cat(2,info_(1),dsp_sum.brewnb,indx,dsp_sum.salida.QUAD{end-1}.thiswl,dsp_sum.salida.QUAD{end-1}.fwhmwl/2,...
