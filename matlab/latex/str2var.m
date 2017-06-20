@@ -10,6 +10,7 @@ str=strrep(str,'%','_');
 str=strrep(str,'-','_');
 str=strrep(str,'.','_');
 str=strrep(str,'/','_');
+str=strrep(str,'+','_');
 
 %\~{n}
 
