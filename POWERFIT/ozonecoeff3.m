@@ -77,8 +77,9 @@ end
 if nargin<2,
     ozonepos=[];
 end
-if isempty(ozonepos),
+if isempty(ozonepos) | isnan(ozonepos)
     ozonepos=brstps2(3063.0,1,[],dcfname);
+    disp('calculated ozone position')
 end
 
 
@@ -117,6 +118,14 @@ ind=(wl>2950 & wl<3500);
 wl=wl(ind);  % 21 2 98 julian new.
 fwhm=fwhm(ind,:);
 fwhm(isnan(fwhm))=0;
+
+%% Bodhaine 1999
+[sb]=sbodhaine(280:0.01:400);
+sb=[10*(280:0.01:400)',sb];
+
+%% Bates
+BE=[0,4870,4620,4410,4220,4040];
+Bates=(BE(2+1)-0.5*BE(3+1)-2.2*BE(4+1)+1.7*BE(5+1));
 %absrayl=nicolet(slitwl/10,P); % rayl for natural log
 
 %if nargin<2,ozonepos=977+3700;end % for br#119.
@@ -149,6 +158,7 @@ for opos=oposrange;
     jj=jj+1;
     daumont=zeros(1,6);
     bremen=zeros(1,6);
+    braycoeff=daumont;
     thiswl=daumont;
     aux=zeros(1,6);wlstep=aux;fwhmwl=aux;o3coeff=aux;
     
@@ -168,9 +178,16 @@ for opos=oposrange;
             [buf,slit_aux]=brslit(fwhmwl(i),daumont_xs(:,1)-thiswl(i)); % calculate slitfunction
             daumont(i)=sum(buf(:,2).*daumont_xs(:,2))/sum(buf(:,2)); % integrate
             daumont(i)=daumont(i)/log(10); % need in log10 units, as in brewer
+            
             [buf,slit_aux]=brslit(fwhmwl(i),sgw(:,1)-thiswl(i)); % calculate slitfunction
             bremen(i)=sum(buf(:,2).*sgw(:,2))/sum(buf(:,2)); % integrate
             bremen(i)=bremen(i)/log(10); % need in log10 units, as in brewer
+            
+            [buf,slit_aux]=brslit(fwhmwl(i),sb(:,1)-thiswl(i)); % calculate slitfunction
+            braycoeff(i)=sum(buf(:,2).*sb(:,2))/sum(buf(:,2)); % integrate already as in brewer units
+            
+            
+            
             
             
             %             [wlj,iu]=unique(test_300UD(:,1));
@@ -188,6 +205,7 @@ for opos=oposrange;
             %raycoeff(i)=sum(slitray(:,2).*nicolet(wlx+thiswl(i)/10,1013.25)')/sum(slitray(:,2));
             raycoeff(i)=nicolet(thiswl(i)/10);
             raycoeff(i)=raycoeff(i)/log(10);
+            
             %disp(sprintf('%10.0f steps:slit %d has rayleigh in log10 units of %15.5f',opos,i,raycoeff(i)));
             % calculate so2
             buf=brslit(fwhmwl(i),fso2(:,1)-thiswl(i));
@@ -213,6 +231,8 @@ for opos=oposrange;
             so2coeff(i)=NaN;
             daumont(i)=NaN;
             bremen(i)=NaN;
+            braycoeff(i)=NaN;
+            
         end
         
         
@@ -223,6 +243,8 @@ for opos=oposrange;
     O3Daumont=(daumont(2+1))-0.5*(daumont(3+1))-2.2*(daumont(4+1))+1.7*(daumont(5+1));
     O3Bremen=(bremen(2+1))-0.5*(bremen(3+1))-2.2*(bremen(4+1))+1.7*(bremen(5+1));
     RAYCoeff=(raycoeff(2+1)-0.5*raycoeff(3+1)-2.2*raycoeff(4+1)+1.7*raycoeff(5+1));
+    BRAYCoeff=(braycoeff(2+1)-0.5*braycoeff(3+1)-2.2*braycoeff(4+1)+1.7*braycoeff(5+1));
+    
     So2coeff=(so2coeff(1+1)-4.2*so2coeff(4+1)+3.2*so2coeff(5+1));
     O34So2cc=o3coeff(1+1)-4.2*o3coeff(4+1)+3.2*o3coeff(5+1);
     I0Coeff=((log10(I0(2+1)))-0.5*(log10(I0(3+1)))-2.2*(log10(I0(4+1)))+1.7*(log10(I0(5+1))))*1e4;
@@ -234,15 +256,16 @@ for opos=oposrange;
     salida{jj}.daumont=daumont;
     salida{jj}.bremen=bremen;
     salida{jj}.raycoeff=raycoeff;
+    salida{jj}.braycoeff=raycoeff;
     salida{jj}.so2coeff=so2coeff;
-    salida{jj}.I0=I0;
+    salida{jj}.I0=-log10(I0)*1e4;
     salida{jj}.ozone_pos=opos;
     salida{jj}.cal_ozonepos=cal_ozonepos;
-    salida{jj}.resumen=[thiswl;fwhmwl;o3coeff;raycoeff;so2coeff;I0;daumont];
+    salida{jj}.resumen=[thiswl;fwhmwl;o3coeff;raycoeff;so2coeff;I0;daumont;bremen;braycoeff];
     
-    resumen_=[opos-cal_ozonepos,O3Coeff,RAYCoeff*1e4,So2coeff,O34So2cc,-I0Coeff,O3Daumont,O3Bremen];
+    resumen_=[opos-cal_ozonepos,O3Coeff,RAYCoeff*1e4,So2coeff,O34So2cc,-I0Coeff,O3Daumont,O3Bremen,BRAYCoeff];
     resumen=[resumen;resumen_];
-    salida_m(:,:,jj)=[thiswl;fwhmwl;o3coeff;raycoeff;so2coeff;bremen];                     
+    salida_m(:,:,jj)=[thiswl;fwhmwl;o3coeff;raycoeff;so2coeff;bremen;braycoeff];                     
     
     s1=sprintf('%5.0f WL(A)        %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f',opos-cal_ozonepos,thiswl);
     s2=sprintf('      Res(A)       %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f',fwhmwl*2);
@@ -250,11 +273,15 @@ for opos=oposrange;
     s3c=sprintf('Daumt O3abs(1/cm)  %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f O3:%8.4f',daumont,O3Daumont);
     s3d=sprintf('Bremen O3abs(1/cm)  %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f O3:%8.4f',bremen,O3Bremen);
     s3b=sprintf('     So2abs(1/cm)  %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f',so2coeff);
-    s4=sprintf('  1e4*Rayabs(1/cm) %8.1f %8.1f %8.1f %8.1f %8.1f %8.1f R:%8.4f',raycoeff*1e4,RAYCoeff);
-    s4b=sprintf(' I0(mW m^-2nm^-1)  %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f',I0);
-    s5=sprintf('Ozone offset due to Rayleigh: %3.1f DU',-RAYCoeff./O3Coeff*1e3);
+    s4=sprintf(' Nicolet 1e4*Rayabs(1/cm) %8.1f %8.1f %8.1f %8.1f %8.1f %8.1f R:%8.4f',raycoeff*1e4,1e4*RAYCoeff);
+    s4b=sprintf('Bates(fix)  1e4*Rayabs(1/cm) %8.1f %8.1f %8.1f %8.1f %8.1f %8.1f R:%8.4f', BE,Bates);
+    s4c=sprintf('Bodhaine  1e4*Rayabs(1/cm) %8.1f %8.1f %8.1f %8.1f %8.1f %8.1f R:%8.4f', braycoeff,BRAYCoeff);
+    s4d=sprintf(' I0(mW m^-2nm^-1)  %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f ETC:%8.0f ',-log10(I0)*1e4,-I0Coeff);
+    s5=sprintf('Ozone offset due to Rayleigh  (RayCOeff/O3Coeff): %3.1f DU',-RAYCoeff./O3Coeff*1e3);
+    s5b=sprintf('Ozone offset due to Rayleigh (Bodhaine): %3.1f DU',-(BRAYCoeff-Bates)/O3Coeff/10);
     s6=sprintf('Ratio Ozone for So2(A3)=%8.4f, So2/O3(A2)=%8.4f', O34So2cc,So2coeff/O34So2cc);
     s7=sprintf('O3 factor from Bass & Paur to Daumont  =%8.4f %', (O3Coeff/O3Daumont));
+    s8=sprintf('O3 factor from Bass & Paur to Bremen  =%8.4f %', (O3Coeff/O3Bremen));
     if abs(opos-mic_ozonepos)<6% preesentamos +/- 5 paso
           disp(s1)
           disp(s2)
@@ -264,9 +291,13 @@ for opos=oposrange;
           disp(s3d)
           disp(s4)
           disp(s4b)
+          disp(s4c)
+          disp(s4d)
           disp(s5)
+          disp(s5b)
           disp(s6)
           disp(s7)
+          disp(s8)
         if nargin>=4,  % print to file
             fprintf(fid,'%s\n',s1);
             fprintf(fid,'%s\n',s2);
@@ -274,8 +305,13 @@ for opos=oposrange;
             fprintf(fid,'%s\n',s3b);
             fprintf(fid,'%s\n',s3d);
             fprintf(fid,'%s\n',s4); 
+            fprintf(fid,'%s\n',s4b); 
+            fprintf(fid,'%s\n',s4c); 
+            fprintf(fid,'%s\n',s4d); 
             fprintf(fid,'%s\n',s5);
             fprintf(fid,'%s\n\n',s6);
+            fprintf(fid,'%s\n\n',s7);
+            fprintf(fid,'%s\n\n',s8);
         end
     end
     %disp(sprintf('%10.0f steps has ozonecoeff:%10.4f',opos,(o3coeff(2))-0.5*(o3coeff(3))-2.2*(o3coeff(4))+1.7*(o3coeff(5))));
@@ -335,6 +371,12 @@ for opos=[mic_ozonepos,umk_step];
             bremen(i)=sum(buf(:,2).*sgw(:,2))/sum(buf(:,2)); % integrate
             bremen(i)=bremen(i)/log(10); % need in log10 units, as in brewer
             
+            
+            [buf,slit_aux]=brslit(fwhmwl(i),sb(:,1)-thiswl(i)); % calculate slitfunction
+            braycoeff(i)=sum(buf(:,2).*sb(:,2))/sum(buf(:,2)); % integrate already as in brewer units
+            
+         
+            
             %figure;semilogy(buf(:,1)+thiswl(i),buf(:,2),o3x1wl,o3x1T/max(o3x1T));
             %disp(sprintf('%10.0f steps:slit %d has FW=%10.4f  A at wl=%15.5f A and o3coeff of %15.5f',opos,i,fwhmwl(i),thiswl(i),o3coeff(i)));
             % now rayleigh:
@@ -368,14 +410,16 @@ for opos=[mic_ozonepos,umk_step];
             so2coeff(i)=NaN;
             daumont(i)=NaN;
             bremen(i)=NaN;
+            braycoeff(i)=NaN;
             
         end
     end
     
     O3Coeff=(o3coeff(2+1))-0.5*(o3coeff(3+1))-2.2*(o3coeff(4+1))+1.7*(o3coeff(5+1));
     O3Daumont=(daumont(2+1))-0.5*(daumont(3+1))-2.2*(daumont(4+1))+1.7*(daumont(5+1));
-    O3Bremen=(daumont(2+1))-0.5*(bremen(3+1))-2.2*(bremen(4+1))+1.7*(bremen(5+1));
+    O3Bremen=(bremen(2+1))-0.5*(bremen(3+1))-2.2*(bremen(4+1))+1.7*(bremen(5+1));
     RAYCoeff=(raycoeff(2+1)-0.5*raycoeff(3+1)-2.2*raycoeff(4+1)+1.7*raycoeff(5+1));
+    BRAYCoeff=(braycoeff(2+1)-0.5*braycoeff(3+1)-2.2*braycoeff(4+1)+1.7*braycoeff(5+1));
     So2coeff=(so2coeff(1+1)-4.2*so2coeff(4+1)+3.2*so2coeff(5+1));
     O34So2cc=o3coeff(1+1)-4.2*o3coeff(4+1)+3.2*o3coeff(5+1);
     I0Coeff=((log10(I0(2+1)))-0.5*(log10(I0(3+1)))-2.2*(log10(I0(4+1)))+1.7*(log10(I0(5+1))))*1e4;
@@ -386,15 +430,16 @@ for opos=[mic_ozonepos,umk_step];
     salida{jj}.daumont=daumont;
     salida{jj}.bremen=bremen;
     salida{jj}.raycoeff=raycoeff;
+    salida{jj}.braycoeff=braycoeff;
     salida{jj}.so2coeff=so2coeff;
     salida{jj}.I0=I0;
     salida{jj}.ozone_pos=opos;
     salida{jj}.cal_ozonepos=cal_ozonepos;
-    salida{jj}.resumen=[thiswl;fwhmwl;o3coeff;raycoeff;so2coeff;I0;daumont;bremen];
+    salida{jj}.resumen=[thiswl;fwhmwl;o3coeff;raycoeff;so2coeff;I0;daumont;bremen;braycoeff];
              
-    resumen_=[opos-cal_ozonepos,O3Coeff,RAYCoeff*1e4,So2coeff,O34So2cc,-I0Coeff,O3Daumont,O3Bremen];
+    resumen_=[opos-cal_ozonepos,O3Coeff,RAYCoeff*1e4,So2coeff,O34So2cc,-I0Coeff,O3Daumont,O3Bremen,BRAYCoeff];
     resumen=[resumen;resumen_];
-    salida_m(:,:,end+1)=[thiswl;fwhmwl;o3coeff;raycoeff;so2coeff;bremen];
+    salida_m(:,:,end+1)=[thiswl;fwhmwl;o3coeff;raycoeff;so2coeff;bremen;braycoeff];
     
     
     s1=sprintf('%5.0f WL(A)        %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f',opos-cal_ozonepos,thiswl);
@@ -403,10 +448,11 @@ for opos=[mic_ozonepos,umk_step];
    s3a=sprintf(' (SGW)O3abs(1/cm)  %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f O3:%8.4f',bremen,O3Bremen);
    s3b=sprintf('     So2abs(1/cm)  %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f',so2coeff);
     s4=sprintf('  1e4*Rayabs(1/cm) %8.1f %8.1f %8.1f %8.1f %8.1f %8.1f R:%8.4f',raycoeff*1e4,RAYCoeff);
-   s4b=sprintf(' I0(mW m^-2nm^-1)  %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f',I0);
-    s5=sprintf('Ozone offset due to Rayleigh: %3.1f DU',-RAYCoeff./O3Coeff*1e3);
+   s4b=sprintf(' I0(mW m^-2nm^-1)  %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f ETC:%8.0f',log(I0)*1e4,-I0Coeff);
+    s5=sprintf('Ozone offset due to Rayleigh (Ray/O3abs) : %3.1f DU ',-RAYCoeff./O3Coeff*1e3);
     s6=sprintf('Ratio Ozone for So2(A3)=%8.4f, So2/O3(A2)=%8.4f', O34So2cc,So2coeff/O34So2cc);
-    
+    s7=sprintf('O3 factor from Bass & Paur to Daumont  =%8.4f %', (O3Coeff/O3Daumont));
+    s8=sprintf('O3 factor from Bass & Paur to Bremen  =%8.4f %', (O3Coeff/O3Bremen));
     %if abs(opos-mic_ozonepos)<5
 %     disp(s1)
 %     disp(s2)
