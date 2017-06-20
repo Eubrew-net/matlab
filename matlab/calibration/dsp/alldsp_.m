@@ -1,5 +1,4 @@
 function [wl,DSP,DSPstd,fwhm,fwhmstd,backlash,resup]=alldsp_(day,year,brew,lines,minslit,maxslit,usewl,dspp)
-
 % function [wl,DSP,DSPstd,fwhm,fwhmstd,backlash]=alldsp(day,year,brew,lines,minslit,maxslit,usewl,dspp);
 % 3 dec 96 julian
 % calculates all dsp files available.
@@ -35,6 +34,7 @@ if nargin<7,usewl=[];end
 if nargin<8,dspp=[];end
 if isempty(dspp),
     dspp=['d:\brewer\dsp\' sprintf('%03d',brew) '\'];
+    %dspp='.';
 end
 if ~ischar(brew),
     brew=sprintf('.%03d',brew);
@@ -74,7 +74,12 @@ for slits=minslit:maxslit,
         for days=day,
 
             daystr=sprintf('%03d',days);
+            if lnes>9
+                filename=sprintf('W%c%d%03d%02d%s',char(55+lnes),slits,days,year,brew);
+            else    
             filename=sprintf('W%d%d%03d%02d%s',lnes,slits,days,year,brew);
+            end
+            
             [a,s]=liesfile(fullfile(dspp,filename),1,2);
             s=char(s);
 
@@ -82,7 +87,7 @@ for slits=minslit:maxslit,
             if isempty(a),
                % disp(['file ' dspp filename ' does not exist']);
             else
-%                 disp(['now:' filename]);
+                 disp(['now:' filename]);
                 
                 daycnt=daycnt+1;
                 if (rem(linecnt,6)==0),figure;linecnt=0;end
