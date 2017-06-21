@@ -313,14 +313,15 @@ end
 
 label_1={'slit #0','slit #1','slit #2','slit #3','slit #4','slit #5'};
 label_2={sprintf('step= %d ',res(jcal,1));'WL(A)';'Res(A)';'O3abs(1/cm)';'Ray abs(1/cm)';'SO2abs(1/cm)'};
-%resumen_=[opos-cal_ozonepos,O3Coeff,RAYCoeff*1e4,So2coeff,O34So2cc,-I0Coeff,O3Daumont,O3Bremen];
+%resumen_=[opos-cal_ozonepos,O3Coeff,RAYCoeff*1e4,So2coeff,O34So2cc,-I0Coeff,O3Daumont,O3Bremen,BRAYCoeff];
+%label_r={'step  ','O3abs  ','Rayabs  ','SO2abs  ','O3SO2Abs','I0','Daumont','O3Bremen','RayBodhaine'};
 label_r={'step  ','O3abs  ','Rayabs  ','SO2abs  ','O3SO2Abs'};
-quad_report=num2cell(res(jcal,1:end-3));
+quad_report=num2cell(res(jcal,1:end-4));
 quad_report=[label_r;quad_report];
 
 
 QUAD_DETAIL=[];
-temp_res=[label_r,'I0','Daumont','Bremen'];
+temp_res=[label_r,'I0','Daumont','Bremen','RayBodhaine'];
 for ii=-1:1
 label_1={'slit\#0','slit\#1','slit\#2','slit\#3','slit\#4','slit\#5'};
 label_2={sprintf('step= %d ',res(jcal+ii,1));'WL(A)';'Res(A)';'O3abs(1/cm)';'Ray abs(1/cm)';'SO2abs(1/cm)'};
@@ -328,9 +329,10 @@ label_r={'step','O3abs','Rayabs','SO2abs','O3SO2Abs'};
     
 % modificado el 05/11/2009
  detail(1,:,jcal+ii)=str2num(sprintf('%7.2f %7.2f %7.2f %7.2f %7.2f %7.2f',detail(1,:,jcal+ii)));%round(detail(1,:,jcal+ii));
- step_report=num2cell(detail(1:end-1,:,jcal+ii));
+ step_report=num2cell(detail(1:end-2,:,jcal+ii));
  %  end -2 introducimos daumont
  %  end -3 introducimos Bremen
+ %  end -4 introducimos Bodhaine
  quad_res=num2cell(res(jcal+ii,1:end));
  step_report=[label_2,[label_1;step_report]];
  QUAD_DETAIL=[QUAD_DETAIL;step_report];
