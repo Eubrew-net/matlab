@@ -51,7 +51,8 @@ arg.addRequired('icf_2', @(x)isfloat(x) || ischar(x));
 arg.addParamValue('grp', '', @(x)any(strcmpi(x,{'events','month','week','month+events'}))); 
 arg.addParamValue('grp_custom', [], @isstruct);    
 arg.addParamValue('fpath', Cal.path_root, @ischar);    
-arg.addParamValue('date_range', Cal.Date.CALC_DAYS, @isfloat);    
+arg.addParamValue('date_range', Cal.Date.CALC_DAYS, @isfloat);  
+arg.addParamValue('reprocess',0, @isfloat)  % default no carga los datos
 
 arg.parse(Cal, icf_1, icf_2,varargin{:});
 
@@ -59,13 +60,13 @@ arg.parse(Cal, icf_1, icf_2,varargin{:});
 config_temp.n_inst=Cal.n_inst; 
 config_temp.brw_name=Cal.brw_name{Cal.n_inst};        
 
-if ~exist([config_temp.brw_name,'_sl_rw.mat'],'file')
+if ~exist([config_temp.brw_name,'_sl_rw.mat'],'file') || arg.Results.reprocess==1
    sl_rw=readb_sl_rawl(fullfile(arg.Results.fpath,['bdata',Cal.brw_str{Cal.n_inst}],['B*.',Cal.brw_str{Cal.n_inst}]),...
-                                                   'date_range',arg.Results.date_range([1 end]),'f_plot',1);
+                                                   'date_range',arg.Results.date_range([1 end]),'f_plot',0);
      save([config_temp.brw_name,'_sl_rw.mat'],'sl_rw');
  else
       load([config_temp.brw_name,'_sl_rw.mat']);
-  end
+end
 
 %% Determinamos los periodos de analisis + configs a aplicar
 % periodos
@@ -98,12 +99,17 @@ for pp=1:length(id_period)
     %%
     try       
      periods_=date_range(y==id_period(pp));
-     [NTC{pp},ajuste{pp},Args,Fraw,Fop]=temp_coeff_raw(config_temp,sl_rw,'outlier_flag',1,'N_TC',icf_op.data(2:6,pp)',...
-                                         'date_range',periods_([1,end]),'plots',0); 
-                                     
-     [NTCx,ajustex,Argsx,Fraw,Falt]    =temp_coeff_raw(config_temp,sl_rw,'outlier_flag',1,'N_TC',icf_alt.data(2:6,pp)',...
-                                         'date_range',periods_([1,end]),'plots',1); 
      
+     [NTC{pp},ajuste{pp},Args,Fraw,Fop]=temp_coeff_raw(config_temp,sl_rw,'outlier_flag',1,'N_TC',icf_op.data(2:6,pp)',...
+                                         'date_range',periods_([1,end]),'plots',0,'temp_flag',[10,50]); 
+     if all(icf_op.data(2:6,pp)==icf_alt.data(2:6,pp))
+         
+      [NTCx,ajustex,Argsx,Fraw,Falt]    =temp_coeff_raw(config_temp,sl_rw,'outlier_flag',1,...
+                                         'date_range',periods_([1,end]),'plots',0,'temp_flag',[10,50]); 
+     else
+     [NTCx,ajustex,Argsx,Fraw,Falt]    =temp_coeff_raw(config_temp,sl_rw,'outlier_flag',1,'N_TC',icf_alt.data(2:6,pp)',...
+                                         'date_range',periods_([1,end]),'plots',0,'temp_flag',[10,50]); 
+     end
      Forig=Fop;                                
      Forig(isnan(Forig(:,1)),:)=[];
      Forigx= Fop; %Forig;
@@ -114,6 +120,8 @@ for pp=1:length(id_period)
                            -matadd(ajuste{pp}.cero(1:5,2),-ajuste{pp}.cero(1,2))')];
      tabl_TC_std=[tabl_TC_std; cat(2,nanmean(Forig(:,1)),ajuste{pp}.orig(7,3),ajuste{pp}.orig(7,4),ajuste{pp}.new(7,3),ajuste{pp}.new(7,4),...
                         sqrt(ajuste{pp}.cero(1:5,end).^2+ajuste{pp}.cero(1,end)^2)')];   
+                    
+     
                     
      figure; 
      set(gcf,'Tag',sprintf('TEMP_COMP_%s_%d',Cal.brw_str{Cal.n_inst},pp));
@@ -184,5 +192,7 @@ lbl_TC={'MaxT','MinT','ORIG R6','std','ORIG slope','std','NEW R6','std','NEW slo
          'coeff#1','coeff#2','coeff#3','coeff#4','coeff#5'};
 
 data_tab=meanperiods(aux,event_info);
-tabla_tc.data=aux; tabla_tc.events=data_tab.evnts; tabla_tc.data_lbl=lbl_TC;
+tabla_tc.data=aux; 
+tabla_tc.events=data_tab.evnts; 
+tabla_tc.data_lbl=lbl_TC;
      
