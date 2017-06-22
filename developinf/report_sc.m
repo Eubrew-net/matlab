@@ -1,5 +1,4 @@
 function tabla_sc=report_sc(Cal,icf,varargin)
-
 % function tabla_sc=report_sc(Cal,icf,varargin)
 % 
 % Analisis de los SC's en periodos
@@ -54,11 +53,16 @@ arg.parse(Cal, icf, varargin{:});
 %% Determinamos los periodos de analisis + configs a aplicar
 % periodos
 lbl_sc={'CSN','[CI-]','[CI+]','Op. CSN','N'};
+%%
+maxf=@(x) x(end);
+
 if isempty(arg.Results.grp)
    event_info=arg.Results.grp_custom;
 else
    event_info=getevents(Cal,'grp',arg.Results.grp,'period',arg.Results.date_range);      
 end
+
+
 if isempty(event_info)
    fprintf('\rDebes definir una variable de eventos valida (help report_wavelength)\n');
    tabla_sc=NaN;
@@ -71,15 +75,26 @@ icf_=getcfgs(arg.Results.date_range,icf,'events',event_info.dates);
 
 %% Procesamos los periods determinados
 CSN.cal_step={}; 
-y=group_time(arg.Results.date_range',event_info.dates); id_period=unique(y);
+
+y=group_time(arg.Results.date_range',event_info.dates); 
+id_period=unique(y);
+
+
 for pp=1:length(id_period)  
     try
        periods_=arg.Results.date_range(y==id_period(pp)); 
+       
        CSN.cal_step{pp}=sc_report(Cal.brw_str{Cal.n_inst},Cal.brw_config_files{Cal.n_inst,2},...
                      'data_path',fullfile(arg.Results.fpath,'..',num2str(year(periods_(1))),['bdata',Cal.brw_str{Cal.n_inst}]),...
                      'date_range',[periods_(1) periods_(end)+1],...
                      'one_flag', 0,'CSN_orig',icf_.data(10,pp),...
                      'control_flag',1,'residual_limit',20);
+                 
+       figs2keep = maxf(findobj('tag','Final_SC_Calculation'))
+       all_figs = findobj(0, 'type', 'figure');
+       delete(setdiff(all_figs, figs2keep));   
+      
+                 
     catch exception
        fprintf('Trouble with Bfile-SC. %s\n',exception.message);
        CSN.cal_step{pp}=NaN*ones(1,5); CSN.cal_step{pp}(1)=periods_(1);
@@ -89,4 +104,5 @@ end
 %% Tabla
    data_tab=meanperiods(cell2mat(CSN.cal_step(cellfun(@(x) ~isnan(x(:,1)),CSN.cal_step))'),event_info);
    
-   tabla_sc.data=cat(2,data_tab.m(:,:),data_tab.N(:,2)); tabla_sc.events=data_tab.evnts; tabla_sc.data_lbl=lbl_sc;
+   tabla_sc.data=cat(2,data_tab.m(:,:),data_tab.N(:,2));
+   tabla_sc.events=data_tab.evnts; tabla_sc.data_lbl=lbl_sc;

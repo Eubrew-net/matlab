@@ -61,8 +61,11 @@ config_orig=read_icf(Cal.brw_config_files{Cal.n_inst,1},mean(arg.Results.date_ra
                         'date_range',arg.Results.date_range([1 end]));
                     
 filter.ETC_FILTER_CORRECTION=ETC_FILTER_CORRECTION;
+
+
 filter.media_fi=media_fi; 
-filter.fi=fi; filter.fi_avg=fi_avg;
+filter.fi=fi;
+filter.fi_avg=fi_avg;
 filt{Cal.n_inst}=filter; 
 o3f=filters_data(filt,Cal);
 filter.o3f=o3f;
@@ -87,7 +90,8 @@ lbl_fi={'F#1 corr','se','F#2 corr','se','F#3 corr','se',...
 
   aux=NaN*ones(size(data_tab.m,1),12);
   aux(:,[1 2:2:10])=data_tab.m(:,[1 3:end]);
-  aux(:,3:2:end)=data_tab.std(:,3:end);
+  %se 
+  aux(:,3:2:end)=data_tab.std(:,3:end)./sqrt(data_tab.N(:,3:end));
   aux(:,end)=data_tab.N(:,end);
   try
       matdiv(data_tab.std(:,3:end),sqrt(data_tab.std(:,3:end)));
@@ -97,4 +101,5 @@ lbl_fi={'F#1 corr','se','F#2 corr','se','F#3 corr','se',...
 tabla_fi.data=aux;
 tabla_fi.events=data_tab.evnts;
 tabla_fi.data_lbl=lbl_fi;
+
 
