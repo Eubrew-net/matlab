@@ -1,4 +1,4 @@
-function H=shadedErrorBar(x,y,errBar,lineProps,transparent)
+function varargout=shadedErrorBar(x,y,errBar,lineProps,transparent)
 % function H=shadedErrorBar(x,y,errBar,lineProps,transparent)
 %
 % Purpose 
@@ -9,13 +9,13 @@ function H=shadedErrorBar(x,y,errBar,lineProps,transparent)
 % x - vector of x values [optional, can be left empty]
 % y - vector of y values or a matrix of n observations by m cases
 %     where m has length(x);
-% errBar - if a vector we draw symmetric errorbars. If it has a
-%          size of [2,length(x)] then we draw asymmetric error bars
-%          with row 1 being the upper bar and row 2 being the lower
-%          bar. ** alternatively ** errBar can be a cellArray of
-%          two function handles. The first defines which statistic
-%          the line should be and the second defines the error
-%          bar. 
+% errBar - if a vector we draw symmetric errorbars. If it has a size
+%          of [2,length(x)] then we draw asymmetric error bars with
+%          row 1 being the upper bar and row 2 being the lower bar
+%          (with respect to y). ** alternatively ** errBar can be a
+%          cellArray of two function handles. The first defines which
+%          statistic the line should be and the second defines the
+%          error bar.
 % lineProps - [optional,'-k' by default] defines the properties of
 %             the data line. e.g.:    
 %             'or-', or {'-or','markerfacecolor',[1,0.2,0.2]}
@@ -50,24 +50,24 @@ function H=shadedErrorBar(x,y,errBar,lineProps,transparent)
     
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
 % Error checking    
-error(nargchk(3,5,nargin))
+narginchk(3,5)
 
 
 %Process y using function handles if needed to make the error bar
 %dynamically
-if iscell(errBar)
+if iscell(errBar) 
     fun1=errBar{1};
     fun2=errBar{2};
     errBar=fun2(y);
     y=fun1(y);
 else
-    y=y(:)';
+    y=y(:).';
 end
 
 if isempty(x)
     x=1:length(y);
 else
-    x=x(:)';
+    x=x(:).';
 end
 
 
@@ -136,6 +136,11 @@ if ~holdStatus, hold on,  end
 yP=[lE,fliplr(uE)];
 xP=[x,fliplr(x)];
 
+%remove nans otherwise patch won't work
+xP(isnan(yP))=[];
+yP(isnan(yP))=[];
+
+
 H.patch=patch(xP,yP,1,'facecolor',patchColor,...
               'edgecolor','none',...
               'facealpha',faceAlpha);
@@ -146,9 +151,12 @@ H.edge(1)=plot(x,lE,'-','color',edgeColor);
 H.edge(2)=plot(x,uE,'-','color',edgeColor);
 
 %Now replace the line (this avoids having to bugger about with z coordinates)
-delete(H.mainLine)
-H.mainLine=plot(x,y,lineProps{:});
+uistack(H.mainLine,'top')
 
 
 if ~holdStatus, hold off, end
 
+
+if nargout==1
+    varargout{1}=H;
+end
