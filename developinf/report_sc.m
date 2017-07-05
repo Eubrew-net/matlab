@@ -90,9 +90,11 @@ for pp=1:length(id_period)
                      'one_flag', 0,'CSN_orig',icf_.data(10,pp),...
                      'control_flag',1,'residual_limit',20);
                  
-       figs2keep = maxf(findobj('tag','Final_SC_Calculation'))
+       figs2keep = findobj('-regexp','tag','Final_SC_Calculation*')
        all_figs = findobj(0, 'type', 'figure');
        delete(setdiff(all_figs, figs2keep));   
+       f =findobj('tag','Final_SC_Calculation');
+       set(f,'Tag',['Final_SC_Calculation_',num2str(pp)]);
       
                  
     catch exception
