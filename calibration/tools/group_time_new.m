@@ -32,7 +32,7 @@ for ii=0:length(periods);
     end
 end
 [aux,grp]=find(g);
-grp=grp-1% 
+grp=grp-1;% 
 if(any(grp==0))
     warning('index =0 will be an error if you use for matrix asigment');
 end
