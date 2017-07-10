@@ -83,7 +83,7 @@ end
         jhg=setdiff(jhg,jhgscan); % after hgscan follows hg
      end
    try  
-        %do not work on new versions of matlab ¿?
+        %do not work on new versions of matlab ??
         hg(length(jhg_old)+1:end,:)=cell2mat(textscan(char(l(jhg))','hg %f:%f:%f %f %f %f %f %f %f',...
                             'delimiter',char(13),'multipleDelimsAsOne',1));   
    catch
@@ -96,7 +96,7 @@ end
    hg=hg';
   end
   
-  time_hg=hg(1,:)*60+hg(2,:)+hg(3,:)/60; %a minutos. Lo de sort es un APAÑO
+  time_hg=hg(1,:)*60+hg(2,:)+hg(3,:)/60; %a minutos. Lo de sort es un APA?O
   flaghg=abs(hg(5,:)-config(14))<2; % more than 2 steps change
   if size(hg,2)>1
         flag_hg=find(diff(flaghg)==-1);   %
@@ -149,6 +149,8 @@ end
                   ds_aux=sscanf(l{jdz(dz_idx(ii))},fmtdz);
                   if size(ds_aux,1)==18
                      ds_=ds_aux; 
+                  elseif size(ds_aux,1)==12
+                      ds_(1:12)=sscanf(l{jdz(dz_idx(ii))},' dz %c %d %f %d %d %d %d %d %d %d %d %d %d %d'); 
                   else
                      ds_(1:14)=sscanf(l{jdz(dz_idx(ii))},' dz %c %d %f %d %d %d %d %d %d %d %d %d %d %d');                  
                   end
@@ -197,7 +199,7 @@ if ~isempty(dzs)
      tb_dzsum=[tb_dzsum,find((hora>time_badhg(ii,1)   & hora<time_badhg(ii,2)))];
      tb_dz=[tb_dz,find((dz(3,:)>time_badhg(ii,1) & dz(3,:)<time_badhg(ii,2)))];
     end
-    % flag hg utilizamos el numero de linea (ï¿½?)
+    % flag hg utilizamos el numero de linea (????)
     timedz(:,2)=ones(size(timedz(:,2)));
     timedzs(:,2)=ones(size(timedzs(:,2)));
     if ~isempty(tb_dzsum)
@@ -222,7 +224,7 @@ if ~isempty(dzs)
      o3.dz_raw0_legend={'date';'hgflag';'ndz';'tmp';'fl1';'fl2';'tim';'m2 ';'m3*pressure corr';'cy ';...
                         'F0 ';'F1 ';'F2 ';'F3 ';'F4 ';'F5 ';'F6 '; 'F7 ';'r1 ';'r2 ';'r3 ';'r4 ';'MS8 ';'MS9 '};    
 
-    %% dz re-calculation: Pendiente. ¿Vale la pena? Por ahora sólo interesan las cuentas brutas (o3.dz_raw0 y )
+    %% dz re-calculation: Pendiente. ?Vale la pena? Por ahora s?lo interesan las cuentas brutas (o3.dz_raw0 y )
 
 else
     disp('Fichero vacio? (no dz measurements)');
