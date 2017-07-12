@@ -95,6 +95,8 @@ if any(id_period==0)
 else
    date_range=arg.Results.date_range; 
 end
+data_sl={};
+data_slr={};
 for pp=1:length(id_period)        
     %%
     try       
@@ -120,7 +122,8 @@ for pp=1:length(id_period)
                            -matadd(ajuste{pp}.cero(1:5,2),-ajuste{pp}.cero(1,2))')];
      tabl_TC_std=[tabl_TC_std; cat(2,nanmean(Forig(:,1)),ajuste{pp}.orig(7,3),ajuste{pp}.orig(7,4),ajuste{pp}.new(7,3),ajuste{pp}.new(7,4),...
                         sqrt(ajuste{pp}.cero(1:5,end).^2+ajuste{pp}.cero(1,end)^2)')];   
-                    
+     data_sl{pp}=Forigx;
+     data_slr{pp}=Fn;
      
                     
      figure; 
@@ -195,4 +198,11 @@ data_tab=meanperiods(aux,event_info);
 tabla_tc.data=aux; 
 tabla_tc.events=data_tab.evnts; 
 tabla_tc.data_lbl=lbl_TC;
+tabla_tc.sl_r=data_slr;
+tabla_tc.sl=data_sl;
+
+
+
+
+
      
