@@ -50,5 +50,5 @@ for count=1:100
     f3=cellfun(@(x,y,z) matmul(x,exp(matmul(y,z))),f3_,f3,t2,'UniformOutput',false);
     f5=cellfun(@(x,y,z) matmul(x,exp(matmul(y,z))),f5_,f5,t2,'UniformOutput',false);
 end
-t2=cellfun(@(x,y) cat(2,x(:,1),x(:,3),x(:,6),y),dz_raw0,t2,'UniformOutput',false);
+t2=cellfun(@(x,y,z) cat(2,x(:,1),x(:,3),x(:,6),y,z(:,1)),dz_raw0,t2,f5,'UniformOutput',false);
 
