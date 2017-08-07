@@ -13,7 +13,10 @@ if ~isempty(c) & ~strcmp(c,'.cfg')
 else
     config_def=bconfig(1:end-1,1); 
 end
-
+if size(config_orig,1)==63
+    config_orig=config_orig(1:52,:);
+    disp('icf cut  : extended icf not supported yet');
+end
 icf_legend=[cellstr(icf_legend);{'date'}];
 
 % changes ? 
