@@ -35,7 +35,7 @@ function result=straylight_model(data,A1,A2,Cal)
  %% ploteo
  f=figure; set(f,'tag',strcat('ETC_StrayLight',Cal.brw_str{Cal.n_inst}));  
  plot(ozone_slant,etcs,'.'); hold on;
- errorbar(m(:,2),m(:,1),s(:,1),'-s'); 
+ errorbar(m(3:end,2),m(3:end,1),s(3:end,1),'-s'); 
  
  % modelamos el stray-light segun Y = a*x^b+c
  % cflibhelp power
