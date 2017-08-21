@@ -1,5 +1,4 @@
 function [tabla_dsp,dsp_quad,dsp_cubic]=report_dispersion(Cal,varargin)
-
 % function [tabla_dsp]=report_dispersion(Cal,varargin)
 %
 % Analisis de los dsp's (funcion read_dsp). Promedios por eventos
@@ -16,7 +15,7 @@ function [tabla_dsp,dsp_quad,dsp_cubic]=report_dispersion(Cal,varargin)
 %                  1) dates  : Fechas asociadas a los eventos definidos
 %                  2) labels : Etiquetas asociadas a los eventos definidos
 % 
-% Si no hemos asignado una valor a ninguno de los parámetros anteriores, entonces no se promedia por eventos,
+% Si no hemos asignado una valor a ninguno de los parï¿½metros anteriores, entonces no se promedia por eventos,
 % sino que se analizan todos los dsp's en date_range.
 % 
 % - fpath      : (String). Path a los ficheros dsp. Por defecto, Cal.path_root\DSP 
@@ -38,8 +37,10 @@ function [tabla_dsp,dsp_quad,dsp_cubic]=report_dispersion(Cal,varargin)
 %                           'CSN','wl_0','wl_2','wl_3','wl_4','wl_5','wl_6',
 %                           'fwhm_0','fwhm_2','fwhm_3','fwhm_4','fwhm_5','fwhm_6',
 %                           'A1 quad.','std','A1 cubic','std','N'
+%                            'RayleighB','RayleighN','Aq_Bremen','Ac_Bremen'
+%                           Los campos wl_# y fwhm_# se refieren a las
+%                           diffs. quad-cubic 
 %
-%                           Los campos wl_# y fwhm_# se refieren a las diffs. quad-cubic
 % EXAMPLE:
 %  Predefined Events : 
 %        tabla_dsp=report_dispersion(Cal,'grp','month+events');
@@ -78,13 +79,16 @@ aux=NaN*ones(size(dsp_quad,1),16);
 aux(:,[1 2])=cat(2,dsp_quad(:,1),matadd(dsp_quad(:,17),-dsp_quad(:,16)));
 aux(:,3:14)=matadd(dsp_quad(:,4:15),-dsp_cubic(:,4:15));
 aux(:,15:16)=cat(1,-O3W*abs(dsp_quad(:,18:23))',-O3W*abs(dsp_cubic(:,18:23))')';
+aux(:,17:18)=cat(1,-O3W*abs(10^4*dsp_quad(:,24:29))',-O3W*abs(10^4*dsp_cubic(:,24:29))')';
+aux(:,19:20)=cat(1,-O3W*abs(dsp_quad(:,30:35))',-O3W*abs(dsp_cubic(:,30:35))')';
+
 
 aux(isnan(aux(:,1)),:)=[];
 
 %% Table, por periodos
- lbl_dsp={'CSN','wl_0','wl_2','wl_3','wl_4','wl_5','wl_6',...
+ lbl_dsp={'Date','CSN','wl_0','wl_2','wl_3','wl_4','wl_5','wl_6',...
                 'fwhm_0','fwhm_2','fwhm_3','fwhm_4','fwhm_5','fwhm_6',...
-                'A1 quad.','std','A1 cubic','std','N'};
+                'A1 quad.','std','A1 cubic','std','N','RayleighB','RayleighN','Aq_Bremen','Ac_Bremen'};
  if isempty(arg.Results.grp)
     if ~isempty(arg.Results.grp_custom)
        event_info=arg.Results.grp_custom;
@@ -105,12 +109,12 @@ aux(isnan(aux(:,1)),:)=[];
 
     idx=findm(event_info.dates,aux(:,1),.5);
     tabla_dsp.data=cat(2,aux(:,1:15),NaN*ones(length(idx),1),...
-                         aux(:,16)  ,NaN*ones(length(idx),1),ones(length(idx),1));
+                         aux(:,16)  ,NaN*ones(length(idx),1),ones(length(idx),1),aux(:,17:end));
     tabla_dsp.events=event_info.labels(idx);   tabla_dsp.data_lbl=lbl_dsp;
  else
     data_tab=meanperiods(aux(~isnan(aux(:,1)),:), event_info);
     tabla_dsp.data=cat(2,data_tab.m(:,1:14),data_tab.m(:,15),data_tab.std(:,15),...
-                         data_tab.m(:,16),data_tab.std(:,16),data_tab.N(:,end));
+                         data_tab.m(:,16),data_tab.std(:,16),data_tab.N(:,end),data_tab.m(:,17:end));
     tabla_dsp.events=data_tab.evnts;  tabla_dsp.data_lbl=lbl_dsp;
  end 
 
