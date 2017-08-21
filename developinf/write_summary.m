@@ -1,5 +1,5 @@
-function write_summary(brw,yr,summary_old,summary,varargin)
-
+function t=write_summary(brw,yr,summary_old,summary,varargin)
+t{length(brw),2}=[];
 for ii=1:length(brw)
     if nargin>4
        idx=group_time(summary_old{ii}(:,1),varargin{1}.old(:,1));
@@ -14,15 +14,18 @@ for ii=1:length(brw)
     fid = fopen(file_name, 'wt'); % Open for writing
     fprintf(fid, '%%Date sza m2 temp nd O3_1 std ms9_corr ms9 O3_2 std O3_1_sl std R6_ref R6_calc\n');
     for ll=1:size(aux_old,1)
-        fprintf(fid, '%f %6.3f %6.4f %d %d %5.1f %5.2f %6.1f %6.1f %5.1f %5.2f %5.1f %5.2f %5.1f %5.1f\n', aux_old(ll,:));
+        fprintf(fid, '%f %6.3f %6.4f %d %d %5.1f %5.2f %6.1f %6.1f %5.1f %5.2f %5.1f %5.2f %5.1f %5.1f %d \n', aux_old(ll,:));
     end
- 
+    t{ii,1}=array2table(aux_old,'VariableNames',varname(cellstr(mmcellstr('Date sza m2 temp nd O3_1 std ms9_corr ms9 O3_2 std O3_1_sl std R6_ref R6_calc',' '))));
+    t{ii,1}.idx=(1:height(t{ii,1}))';
     % summary    
     file_name=strcat('summary_Brw',num2str(brw(ii)),'_',num2str(yr),'.txt');
     fiq = fopen(file_name, 'wt'); % Open for writing
     fprintf(fiq, '%%Date sza m2 temp nd O3_1 std ms9_corr ms9 O3_2 std O3_1_sl std R6_ref R6_calc\n');
     for ll=1:size(aux,1)
         fprintf(fiq, '%f %6.3f %6.4f %d %d %5.1f %5.2f %6.1f %6.1f %5.1f %5.2f %5.1f %5.2f %5.1f %5.1f\n', aux(ll,:));
-    end    
+    end
+    t{ii,2}=array2table(aux,'VariableNames',varname(cellstr(mmcellstr('Date sza m2 temp nd O3_1 std ms9_corr ms9 O3_2 std O3_1_sl std R6_ref R6_calc',' '))));
+    t{ii,2}.idx=(1:height(t{ii,2}))';
 end
 fclose all;
