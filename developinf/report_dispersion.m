@@ -75,12 +75,12 @@ else
              'inst',Cal.n_inst,'configs',Cal.brw_config_files,...
              'process',arg.Results.process,'date_range',arg.Results.date_range([1 end]));
 end
-aux=NaN*ones(size(dsp_quad,1),16);
+aux=NaN*ones(size(dsp_quad,1),20);
 aux(:,[1 2])=cat(2,dsp_quad(:,1),matadd(dsp_quad(:,17),-dsp_quad(:,16)));
 aux(:,3:14)=matadd(dsp_quad(:,4:15),-dsp_cubic(:,4:15));
 aux(:,15:16)=cat(1,-O3W*abs(dsp_quad(:,18:23))',-O3W*abs(dsp_cubic(:,18:23))')';
 aux(:,17:18)=cat(1,-O3W*abs(10^4*dsp_quad(:,24:29))',-O3W*abs(10^4*dsp_cubic(:,24:29))')';
-aux(:,19:20)=cat(1,-O3W*abs(dsp_quad(:,30:35))',-O3W*abs(dsp_cubic(:,30:35))')';
+aux(:,19:20)=cat(1,-O3W*abs(dsp_quad(:,24:29))',-O3W*abs(dsp_cubic(:,24:29))')';
 
 
 aux(isnan(aux(:,1)),:)=[];
