@@ -153,7 +153,11 @@ for m = 1:length(p)
         x2 = sort(x(~isnan(x(:,n)),n)); % sort
         N(m,n) = length(x2); % sample size
         if min_con(N(m,n),p(m)) % at lower limit
-            q(m,n) = x2(1);
+            if ~isempty(x2)
+              q(m,n) = x2(1);
+            else
+              q(m,n) = NaN;
+            end
         elseif max_con(N(m,n),p(m)) % at upper limit
             q(m,n) = x2(N(m,n));
         else % everything else
