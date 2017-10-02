@@ -137,6 +137,9 @@ function interactivelegend(varargin)
 %               objects in the wrong order.
 %
 %   2005-04-19  Fix: tag now appears above all other plot elements.
+%
+%   2017-03-01  Fix: update for Matlab 2016b (and some lower versions)
+%
 
 % ===============================
 % Managing input arguments
@@ -176,7 +179,7 @@ opts.handles = plot_handles;
 
 % Defaults options
 if ~isfield(opts,'selected')
-    opts.selected.Color = 'r';
+    %opts.selected.Color = 'r';
     opts.selected.LineWidth = 2;
 else
     if ~isfield(opts.selected,'Color')
@@ -186,7 +189,7 @@ else
         opts.selected.LineWidth = 2;
     end;
 end;
-if ~isfield(opts,'tag')
+if ~isfield(opts,'tag') && isfield(opts.selected,'Color')
     opts.tag.Color = opts.selected.Color;
 end;
 if ~isfield(opts,'pointer')
@@ -233,12 +236,13 @@ opts.axes_handles = get_unique_parents(opts.handles);
 % Setting ButtonDownFcn's for opts.handles
 % and axes_handles
 set(opts.handles,'ButtonDownFcn',@click_plot);
-set(opts.axes_handles,'ButtonDownFcn',@click_axes);
+if ~iscell(opts.axes_handles) opts.axes_handles = {opts.axes_handles}; end
+cellfun(@(ax) set(ax,'ButtonDownFcn',@click_axes), opts.axes_handles);
 
 % Storing the opts structure in axes_handles
 % UserData property (each set of axes thus
 % have a copy of opts).
-set(opts.axes_handles,'UserData',opts);
+cellfun(@(ax) set(ax,'UserData',opts), opts.axes_handles);
 
 % Getting the set of handles for figures
 % that are the parents of the axes whose
@@ -296,7 +300,8 @@ set(gcf,'Pointer',opts.pointer);
 
 % Storing the new opts structure which may
 % have changed if opts.taghandle was deleted.
-set(opts.axes_handles,'UserData',opts);
+cellfun(@(ax) set(ax,'UserData',opts), opts.axes_handles);
+
 
 % ===============================
 % Plot click function
@@ -325,7 +330,7 @@ set(obj,opts.selected);
 
 % Creating the text tag using the
 % selected plot's 'Tat' property
-opts.taghandle = text(current_point(1,1)+0.02*dx,current_point(1,2),get(obj,'Tag'));
+opts.taghandle = text(current_point(1,1)+0.02*dx,current_point(1,2),get(obj,'Tag'),'BackgroundColor',[.9,.9,.9],'Interpreter','none');
 
 % Setting the text tag properties
 % using opts.tag if it exists
@@ -354,7 +359,7 @@ set(gcf,'Pointer',opts.pointer);
 
 % Storing the new opts structure which may
 % have changed if opts.taghandle was deleted.
-set(opts.axes_handles,'UserData',opts);
+cellfun(@(ax) set(ax,'UserData',opts), opts.axes_handles);
 
 % ===============================
 % Clear selected plot
@@ -401,7 +406,7 @@ end;
 
 % Storing the new opts structure which may
 % have changed if opts.taghandle was deleted.
-set(opts.axes_handles,'UserData',opts);
+cellfun(@(ax) set(ax,'UserData',opts), opts.axes_handles);
 
 % ===============================
 % Move plots to top or bottom
@@ -440,11 +445,23 @@ end;
 % ===============================
 
 function parents = get_unique_parents(children);
+if iscell(children), children = children{1}; end
 parents = get(children,'Parent');
 if iscell(parents)
-    parents = cell2mat(parents);
+    % Get unique values from cell array (as cell/unique expects only text)
+    ref = 1; i = 2;
+    while ref < length(parents)
+        if parents{ref} == parents{i}
+            parents(i) = [];
+        else
+            i = i+1;
+        end
+        if i == length(parents)+1
+            ref = ref+1;
+            i = ref+1;
+        end
+    end
 end;
-parents = unique(parents);
 
 % ===============================
 % Finds wether a handle is one of
@@ -457,9 +474,9 @@ isit = zeros(size(handle));
 % Getting all existing axes
 figure_handles = get(0,'Children');
 axes_handles = get(figure_handles,'Children');
-if iscell(axes_handles)
-    axes_handles = cell2mat(axes_handles);
-end;
+% if iscell(axes_handles)
+%     axes_handles = cell2mat(axes_handles);
+% end;
 for k = 1:L
     idx = find(handle(k)==axes_handles);
     if ~isempty(idx)
