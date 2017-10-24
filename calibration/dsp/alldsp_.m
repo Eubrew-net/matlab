@@ -74,11 +74,11 @@ for slits=minslit:maxslit,
         for days=day,
 
             daystr=sprintf('%03d',days);
-            if lnes>9
-                filename=sprintf('W%c%d%03d%02d%s',char(55+lnes),slits,days,year,brew);
-            else    
-            filename=sprintf('W%d%d%03d%02d%s',lnes,slits,days,year,brew);
-            end
+            %if lnes>9
+             %   filename=sprintf('W%c%d%03d%02d%s',char(55+lnes),slits,days,year,brew);
+            %else    
+                filename=sprintf('W%d%d%03d%02d%s',lnes,slits,days,year,brew);
+            %end
             
             [a,s]=liesfile(fullfile(dspp,filename),1,2);
             s=char(s);
