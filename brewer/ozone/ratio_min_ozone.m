@@ -184,9 +184,9 @@ if  nargin~=3 && ~strcmp(name_a,name_b)
      set(findobj(gca,'Type','Line'),'MarkerSize',15);
      set(findobj(gcf,'Tag','legend'),'Location','EastOutside')
     opts.selected.Marker='x';     opts.selected.Color='k';
-    if verLessThan('Matlab','8.4')
-     interactivelegend(P,cellstr(num2str(unique(diaj(data(:,1))))),opts);
-    end 
+%     if verLessThan('Matlab','8.4')
+%      interactivelegend(P,cellstr(num2str(unique(diaj(data(:,1))))),opts);
+%     end 
     set(gca,'Xlim',OSC_lim,'Ylim',[-3,3]);
      xlabel('Ozone slant path (DU)'); ylabel('Ozone Relative Difference (%)');
      title(sprintf('(%s - %s) / %s.  Grouped by day',name_a,name_b,name_b))
@@ -275,9 +275,14 @@ if  nargin~=3 && ~strcmp(name_a,name_b)
        set(findobj(gca,'Type','Line'),'MarkerSize',5);
        set(findobj(gcf,'Tag','legend'),'Location','EastOutside');
     opts.selected.Marker='x';     opts.selected.Color='k';
-    if verLessThan('Matlab','8.4')  %interactivelegen do not work in hg2
-    interactivelegend(P,cellstr(num2str(unique(diaj(data(:,1))))),opts);
-    end
+    %if verLessThan('Matlab','8.4')  %interactivelegen do not work in hg2
+        try
+            interactivelegend(P,cellstr(num2str(unique(diaj(data(:,1))))),opts);
+        catch
+           legend(P,cellstr(num2str(unique(diaj(data(:,1))))))
+        end
+            
+    %end
        xlabel('Ozone slant path (DU)'); ylabel('Ozone Relative Difference (%)');
        title(sprintf('(%s - %s) / %s . Temperature',name_a,name_b,name_b));
         
