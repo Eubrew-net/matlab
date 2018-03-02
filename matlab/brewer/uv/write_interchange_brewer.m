@@ -39,7 +39,8 @@ function write_interchange(uv)
           else  
             file_int=sprintf('%03d%02d%02dG.%03d',diajul,hora,min,uv.inst)
           end 
-          
+          mkdir(num2str(uv.inst));
+          file_int=fullfile(num2str(uv.inst),file_int)
           f=fopen(file_int,'w');
           if f~=1
           uv.dark(i)=0.0;
