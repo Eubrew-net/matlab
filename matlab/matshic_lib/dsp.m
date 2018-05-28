@@ -151,7 +151,7 @@ fwhm=(pup(2)+pup(1)-(pup(1)+pup(3)*x_up))/pup(3); % 19 8 97 julian fwhm from ide
 % 21 8 2000: Julian plot differences to linefit
 %subplot(2,1,1);
 if pl
-plot(steps,cnts(:,1),'r',steps,cnts(:,2),'b',steps(ind1),cnts(ind1,1),'rx',steps(ind2),cnts(ind2,2),'bo',[x_up;x_up],[0;maxcnts(1)*1.2],'r',[x_dwn;x_dwn],[0;maxcnts(2)*1.2],'b');
+plot(steps,cnts(:,1),'.r',steps,cnts(:,2),':.b',steps(ind1),cnts(ind1,1),'rx',steps(ind2),cnts(ind2,2),'bo',[x_up;x_up],[0;maxcnts(1)*1.2],'r',[x_dwn;x_dwn],[0;maxcnts(2)*1.2],'b');
 %ax=axis;
 %subplot(2,1,2);
 %plot(steps(ind1),[resupa;resupb],'rx',steps(ind2),[resdwna;resdwnb],'bx');
