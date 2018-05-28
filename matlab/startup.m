@@ -49,7 +49,9 @@ set(0,'DefaultfigureColor',[1,1,1]);
  %set(0,'DefaultaxesColorOrder',[0,0,0;0,0,1;1,0,0;0,0,1;1,0.5,0.5;1,0,1]);
 
 set(0,'DefaultaxesColorOrder',[0,0,0;0,0,1;1,0,0;0,1,0;1,0.5,1;0.5,0,0.5]);
-set(0,'DefaultaxesLineStyleOrder', '-o|:x|-|o:|.:|-x|+|:.|:+|:x'); 
+%set(0,'DefaultaxesLineStyleOrder', '-o|:x|-|o:|.:|-x|+|:.|:+|:x'); 
+set(0,'DefaultaxesLineStyleOrder', '-|:|-.|-+|-x|-o|-*|-s|-d|:.|:+|:x|:o|:*');
+
 %% marker for brewer plot
 MK=set(plot(1),'Marker');MK{14}='x';MK(15)=MK(2);MK{16}='p';MK(17)=MK(3);
 % 
@@ -65,7 +67,7 @@ MK=set(plot(1),'Marker');MK{14}='x';MK(15)=MK(2);MK{16}='p';MK(17)=MK(3);
 
 % set(0,'DefaultFigureWindowStyle','Normal');
 % set_figure_toscreen(2)
-set(0,'DefaultFigureWindowStyle','Docked');
+%set(0,'DefaultFigureWindowStyle','Docked');
 %pub.format='latex';
 pub.imageFormat='eps' ;
 pub.figureSnapMethod='print';% | 'getframe'
