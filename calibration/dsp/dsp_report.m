@@ -7,7 +7,7 @@ function [res,detail,DSP_QUAD,QUAD_SUM,QUAD_DETAIL,CUBIC_SUM,CUBIC_DETAIL,SALIDA
 % 
 
 if nargin==7
-     wvlim=3400 ; 
+     wvlim=3500 ; 
 end
 day=day-1:day+1;
 polynb=3;% polinomial order
@@ -61,12 +61,12 @@ jbad=[];
 lamda_nominal=[3032.06 3063.01 3100.53 3135.07 3168.09 3199.98];
 flag_reprocess=0;
 for j=1:5
- for i=1:6 %slit 
+ for i=6:-1:1 %slit 
 
     jbad=[];
     fwll=fwl(:,i);
     len=size(find(fwll),1);
-    if j==1     jbad=find(abs(fwll)>0.15);
+    if j==1     jbad=find(abs(fwll)>0.25);
     else jbad=find(abs(fwll)>0.12);
     end
     
