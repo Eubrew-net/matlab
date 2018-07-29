@@ -1,7 +1,7 @@
 % plotea el fichero run/stop
 % Juanjo 02/11/2009
 %% Modificaciones
-%  añandido flag de depuracion;
+%  aï¿½andido flag de depuracion;
 % 28/10/2010 Isabel  Comentados:
 %     disp(datestr(rsa(dx,1)))
 %     disp(datestr(rsa(dx,1)))
@@ -14,7 +14,16 @@ try
     a=textread(file,'');
 catch
     try
-        a=read_avg_line(file,9);
+     
+        %% rs file has 3 columns
+        [a,a2,a3]=read_avg_line(file,[9,13,11]);
+        if ~isempty(a2)
+          a=[a;a2(:,1:9)];
+        end
+        if ~isempty(a3)
+          a=[a;a3(:,1:9)];
+        end
+        
     catch
         disp(file);
         aux=lasterror;
@@ -46,7 +55,7 @@ end
 
 %% OUTLIERS
 % Aqui no es trivial construir una tabla. No queremos perder varios rs en
-% el mismo día -> no se puede usar igual método que en sl
+% el mismo dï¿½a -> no se puede usar igual mï¿½todo que en sl
 if ~isempty(outlier_flag)
     dx={}; out={};
     for sl=1:6

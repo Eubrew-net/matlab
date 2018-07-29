@@ -5,7 +5,7 @@
 
 
 %%
-function opa=op_avg(file,varargin)
+function [opa,a]=op_avg(file,varargin)
 
 % Validamos argumentos
 arg = inputParser;   % Create instance of inputParser class.
@@ -21,7 +21,7 @@ arg.addParamValue('date_range', [], @isfloat); % por defecto, no control de fech
 
 % validamos los argumentos definidos:
 arg.parse(file, varargin{:});
-
+opa=[];
 
 try
     a= textscan(fopen(file,'rt'),'%s%f%s%s%s%s%d%d%d%s%f%f%d%f%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%s%s%s%s','delimiter',',');
@@ -30,18 +30,29 @@ try
     %     a{35}= Hora
     fhn=datenum(double(f(:,1:3)))+datenum(a{:,35})-datenum('00:00:00');
     fh= datestr(datenum(double(f(:,1:3)))+datenum(a{:,35})-datenum('00:00:00'));
-catch
-    disp(file);
-    aux=lasterror;
-    disp(aux.message)
-end
-
-%   op=[a{1} a{2} a{3} a{4} a{5} a{6} a{7} a{8} a{9} a{10} a{11} a{12} a{13} a{14} a{15} a{16} a{17} a{18} a{19} a{20} a{21} a{22} a{23} a{24} a{25} a{26} a{27} a{28} a{29} a{30} a{31} a{32} a{33} a{34} a{35}];
-op=[fhn a{14} a{15} a{16} a{17}];
+    op=[fhn a{14} a{15} a{16} a{17}];
 %     a{14}= TE% Voltage representation of Brewer temperature
 %     a{15}= NC% Azimuth north correction
 %     a{16}= HC% Zenith horizont correction
 %     a{17}= SR% Azimut steps per revolution.
+catch
+    try
+     a=readtable('bdata071/OPAVG.071','FileType','text','format','%s%f%s%s%s%s%d%d%d%s%f%f%d%f%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%s%s%s%s%s%s');    
+     fh=a{:,[9,8,7]};
+     fh(:,1)=fh(:,1)+2000;
+     fh=datenum(double(fh));
+     op=[fh, a.Var14,a.Var15,a.Var16,a.Var17];
+    catch
+      
+        disp(file);
+        aux=lasterror;
+        disp(aux.message)
+    end
+
+end
+
+%   op=[a{1} a{2} a{3} a{4} a{5} a{6} a{7} a{8} a{9} a{10} a{11} a{12} a{13} a{14} a{15} a{16} a{17} a{18} a{19} a{20} a{21} a{22} a{23} a{24} a{25} a{26} a{27} a{28} a{29} a{30} a{31} a{32} a{33} a{34} a{35}];
+
 
 
 if ~isempty(arg.Results.date_range)
@@ -54,10 +65,10 @@ if ~isempty(arg.Results.date_range)
         disp('error de seleccion de fecha');
     end
     if isempty(opa)
-        opa=op;
+        opa=double(op);
     end
 else
-    opa=op;
+    opa=double(op);
 end
 
 
