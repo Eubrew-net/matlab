@@ -1,8 +1,9 @@
-function [avg,avg2,ERR]=read_avg_line(file_input,NCOLS)
+function [avg,avg2,avg3,ERR]=read_avg_line(file_input,NCOLS)
 
 
 avg=[];
 avg2=[];
+avg3=[];
 ERR=[];
 jerr=1;
 if nargin==1 NCOLS=18; 
@@ -22,6 +23,7 @@ idx=1; count_=[]; avg_={};
 while ~feof(fid)
    s=fgets(fid);
    s=strrep(s,':',' ');
+   s=strrep(s,'OFF->',' ');
    try
       [A,COUNT,ERRMSG,NEXTINDEX]=sscanf(s,'%f\r\n',Inf);
       count_=[count_,COUNT];
@@ -30,6 +32,8 @@ while ~feof(fid)
          avg=[avg;double(A)'];
       elseif COUNT==NCOLS(2)
          avg2=[avg2;double(A)'];
+      else
+         avg3=[avg3;double(A)']; 
       end
    catch
      ERR{jerr}={s,ERRMSG,COUNT};

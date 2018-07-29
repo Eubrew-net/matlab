@@ -1,6 +1,6 @@
 %  Juanjo 02/11/2009
 %% Modificaciones
-% añandido flag de depuracion;
+% aï¿½andido flag de depuracion;
 % 27.05.10 Isabel Introducido el antiguo valor para DT (aparece color rojo)
 %           p3=hline(ref(1).*1e9,'r-',num2str(ref(1)));
 %           p3=hline(ref(2).*1e9,'c-',num2str(ref(2)));
@@ -25,16 +25,20 @@ elseif nargin==3
 end
 a=[];
 a2=[];
-
+a3=[];
 try
     a=textread(file,'');
 catch
     try
         %% DT file has 3 columns
-        [a,a2]=read_avg_line(file,[3,7]);
+        [a,a2,a3]=read_avg_line(file,[3,7,11]);
         if ~isempty(a2)
           a=[a;a2(:,1:3)];
         end
+        if ~isempty(a3)
+          a=[a;a3(:,1:3)];
+        end
+        
     catch
         disp(file);
         aux=lasterror;
@@ -87,7 +91,11 @@ f=figure; set(f,'tag','DTAVG');
 num_lab=10;         labs=linspace(dta(1,1),dta(end,1),num_lab);
 plot(dta(:,1),dta(:,4),'ks',dta(:,1),dta(:,5),'bo');
 if nargin>2
-set(gca,'XLim',[date_range(1)-4 dta(end,1)+4]);
+try    
+  set(gca,'XLim',[date_range(1)-4 dta(end,1)+4]);
+catch
+  disp('DT daterange error');
+end
 end
 p3=hline(ref(1).*1e9,'r-',num2str(ref(1)));
 p3=hline(ref(2).*1e9,'c-',num2str(ref(2)));
