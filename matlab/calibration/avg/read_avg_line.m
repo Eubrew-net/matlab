@@ -21,6 +21,7 @@ end
 idx=1; count_=[]; avg_={};
 while ~feof(fid)
    s=fgets(fid);
+   s=strrep(s,':',' ');
    try
       [A,COUNT,ERRMSG,NEXTINDEX]=sscanf(s,'%f\r\n',Inf);
       count_=[count_,COUNT];
