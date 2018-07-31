@@ -1,5 +1,4 @@
 function matrix2latex_QDETAIL(matrix, filename, varargin)
-
 % function: matrix2latex(...)
 % Author:   M. Koehler
 % Contact:  koehler@in.tum.de
@@ -147,9 +146,9 @@ function matrix2latex_QDETAIL(matrix, filename, varargin)
             fprintf(fid, '\\textbf{%s}&', rowLabels{h});
         end
         if h==13
-            fprintf(fid, '%s\r\n','\hiderowcolors' );
+            fprintf(fid, '%s\r\n','%\hiderowcolors' );
         elseif h==19
-            fprintf(fid, '%s\r\n','\showrowcolors' );
+            fprintf(fid, '%s\r\n','%\showrowcolors' );
         end
         for w=1:width-1
             fprintf(fid, '%s&', matrix{h, w});
