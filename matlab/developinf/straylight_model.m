@@ -44,8 +44,8 @@ function result=straylight_model(data,A1,A2,Cal)
   plot(osc,r(osc),'r.-'); grid on;    
   plot(osc,predint(r,osc),'r:');
   mf=1:.1:9;mf=mf';
-  o3c=[mf.*400/1000,100*(r(mf.*400/1000)-A2)/A1./mf/10./400,100*(predint(r,mf.*400/1000)-A2)/A1./mf/10./400];
-  o3r=[ozone_slant,100*(r(ozone_slant)-A2)/A1./m_inst/10./o3_ref,100*(predint(r,ozone_slant)-A2)/A1./m_inst/10./o3_ref];
+  o3c=[mf.*400/1000,100*(r(mf.*400/1000)-A2)/A1./mf/10./400,100*(matdiv((predint(r,mf.*400/1000)-A2)/A1,mf)/10./400)];
+  o3r=[ozone_slant,100*(r(ozone_slant)-A2)/A1./m_inst/10./o3_ref,100*matdiv(matdiv((predint(r,ozone_slant)-A2)/A1,m_inst)/10,o3_ref)];
  
  [r1,gof1,c1]=fit(m(:,2),m(:,1)-A2,'power1','Robust','on','StartPoint',[1,3]);
  plot(.10:.1:max_osc,r1(.1:.1:max_osc)+A2,'r.-'); grid         
@@ -70,8 +70,8 @@ function result=straylight_model(data,A1,A2,Cal)
 fb=figure
 set(fb,'Tag','Correction bounds');
 hold on
-h1=plot(mf*400,o3c(:,3:end)-o3c(:,2),'-k');
-h2=plot(ozone_slant*1000,o3r(:,3:end)-o3r(:,2),'.k');
+h1=plot(mf*400,matadd(o3c(:,3:end),-o3c(:,2)),'-k');
+h2=plot(ozone_slant*1000,matadd(o3r(:,3:end),-o3r(:,2)),'.k');
 set(gca,'XLim',[250,2500]); 
 xlabel('Ozone Slant Column');
 ylabel(' Stray Light ozone correction %')
