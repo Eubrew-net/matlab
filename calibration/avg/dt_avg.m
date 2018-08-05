@@ -36,7 +36,9 @@ catch
           a=[a;a2(:,1:3)];
         end
         if ~isempty(a3)
-          a=[a;a3(:,1:3)];
+          if(size(a3,2)>2)  
+            a=[a;a3(:,1:3)];
+          end
         end
         
     catch

@@ -20,8 +20,10 @@ catch
         if ~isempty(a2)
           a=[a;a2(:,1:9)];
         end
-        if ~isempty(a3)
-          a=[a;a3(:,1:9)];
+        if ~isempty(a3) 
+            if size(a3,2)>8
+                a=[a;a3(:,1:9)];
+            end
         end
         
     catch
