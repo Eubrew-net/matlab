@@ -21,6 +21,7 @@ try
     
     wl=spec(:,1);
     if isempty(wlout),wlout=wl;end
+    if isnan(wlout),wlout=wl;end  % Alberto on 2018a version
     %19 6 2014 JG find minimum wl and take dwl as reference
     %wl1=nanmin([min(wl) min(wlout)]);
     %wl2=nanmax([max(wl) max(wlout)]);
