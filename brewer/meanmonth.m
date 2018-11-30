@@ -9,6 +9,9 @@ function stats=meanmonth(data,NMIN)
   if nargin==1
       NMIN=12;
   end
+  minf=@(x) x(:,1);
+  year=@(x) minf(datevec(x(:)));
+  
   year_ini=year(min(data(:,1)));
   year_fin=year(max(data(:,1)));
   
