@@ -28,6 +28,14 @@ Meses = ['Ene';'Feb';'Mar';'Apr';'May';'Jun';'Jul';
      305   335 365];
 Month_str = ['Jan';'Feb';'Mar';'Apr';'May';'Jun';'Jul';
         'Aug';'Sep';'Oct';'Nov';'Dic'];
+    
+ 
+maxf=@(x) x(end);
+minf=@(x) x(1);
+brewerdate=@(x,y) datenum(y,1,0)+x;
+n1=@(x,y) unique(x(~isnan(x(:,y+1)),y+1));
+year=@(x) minf(datevec(x));
+    
 Markers=['+';'o';'.';'*';'d';'p';'x';'s';'h';'^';'>';'<';'v'];
 
 % graficos por defecto
