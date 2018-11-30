@@ -271,6 +271,11 @@ ref=summary{n_ref}(jday,:);
          y=ms9c./m_ref; x=[o3ref,1./m_ref];
         [b1,bi1,res,resi,st]=regress(y,x);
         gscatter(1./(o3ref.*m_inst),res,o3_c(:,18),'','o',7) ;
+        [ms,ss]=grpstats([1./(o3ref.*m_inst),res],o3_c(:,18));
+        hold on;
+        errorbar(ms(:,1),ms(:,2),ss(:,2),'x','LineWidth',5);
+        grid;
+        title(sprintf('%d ',round(ms(:,2))));
         %%
 %         figure;
 %         grpstats(res,diaj(o3_c(:,1)),0.05);
