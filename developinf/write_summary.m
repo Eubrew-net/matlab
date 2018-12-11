@@ -1,6 +1,8 @@
 function t=write_summary(brw,yr,summary_old,summary,varargin)
 t{length(brw),2}=[];
-for ii=1:length(brw)
+
+x=find(~cellfun(@isempty,summary));    
+for ii=x
     if nargin>4
        idx=group_time(summary_old{ii}(:,1),varargin{1}.old(:,1));
        aux_old=cat(2,summary_old{ii},varargin{1}.old(idx,ii+1),varargin{2}.old(idx,ii+1));
