@@ -213,13 +213,13 @@ if ~isempty(arg.Results.AOD)
 
        [id_am loc_am]=ismember(fix(aod_m(:,1)),cellfun(@(x) unique(fix(x(:,1))),data_AM));
        data_AM_(loc_am(loc_am~=0))=data_AM(loc_am(loc_am~=0));
-       aod_am=aod_m(id_am,:);        idx_am=aod_am(:,4)>0.01; 
+       aod_am=aod_m(id_am,:);        idx_am=aod_am(:,4)>0.05; 
        [id_am loc_am]=ismember(fix(aod_am(idx_am,1)),cellfun(@(x) unique(fix(x(:,1))),data_AM_)); 
        data_AM_(loc_am)={NaN}; data_AM_(cellfun(@(x) length(x)==1,data_AM_))={[]};
        
        [id_pm loc_pm]=ismember(fix(aod_m(:,1)),cellfun(@(x) unique(fix(x(:,1))),data_PM)); 
        data_PM_(loc_pm(loc_pm~=0))=data_PM(loc_pm(loc_pm~=0));
-       aod_pm=aod_m(id_pm,:);        idx_pm=aod_m(id_pm,8)>0.01; 
+       aod_pm=aod_m(id_pm,:);        idx_pm=aod_m(id_pm,8)>0.05; 
        [id_pm loc_pm]=ismember(fix(aod_pm(idx_pm,1)),cellfun(@(x) unique(fix(x(:,1))),data_PM_)); 
        data_PM_(loc_pm)={NaN}; data_PM_(cellfun(@(x) length(x)==1,data_PM_))={[]};
         
