@@ -7,28 +7,28 @@ function [LRatPFHT ErrorRaCI]=analyzeCI(path,nameb,varargin)
 % [LRatPFHT_185 ErrorRaCI_185 ErrorRCI_185]=analyzeCI('E:\CODE\aro2010\bdata185\CI2*10.185','CI20110.185');
 %  
 %%  TODO: 
-%        ¿Es necesario pasarle el nombre CI?
-%        Comprobar depuración de outliers. Eliminarlos en su caso??
+%        ï¿½Es necesario pasarle el nombre CI?
+%        Comprobar depuraciï¿½n de outliers. Eliminarlos en su caso??
 % 
 %%   MODIFICADO:
 %  23/07/2010 Isabel  Modificado para que como salida tome el error cometido
 %                     al usa la funcion RCI (error individual)
-%                     al usar la función RaCI (error al comparar)
+%                     al usar la funciï¿½n RaCI (error al comparar)
 %
-%  10/08/2010 Juanjo: Retocados los ploteos para hacerlo acorde al resto del report de calibración
+%  10/08/2010 Juanjo: Retocados los ploteos para hacerlo acorde al resto del report de calibraciï¿½n
 % 
 %  13/08/2010 Juanjo: Modificado el control de inputs. Ahora se hace uso de clase inputParser. 
 %                     Obligatorios: path, nameb (scan tomado como referencia)
 %                     Opcionales: date_range (por defecto no date_range). Se requiere brewer_date.m 
-%                                 depuracion (0 ó 1). Para hacer uso de interactivelegend. Por defecto 0
-%                                 outlier_flag (0 ó 1). Por defecto 0
+%                                 depuracion (0 ï¿½ 1). Para hacer uso de interactivelegend. Por defecto 0
+%                                 outlier_flag (0 ï¿½ 1). Por defecto 0
 %                     Se muestran al final del script los parametros que han tomado un valor por defecto.   
 %                     Ya no es necesario trabajar desde el directorio donde se hallan los
 %                     ficheros CI. En cualquier caso funciona de esa manera
 %  26/10/2010 Isabel  Modificados titulos y ejes para que salgan en negrita.
 %                     Se muestran los outliers.
 %                     Se comenta el que muestre los outliers,CIFiles=dir(path);
-% 16/03/2013 Juanjo:  Modificado para aceptar diferentes años, siempre con la estructura del
+% 16/03/2013 Juanjo:  Modificado para aceptar diferentes aï¿½os, siempre con la estructura del
 %                     repositorio !! yyyy/bdata###
 % 05/2015 Alberto  iteractive legend removed by compatibility issues 
 
@@ -88,10 +88,10 @@ if ~isempty(date_range)
 else
     CIFiles=dir(path);    
     dir_cell=struct2cell(CIFiles); FilesCI=dir_cell(1,:);
-    paths=repmat({pathstr},length(CIFiles),1);  
+    paths=repmat({pathstring},length(CIFiles),1);  
 end
 
-    myfunc_clean=@(x)regexp(x, '^ci\d{5}[.]\d*','ignorecase')';     clean=@(x)~isempty(x); 
+    myfunc_clean=@(x)regexp(x, '^ci|cj\d{5}[.]\d*','ignorecase')';     clean=@(x)~isempty(x); 
     remove=cellfun(clean,cellfun(myfunc_clean,FilesCI, 'UniformOutput', false));
     FilesCI(~remove)=[];  
     myfunc=@(x)sscanf(x,'%*2c%3d%2d.%*d')';    
@@ -103,7 +103,7 @@ end
     
 % control de fechas
 if ~isempty(date_range)
-%                  Año    Dia
+%                  Aï¿½o    Dia
    dates=datejuli(A(:,2),A(:,1));    
    FilesCI(dates<date_range(1))=[]; paths(dates<date_range(1))=[]; dates(dates<date_range(1))=[]; 
    if length(date_range)>1
@@ -131,11 +131,13 @@ for i=1:length(FilesCI)
        file_d=fullfile(paths{i},[b,'_dep',ext]); 
     else
        file_d=fullfile(paths{i},[b,ext]); 
+       name_b=fullfile(paths{i},nameb); 
+       
     end
     
     try
         [r{i},ab{i},rp{i},data{i},DataNumRFH_a{i},DataNumRFH_b{i},...
-         CLongRatio{i},CLongRatioP{i},TNumTotal_a{i},Error]=RaCI(file_d,nameb,outlier_flag);
+         CLongRatio{i},CLongRatioP{i},TNumTotal_a{i},Error]=RaCI(file_d,name_b,outlier_flag);
         
         % Obtenemos valores para cada fichero.
         RatiosFiles       = [RatiosFiles          CLongRatio{i}(:,2:end)];
@@ -171,14 +173,14 @@ for i=1:length(FilesCI)
         end
         % En lugar de coger solo un dato asociado a cada columna CS, cogemos
         % ...los valores asociados a cada valor, para poder hacer la
-        % ...representación gráfica 3D.
+        % ...representaciï¿½n grï¿½fica 3D.
                        
         %...TEMPERATURA.......................................................
         Ttodosai= [Ttodosai TNumTotal_a{i}];
         
         % Cada vez que lee un fichero me salen los valores de la temperatura
         % ...del fichero que estamos referenciando(en fila). Cada valor corresponde
-        % ...a una repetición j. Así que una parte Ttodosai podemos tener uno o dos valores.
+        % ...a una repeticiï¿½n j. Asï¿½ que una parte Ttodosai podemos tener uno o dos valores.
         % Tenemos fila de T asociada a cada columna Ratio.
         
         
@@ -186,14 +188,14 @@ for i=1:length(FilesCI)
         
         NaNFHjT= [NaN FHj];
         NaNTTai= [NaN  Ttodosai];
-        % La primera columna es la L (xlo que añadimos un espacio vacío a nuestra fila FH)
-        % La primera columna es la Longitud (xlo que añadimos un espacio vacío a nuestra fila Ttodosai)
+        % La primera columna es la L (xlo que aï¿½adimos un espacio vacï¿½o a nuestra fila FH)
+        % La primera columna es la Longitud (xlo que aï¿½adimos un espacio vacï¿½o a nuestra fila Ttodosai)
         LRatFH=  [CLongRatiosFiles ; NaNFHjT];
         LRatPFH= [CLongRatiosPFiles; NaNFHjT];
         LRatFHT=  [LRatFH;  NaNTTai];
         LRatPFHT= [LRatPFH; NaNTTai];
         % Unimos todas las columnas ratio/longitud, con la fila Fecha hora.
-        % Unimos el resultado con la fila  T también                
+        % Unimos el resultado con la fila  T tambiï¿½n                
     catch
 %         ErrorRaCI=[ErrorRaCI;FilesCI{i}];
         %ex=lasterror;
@@ -212,7 +214,7 @@ for ii=1:length(data)
     end
 end
 
-% Depuración
+% Depuraciï¿½n
 if outlier_flag==1   
    [m,s]=mean_lamp(CLongRatiosPFiles);
    [a,b,c,out_idx]=outliers_bp(nanmean(s(:,2:end),1),5.5);
@@ -224,7 +226,7 @@ if outlier_flag==1
    CLongRatiosPFiles(:,out_idx+1)=NaN;  data_plot(:,out_idx+1)=NaN;
 end
 
-%% GRÁFICOS 2D
+%% GRï¿½FICOS 2D
 figure;
 set(gcf,'Tag','CI_Report');
 subplot(2,1,1);
@@ -297,11 +299,11 @@ title(sprintf('Mean and standard dev (10 nm averaged)\nRef: %s',[name,ext]));
 % xlabel('T ');
 % ylabel('Ratio para una L');
 % title('');
-% Representamos de la matriz salida.Donde 100 es la posición de la fila
-%...y cada fila está asociada a una L.
+% Representamos de la matriz salida.Donde 100 es la posiciï¿½n de la fila
+%...y cada fila estï¿½ asociada a una L.
 
 
-%...GRÁFICOS 3D...................................................
+%...GRï¿½FICOS 3D...................................................
 %...FechaHora.....................................................
 
 % figure
@@ -330,12 +332,12 @@ title(sprintf('Mean and standard dev (10 nm averaged)\nRef: %s',[name,ext]));
 
 
 
-% %% ELIMINACIÓN DE ERRORES...................................
+% %% ELIMINACIï¿½N DE ERRORES...................................
 % 
 % CLongRatiosPFilesSinErrores=CLongRatiosPFiles;
 % 
-% % Escogemos una longitud de onda en concreto viendo la gráfica anterioir(por ejemplo la 3200A. fila 68)
-% % find(CLongRatiosPFiles(:,1)==longitud de interés)
+% % Escogemos una longitud de onda en concreto viendo la grï¿½fica anterioir(por ejemplo la 3200A. fila 68)
+% % find(CLongRatiosPFiles(:,1)==longitud de interï¿½s)
 % 
 % %         [params, outside_values,index]= boxparams (LRatPFHT(50,2:end),2);
 % %         RatPFHT= LRatPFHT;
@@ -346,7 +348,7 @@ title(sprintf('Mean and standard dev (10 nm averaged)\nRef: %s',[name,ext]));
 % %         CLongRatiosPFilesSinErrores= LRatPFHTSinErrores(1:end-2,:);
 % %         % [params, outside_values,index] = boxparams(x,intc)
 % %         % Eliminamos las columnas de los valores malos.
-% %         % Eliminamos también los valores para la variable FHj, para que siga siendo
+% %         % Eliminamos tambiï¿½n los valores para la variable FHj, para que siga siendo
 % %         % ...correcto el interactivelegend
 % %         % Volvemos a representar
 % %         % Nuestra matriz sin errores, sin FH y T (Longitudes y Ratios)
@@ -392,7 +394,7 @@ title(sprintf('Mean and standard dev (10 nm averaged)\nRef: %s',[name,ext]));
 % 
 % 
 % %...MEDIA MENSUAL....................................................
-% % Basado en la función mean_month
+% % Basado en la funciï¿½n mean_month
 % try
 %     [LMedia_mes LMedia_ano Ano_MesT]=month_meanCI(LRatPFHTSinErrores);
 %     
