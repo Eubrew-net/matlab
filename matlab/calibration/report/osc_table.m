@@ -1,4 +1,4 @@
-function [osc_table,osc_matrix,stats]=osc_table(Cal,ratio_ref,osc_interval)
+function [osc_table,osc_matrix,stats,f]=osctable(Cal,ratio_ref,osc_interval,f)
 % calculate the osc_table from ratio_ref
 % osc_matrix: tridimensional matrix (nobs x ratio x osc_ranges (length
 % osc_interval+1))
@@ -49,12 +49,18 @@ function [osc_table,osc_matrix,stats]=osc_table(Cal,ratio_ref,osc_interval)
 
  %end
  
- if nargout==3
-    figure; 
+ if nargout==4
+    if nargin==4 
+        figure(f);
+    end
+    set(f,'Tag','bp_osc_table')
     [stats,hp,hb]=box_plot(dat_osc(:,2:size(ratio_ref,2)-1,:),'Limit','3IQR');
     set(gca,'XtickLabel', Cal.brw_str);   
     title('Box-Plot Ozone Deviation to reference by Ozone Slant Column');
     legend(squeeze(hp(:,1,:)),header_);
+    leg.h=squeeze(hp(:,1,:));
+    leg.tx=header_;
+    set(f,'UserData',leg);
     box('on');
     arrayfun(@(x,y) set(y,'FaceColor',get(x,'Color')),hp,hb)
  end
