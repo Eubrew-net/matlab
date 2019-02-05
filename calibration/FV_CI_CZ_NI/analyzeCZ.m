@@ -1,21 +1,19 @@
-
 function [wl fwhm]=analyzeCZ(path,varargin)
-
 % This function analyze Custom Scans files and gives the response of each one.
 % 
 % OUTPUT
 % 
-% - wl: Resultados del análisis. Matriz (m,6), siendo m el número total de
+% - wl: Resultados del anï¿½lisis. Matriz (m,6), siendo m el nï¿½mero total de
 %       escanes analizados y las siguientes 6 columnas:
-%       'Fecha','wl real','wl, método pendientes','Diferencia','wl, método centro masas','Diferencia','Intensidad Lmax'
+%       'Fecha','wl real','wl, mï¿½todo pendientes','Diferencia','wl, mï¿½todo centro masas','Diferencia','Intensidad Lmax'
 % 
 % - fwhm:  
 %
 % MODIFICADO:
 %      
-% 22/07/2010 Isabel: Añadido nombre de Brewer a la gráfica.
+% 22/07/2010 Isabel: Aï¿½adido nombre de Brewer a la grï¿½fica.
 %
-% 10/08/2010 Juanjo: Retocados los ploteos para hacerlo acorde al resto del report de calibración
+% 10/08/2010 Juanjo: Retocados los ploteos para hacerlo acorde al resto del report de calibraciï¿½n
 % 
 % 13/08/2010 Juanjo: Modificado el control de inputs. Ahora se hace uso de clase inputParser. 
 %                    Obligatorios: path. 
@@ -25,16 +23,16 @@ function [wl fwhm]=analyzeCZ(path,varargin)
 %                    Ya no es necesario trabajar desde el directorio donde se hallan los
 %                    ficheros CZ. En cualquier caso funciona de esa manera
 % 
-% 20/10/2010 Isabel: Salen las 3 gráficas para las 3 longitudes de onda (2967,3022,3341).
-%                    Pero en lugar de salir 3, sale sólo 1 con los datos
+% 20/10/2010 Isabel: Salen las 3 grï¿½ficas para las 3 longitudes de onda (2967,3022,3341).
+%                    Pero en lugar de salir 3, sale sï¿½lo 1 con los datos
 %                    de las longitudes 2967 y 3341
 % 
 % 26/10/2010 Isabel: Se muestran los ficheros de error
 %                    Modificados titulos y ejes para que aparezcan en
 %                    negrita. Se comenta el display del error y CZFiles=dir(path);
 % 
-% 16/03/2013 Juanjo: Modificado para aceptar diferentes años, siempre con la estructura del
-%                    repositorio !! yyyy/bdata###. Añadido input opcional plot_flag (default: 1)
+% 16/03/2013 Juanjo: Modificado para aceptar diferentes aï¿½os, siempre con la estructura del
+%                    repositorio !! yyyy/bdata###. Aï¿½adido input opcional plot_flag (default: 1)
 
 %% Validacion de argumentos de entrada
 arg = inputParser;   % Create instance of inputParser class.
@@ -89,11 +87,13 @@ if ~isempty(date_range)
     FilesCZ=files; paths=pat;
 else
     CZFiles=dir(path);    
-    dir_cell=struct2cell(CZFiles); FilesCZ=dir_cell(1,:);
-    paths=repmat({pathstr},length(CZFiles),1);  
+    dir_cell=struct2cell(CZFiles);
+    FilesCZ=dir_cell(1,:);
+    paths=cellstr(repmat(fileparts(path),length(CZFiles),1));  
 end
 
-    myfunc_clean=@(x)regexp(x, '^(cz|hl|hs)\d{5}[.]\d*','ignorecase')';     clean=@(x)~isempty(x); 
+    myfunc_clean=@(x)regexp(x, '^(cz|hl|hs|cj)\d{5}[.]\d*','ignorecase')';  
+    clean=@(x)~isempty(x); 
     remove=cellfun(clean,cellfun(myfunc_clean,FilesCZ, 'UniformOutput', false));
     FilesCZ(~remove)=[];  
     myfunc=@(x)sscanf(x,'%*2c%3d%2d.%*d')';    
@@ -105,7 +105,7 @@ end
     
 % control de fechas
 if ~isempty(date_range)
-%                  Año    Dia
+%                  Aï¿½o    Dia
    dates=datejuli(A(:,2),A(:,1));    
    FilesCZ(dates<date_range(1))=[]; paths(dates<date_range(1))=[]; dates(dates<date_range(1))=[]; 
    if length(date_range)>1
@@ -157,7 +157,7 @@ end
 if plot_flag
     wich=find(cellfun(@(x) ~isempty(x),wl)==1);
     if length(wich)>1
-    disp('¿Qué Hacer con varias longitudes a la vez? TODO'); 
+    disp('ï¿½Quï¿½ Hacer con varias longitudes a la vez? TODO'); 
     wich=1;
     end
 
