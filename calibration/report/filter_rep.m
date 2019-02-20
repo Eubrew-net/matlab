@@ -217,6 +217,8 @@ nmeas=size(fi,1);    % numero de medidas
 %chapuzilla para los fallos si hay un solo dato
 if nmeas==1
     fi(2,:,:)=fi(1,:,:);
+    temp(2,:,:)=temp(1,:,:);
+    fech(2,:,:)=fech(1,:,:);
     nmeas=2;
 end
 
@@ -242,6 +244,7 @@ ETC_FILTER_CORRECTION=round(O3W*media);
 o3w=cell(size(fi,1),1);
 
 for ii=1:size(fi,1), o3w{ii}=O3W*squeeze(fi(ii,4:2:end,2:end)); end
+
 o3f=cell2mat(o3w);
 
 
