@@ -114,14 +114,14 @@ for ii=1:2
     r=sqrt(corrcoef(y1,data_dw{ii}(j_dw{ii},5))); % sqrt (?)
     r_d{ii}=r(1,2);
     ll=polyfit(xu{ii},[0,1],1); y1=polyval(ll,data_up{ii}(j_up{ii},1));
-    r=sqrt(corrcoef(y1,data_up{ii}(j_up{ii},5))); % sqrt (?) 
+    r=real(sqrt(corrcoef(y1,data_up{ii}(j_up{ii},5)))); % sqrt (?) 
     r_u{ii}=r(1,2);
     
     %% TOP
     jtop{ii}=find(data{ii}(:,1)>xu{ii}(2) & data{ii}(:,1)<xd{ii}(2))';
     [p_top{ii},st{ii}]=polyfit(data{ii}(jtop{ii},1),data{ii}(jtop{ii},5),2);
     y1=polyval(p_top{ii},data{ii}(jtop{ii},1));
-    r=sqrt(corrcoef(y1,data{ii}(jtop{ii},5)));
+    r=real(sqrt(corrcoef(y1,data{ii}(jtop{ii},5))));
     r_top{ii}=r(1,2);
     
     mx{ii}=-p_top{ii}(2)/2/p_top{ii}(1);
