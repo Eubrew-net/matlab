@@ -93,7 +93,7 @@ for ii=1:2
         xi=data{ii}(1,1):dx:data{ii}(end,1);
         xi=union(xi,data{ii}(:,1));
         yi=ppval(pp,xi);
-        data{ii}=scan_join(data{ii},[xi;yi]');
+        data{ii}=scan_join(data{ii},[xi(:),yi(:)]);
         data_up{ii}=data{ii}(1:find(~data{ii}(:,1)),:);
         data_dw{ii}=data{ii}(find(~data{ii}(:,1)):end,:);
         j_up{ii}=find(~(data_up{ii}(:,5)>=uplim | data_up{ii}(:,5)<=dwlim) );
