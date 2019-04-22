@@ -39,6 +39,8 @@ extrat_2=[];absx_2=[];AT_2=[];
 %formats for reading the bfile
 fmtds=[' ds %c %d %f %d %d %d %d %d %d %d %d %d %d rat %f %f %f %f'];
 fmtsc=[' sc %c %d %f %d %d %d %d %d %d %d %d %d %d rat %d %d %d %d'];
+fmtsc=[' sc %c %d %f %d %d %d %d %d %d %d %d %d %d rat %f %f %f %f'];
+
 
 fmt=['ds %*s %d %f %d %d %d %d %d %d %d %d %d %d rat %d %d %d %d']; % format of ds Bfile
 fmtsum=['summary %d:%d:%d %c%c%c %f/ %f %f %f %f %c%c %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f']; % summary format
