@@ -98,7 +98,7 @@ end
 % % set(gca,'XLim',[op(1,1)-4 op(end,1)+4]);
 % grid;
 % datetick('x',25,'keeplimits','keepticks');
-% rotateticklabel(gca,20);
+% xtickangle(gca,20);
 % ylabel('North correction');
 % sup=suptitle(sprintf('%s%s','Op Test, ',file(regexp(file,'AVG')-2:regexp(file,'AVG')+6)));
 % pos=get(sup,'Position');
@@ -130,7 +130,7 @@ end
  % set(gca,'XLim',[op(1,1)-4 op(end,1)+4]);
 grid;
 datetick('x',25,'keeplimits','keepticks');
-rotateticklabel(gca,20);
+xtickangle(gca,20);
 ylabel('North correction','FontWeight','bold');
 sup=suptitle(sprintf('%s%s','Op Test, ',file(regexp(file,'AVG')-2:regexp(file,'AVG')+6)));
 set(sup,'FontWeight','bold');

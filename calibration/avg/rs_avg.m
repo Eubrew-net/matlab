@@ -1,7 +1,7 @@
 % plotea el fichero run/stop
 % Juanjo 02/11/2009
 %% Modificaciones
-%  aï¿½andido flag de depuracion;
+%  aÿandido flag de depuracion;
 % 28/10/2010 Isabel  Comentados:
 %     disp(datestr(rsa(dx,1)))
 %     disp(datestr(rsa(dx,1)))
@@ -57,7 +57,7 @@ end
 
 %% OUTLIERS
 % Aqui no es trivial construir una tabla. No queremos perder varios rs en
-% el mismo dï¿½a -> no se puede usar igual mï¿½todo que en sl
+% el mismo dÿa -> no se puede usar igual mÿtodo que en sl
 if ~isempty(outlier_flag)
     dx={}; out={};
     for sl=1:6
@@ -94,7 +94,7 @@ end
 samexaxis('xmt','off','join','yld',1);%
 if i==6
     set(gca,'YTick',[.988 .997 1.003],'YTickLabel',{'','0.997','1.003'},'XTick',labs);
-    datetick('x',25,'keeplimits','keepticks');  rotateticklabel(gca,20);
+    datetick('x',25,'keeplimits','keepticks');  xtickangle(gca,20);
 end
 sup=suptitle(sprintf('%s%s','Run/Stop Test, ',file(regexp(file,'AVG')-3:regexp(file,'AVG')+6)));
 set(sup,'FontWeight','bold');

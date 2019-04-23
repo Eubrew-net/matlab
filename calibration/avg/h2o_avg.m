@@ -1,9 +1,9 @@
 function [h2o,Outliers]=h2o_avg(file,varargin)
 % 06/2015 ALBERTO Added severall columns
 % 1. Julian day (jjjyy)
-% 2. Temperature at the PMT (°C)
-% 3. ‘Fan’ Temperature in °C - used in the absolute humidity calculation.
-% 4. Temp of base plate (°C)
+% 2. Temperature at the PMT (ÿC)
+% 3. ÿFanÿ Temperature in ÿC - used in the absolute humidity calculation.
+% 4. Temp of base plate (ÿC)
 % 5. Moisture measured in grams of water per cubic meter of air.
 % 6. Relative Humidity (%)    
 
@@ -57,7 +57,7 @@ f=figure; set(f,'Tag','H2OAVG');
 h=mmplotyy(h2o(:,1),h2o(:,7),'.k',h2o(:,5),'.b'); set(h,'LineWidth',2.5)
 h=mmplotyy('Fan Temperature (\circC)');     set(h,'FontWeight','bold');  hold on
 h=plot(h2o(dx,1),h2o(dx,7),'+r');  set(h,'LineWidth',2.5);      hold off
-datetick('x',25,'keeplimits','keepticks'); rotateticklabel(gca,20); grid; 
+datetick('x',25,'keeplimits','keepticks'); xtickangle(gca,20); grid; 
 ylabel('Absolute Humidity (gm^{-3})','FontWeight','bold');
 sup=suptitle(sprintf('%s%s','Humidity, ',file(regexp(file,'AVG')-3:regexp(file,'AVG')+6)));
 set(sup,'FontWeight','bold'); pos=get(sup,'Position');

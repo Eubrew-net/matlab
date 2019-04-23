@@ -1,6 +1,6 @@
 %  Juanjo 02/11/2009
 %% Modificaciones
-% añadido flag de depuracion;
+% aÿadido flag de depuracion;
 % 28/10/2010 Isabel  Comentados:
 %         disp('outliers HT')
 %         disp(datestr(apa(dx,1)))
@@ -91,7 +91,7 @@ subplot(2,2,3:4)
 % apa(find(apa(:,4)<800),4)=NaN;
 plot(apa(:,1),apa(:,4),'-k.');
 set(gca,'GridLineStyle','-.','Linewidth',1);
-datetick('x',25,'keeplimits','keepticks');  rotateticklabel(gca,20);
+datetick('x',25,'keeplimits','keepticks');  xtickangle(gca,20);
 ylabel('H.T. Voltage {\it(V)}','FontWeight','bold');
 grid;
 

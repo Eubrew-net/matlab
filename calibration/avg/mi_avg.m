@@ -1,7 +1,7 @@
 % plotea el fichero MIOAVG
 % Isa, modificado del de Juanjo dt Juanjo 02/11/2009
 %% Modificaciones
-%  añandido flag de depuracion;
+%  aÿandido flag de depuracion;
 % 28/10/2010 Isabel  Comentados:
 %     disp('OUTLIERS Micrometer steps');
 %     disp(datestr(mia(dx1,1)))
@@ -81,7 +81,7 @@ h=plot(mia(dx1,1),mia(dx1,6),'+r');                 set(h,'LineWidth',2);
 h=mmplotyy('Offset constant from ICF');             set(h,'FontWeight','bold');
 hold off
 set(gca,'XLim',[arg.Results.date_range(1)-4 mia(end,1)+4]);
-datetick('x',25,'keeplimits','keepticks');          rotateticklabel(gca,20);
+datetick('x',25,'keeplimits','keepticks');          xtickangle(gca,20);
 T=title(sprintf('%s%s','Micrometer Test, ',file(regexp(file,'AVG')-3:regexp(file,'AVG')+6)));
 set(T,'FontWeight','bold');
 ylabel('Micrometer 1 steps','FontWeight','bold');
@@ -97,7 +97,7 @@ h=plot(mia(dx2,1),mia(dx2,8),'+r');                  set(h,'LineWidth',2);
 h=mmplotyy('Offset constant from ICF');              set(h,'FontWeight','bold');
 hold off
 set(gca,'XLim',[arg.Results.date_range(1)-4 mia(end,1)+4]);
-datetick('x',25,'keeplimits','keepticks');  rotateticklabel(gca,20);
+datetick('x',25,'keeplimits','keepticks');  xtickangle(gca,20);
 T=title(sprintf('%s%s','Micrometer Test, ',file(regexp(file,'AVG')-3:regexp(file,'AVG')+6)));
 set(T,'FontWeight','bold');
 ylabel('Filter Wheel 3 steps','FontWeight','bold');
@@ -119,7 +119,7 @@ h2=mmplotyy('Offset constant from ICF(black dots)');  set(h2,'FontWeight','bold'
 %Izq:steps to zero (c)
 %Der:offset constant from ICF (k)
 set(gca,'XLim',[arg.Results.date_range(1)-4 mia(end,1)+4]);
-datetick('x',25,'keeplimits','keepticks');  rotateticklabel(gca,20);
+datetick('x',25,'keeplimits','keepticks');  xtickangle(gca,20);
 T=title(sprintf('%s%s','MicrometerOut Test, ',file(regexp(file,'AVG')-3:regexp(file,'AVG')+6)));
 set(T,'FontWeight','bold');
 ylabel('Micrometer 1 steps','FontWeight','bold');
@@ -132,7 +132,7 @@ set(k2,'FontWeight','bold');
 %Izq:steps to zero (c)
 %Der:offset constant from ICF (k)
 set(gca,'XLim',[arg.Results.date_range(1)-4 mia(end,1)+4]);
-datetick('x',25,'keeplimits','keepticks');  rotateticklabel(gca,20);
+datetick('x',25,'keeplimits','keepticks');  xtickangle(gca,20);
 T=title(sprintf('%s%s','MicrometerOut Test, ',file(regexp(file,'AVG')-3:regexp(file,'AVG')+6)));
 set(T,'FontWeight','bold');
 ylabel('Filter Wheel 3 steps','FontWeight','bold');   grid; orient portrait;

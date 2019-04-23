@@ -1,6 +1,6 @@
 %  Juanjo 02/11/2009
 %% Modificaciones
-% aï¿½andido flag de depuracion;
+% aÿandido flag de depuracion;
 % 27.05.10 Isabel Introducido el antiguo valor para DT (aparece color rojo)
 %           p3=hline(ref(1).*1e9,'r-',num2str(ref(1)));
 %           p3=hline(ref(2).*1e9,'c-',num2str(ref(2)));
@@ -114,4 +114,4 @@ if any(OutHTLT(1,2:end))
                     OutHTLT(ix_l,1),OutHTLT(ix_l,5),'ob');
                set(p,'MarkerFaceColor','r')
 end
-datetick('x',25,'keeplimits','keepticks');  rotateticklabel(gca,20);
+datetick('x',25,'keeplimits','keepticks');  xtickangle(gca,20);
