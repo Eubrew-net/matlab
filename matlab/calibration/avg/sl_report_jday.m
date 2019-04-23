@@ -166,7 +166,7 @@ sl_median(:,2)=[]; sl_median=sortrows(sl_median,1);
     else
         title('NO bad hg''s'); ylabel('R6'); 
     end
-    datetick('x',29,'keeplimits','keepticks'); rotateticklabel(gca,20); grid;
+    datetick('x',29,'keeplimits','keepticks'); xtickangle(gca,20); grid;
 
     cname={'R6','F1','F5','T'};
     ncols=[22,23,24,13];

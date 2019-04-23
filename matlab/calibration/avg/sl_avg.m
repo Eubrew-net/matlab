@@ -133,7 +133,7 @@ if ~isempty(OutR6R5F5)
     idx=OutR6R5F5(:,4)<mean(sl(:,12))+std(sl(:,12))*2 & OutR6R5F5(:,4)>mean(sl(:,12))-std(sl(:,12))*2;
     hold on; plot(OutR6R5F5(idx,1),OutR6R5F5(idx,4),'sg','MarkerFaceColor','r');
 end
-datetick('x',25,'keeplimits','keepticks');         rotateticklabel(gca,20);
+datetick('x',25,'keeplimits','keepticks');         xtickangle(gca,20);
 
 % R5 plot
 f=figure; set(f,'tag','SLAVG_R5')
@@ -148,7 +148,7 @@ if ~isempty(OutR6R5F5)
     idx=OutR6R5F5(:,6)<mean(sl(:,11))+std(sl(:,11))*2 & OutR6R5F5(:,6)>mean(sl(:,11))-std(sl(:,11))*2;
     hold on; plot(OutR6R5F5(idx,1),OutR6R5F5(idx,6),'sg','MarkerFaceColor','r');
 end
-datetick('x',25,'keeplimits','keepticks');  rotateticklabel(gca,20);
+datetick('x',25,'keeplimits','keepticks');  xtickangle(gca,20);
 
 % F5 plot
 f=figure; set(f,'tag','SLAVG_F5')
@@ -159,7 +159,7 @@ set(gca,'XTick',labs,'GridLineStyle','-.','Linewidth',1);
 ylabel('F5','FontWeight','bold');
 title(sprintf('%s%s','Standar Lamp Test, ',file(regexp(file,'AVG')-3:regexp(file,'AVG')+6)),'FontWeight','bold');
 grid; orient portrait
-datetick('x',25,'keeplimits','keepticks');  rotateticklabel(gca,20);
+datetick('x',25,'keeplimits','keepticks');  xtickangle(gca,20);
 
 % subplot(2,2,4);
 temp=mean(sla(:,4:5),2);

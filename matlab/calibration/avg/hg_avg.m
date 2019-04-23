@@ -78,7 +78,7 @@ catch
   disp('No data for selected date range');
 end
 grid;
-datetick('x',25,'keeplimits','keepticks');        rotateticklabel(gca,20);
+datetick('x',25,'keeplimits','keepticks');        xtickangle(gca,20);
 ylabel('Lamp Intensity','FontWeight','bold');
 sup=suptitle(sprintf('%s%s','Hg Test, ',file(regexp(file,'AVG')-3:regexp(file,'AVG')+6)));
 set(sup,'FontWeight','bold');                     pos=get(sup,'Position');
@@ -95,7 +95,7 @@ h=mmplotyy('Temperature  (black dots)');           set(h,'FontWeight','bold');
 set(h2,'LineWidth',2.5)             
 set(gca,'XLim',[arg.Results.date_range(1)-4 hga(end,1)+4]);
 grid;  datetick('x',25,'keeplimits','keepticks');
-rotateticklabel(gca,20);         ylabel('Lamp Intensity','FontWeight','bold');
+xtickangle(gca,20);         ylabel('Lamp Intensity','FontWeight','bold');
 sup=suptitle(sprintf('%s%s','HgOut Test, ',file(regexp(file,'AVG')-3:regexp(file,'AVG')+6)));
 set(sup,'FontWeight','bold');                      pos=get(sup,'Position');
 end

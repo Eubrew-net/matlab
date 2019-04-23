@@ -164,7 +164,7 @@ ylabel('SL double ratio MS9');
 title(sprintf('Daily means for sl ozone ratio & temperature. Brewer%s\r\n (from bfile sl summaries)',ext(2:end)));
 set(gca,'XTickLabels',datestr(get(gca,'XTick'),2));  grid; 
 ax(1)=gca; set(ax(1),'Position',[0.1  0.12  0.75  0.72]);% [left bottom width height]
-rotateticklabel(gca,30);
+xtickangle(gca,30);
 
 ax(2)=axes('Position',get(ax(1),'Position'),...
    'XAxisLocation','top',...
