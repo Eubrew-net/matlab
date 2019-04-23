@@ -75,7 +75,7 @@ ylabel('SL double ratio MS9');
 title(sprintf('Daily means for sl ozone ratio & temperature. Brewer %s\r\n (from bfile sl summaries)',Cal.brw_name{Cal.n_inst}));
 set(gca,'XTickLabels',datestr(get(gca,'XTick'),2));  grid;
 ax(1)=gca; set(ax(1),'Position',[0.1  0.12  0.75  0.72]);% [left bottom width height]
-rotateticklabel(gca,30);
+xtickangle(gca,30);
 ax(2)=axes('Position',get(ax(1),'Position'),...
    'XAxisLocation','top',...
    'YAxisLocation','right',...
@@ -152,7 +152,7 @@ close all
 %% Latex stuff
 
 % Temperature Range
-% Para que funcione asignamos la salida Fr en la llamada a la función
+% Para que funcione asignamos la salida Fr en la llamada a la funciÿn
 % temp_coeff_raw donde se calculen los TC's (en este caso en {})
 tmp=Fr(:,2);
 latexcmd(fullfile(Cal.file_latex,['cal_tempcoeff_',Cal.brw_str{Cal.n_inst}]),...
@@ -163,7 +163,7 @@ temperature{Cal.n_inst}.NTC=NTC;
 temperature{Cal.n_inst}.ajuste=ajuste;
 if exist('Args','var')
 temperature{Cal.n_inst}.info=Args;
-else warning('No se están guardando los inputs de la función!!')
+else warning('No se estÿn guardando los inputs de la funciÿn!!')
 end
 save(Cal.file_save,'-APPEND','temperature');
 
