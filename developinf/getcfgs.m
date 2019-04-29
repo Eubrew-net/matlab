@@ -1,6 +1,4 @@
-
 function cfg=getcfgs(period,config,varargin)
-
 % function  cfg=getcfgs(Cal,config,varargin)
 % 
 % A simple function to get cal. constants used to recalculate Brewer data
@@ -68,6 +66,9 @@ if ischar(config)                 % Path a fichero de configuracion
       if ~isempty(arg.Results.events) % Configuraciones asociadas a los eventos
          cfg.data=repmat(cal(cal_id),1,length(arg.Results.events));          
       else                            % Configuraciones asociadas al periodo de analisis (solo 1)
+         % date from file 
+         [p,n,e]=fileparts(config);
+         cal(1,:)=datenum(2000+str2double(n(7:end)),1,0)+str2double(n(4:6));
          icf_id=unique(group_time(period',cal(1,:))); icf_id=icf_id(icf_id~=0);
          if any(icf_id==0)  
             cfg.data=NaN*ones(length(cfg.legend),length(icf_id));
