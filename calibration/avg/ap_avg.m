@@ -36,6 +36,8 @@ if ~isempty(date_range)
     end
 else
     apa=ap;
+    date_range(1)=min(ap(:,1));
+    date_range(2)=max(ap(:,1));
 end
 
 %% OUTLIERS

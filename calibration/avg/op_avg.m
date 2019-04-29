@@ -37,7 +37,7 @@ try
 %     a{17}= SR% Azimut steps per revolution.
 catch
     try
-     a=readtable('bdata071/OPAVG.071','FileType','text','format','%s%f%s%s%s%s%d%d%d%s%f%f%d%f%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%s%s%s%s%s%s');    
+     a=readtable(file,'FileType','text','format','%s%f%s%s%s%s%d%d%d%s%f%f%d%f%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%s%s%s%s%s%s');    
      fh=a{:,[9,8,7]};
      fh(:,1)=fh(:,1)+2000;
      fh=datenum(double(fh));
