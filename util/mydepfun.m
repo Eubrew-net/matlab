@@ -66,7 +66,7 @@ function list = i_scan(f)
 
 func = i_function_name(f);
 
-list = depfun(func,'-toponly','-quiet');
+list = matlab.codetools.requiredFilesAndProducts(func,'toponly').';
 
 toolboxroot = fullfile(matlabroot,'toolbox');
 
