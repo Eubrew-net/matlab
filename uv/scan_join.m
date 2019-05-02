@@ -7,10 +7,16 @@
 function [scan]=scan_join(scan0,scan1)
 % gestiona que los scanes tengan la misma longitud rellenando con nan si es preciso
 % 
+
+if nargin==1
+    scan=scan0;
+    return
+end
+    
 if isempty(scan0)
     scan=scan1;
-    mean=scan1;
-    rat=scan1;
+    %mean=scan1;
+    %rat=scan1;
     return
     
 end
