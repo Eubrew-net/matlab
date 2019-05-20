@@ -252,8 +252,8 @@ grid;
 hold on;
 plot(CLongRatiosPFiles(:,1),nanmean(CLongRatiosPFiles(:,3:end)'),'r-','LineWidth',1.5);
 if depuracion
-    legend(P,cellstr(datestr(FHj)),-1);
-    %interactivelegend(P,cellstr(num2str(diaj(FHj))));
+    legend(P,cellstr(datestr(FHj)));
+    interactivelegend(P,cellstr(num2str(diaj(FHj))));
 end
 
 figure;
