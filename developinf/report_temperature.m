@@ -104,7 +104,7 @@ for pp=1:length(id_period)
      
      [NTC{pp},ajuste{pp},Args,Fraw,Fop]=temp_coeff_raw(config_temp,sl_rw,'outlier_flag',1,'N_TC',icf_op.data(2:6,pp)',...
                                          'date_range',periods_([1,end]),'plots',0,'temp_flag',[10,50]); 
-     if all(icf_op.data(2:6,pp)==icf_alt.data(2:6,pp))
+     if all(icf_op.data(2:6,pp)==icf_alt.data(2:6,pp))% calculamos los nuevos coefficientes
          
       [NTCx,ajustex,Argsx,Fraw,Falt]    =temp_coeff_raw(config_temp,sl_rw,'outlier_flag',1,...
                                          'date_range',periods_([1,end]),'plots',0,'temp_flag',[10,50]); 
@@ -156,17 +156,17 @@ for pp=1:length(id_period)
       set(gcf,'Tag',sprintf('TEMP_COMP_DATE_%s_%d',Cal.brw_str{Cal.n_inst},pp));
       plot(Forigx(:,1),Forigx(:,2),'b.','MarkerSize',6); 
       ylabel('Temperature','Color','b'); ax(1)=gca; set(ax(1),'YAxisLocation','right','XTicklabels',{' '}); 
-[mn,sn]=grpstats(Forigx(:,[1,end,2]),{year(Forigx(:,1)),fix(Forigx(:,1))},{'mean','sem'});
-[mt,st]=grpstats(Fn(:,[1,end]),{year(Fn(:,1)),fix(Fn(:,1))},{'mean','sem'}); 
-ax(2) = axes('YAxisLocation','left','Color','none'); 
-hold all; errorbar(mn(:,1),mn(:,2),sn(:,2),'Color','k','Marker','s');
-errorbar(mt(:,1),mt(:,2),st(:,2),'Color','g','Marker','s');
-errorbar(mt(:,1),mt(:,2),st(:,2),'Color','g','Marker','s');
-title(['R6 Temperature dependence Brewer#', Cal.brw_str{Cal.n_inst}]); ylabel('Standard Lamp R6 ratio');
-datetick('x',6,'KeepTicks','KeepLimits'); grid on; 
-lg=legend(ax(2),'Operative temperature coeff','Alternative temperature coeff','Location','best'); 
-set(lg,'HandleVisibility','Off');  set(findobj(lg,'Type','text'),'FontSize',7,'HandleVisibility','Off');    
-linkprop(ax,{'Position','XTick'}); 
+     [mn,sn]=grpstats(Forigx(:,[1,end,2]),{year(Forigx(:,1)),fix(Forigx(:,1))},{'mean','sem'});
+     [mt,st]=grpstats(Fn(:,[1,end]),{year(Fn(:,1)),fix(Fn(:,1))},{'mean','sem'}); 
+     ax(2) = axes('YAxisLocation','left','Color','none'); 
+     hold all; errorbar(mn(:,1),mn(:,2),sn(:,2),'Color','k','Marker','s');
+     errorbar(mt(:,1),mt(:,2),st(:,2),'Color','g','Marker','s');
+     errorbar(mt(:,1),mt(:,2),st(:,2),'Color','g','Marker','s');
+     title(['R6 Temperature dependence Brewer#', Cal.brw_str{Cal.n_inst}]); ylabel('Standard Lamp R6 ratio');
+     datetick('x',6,'KeepTicks','KeepLimits'); grid on; 
+     lg=legend(ax(2),'Operative temperature coeff','Alternative temperature coeff','Location','best'); 
+     set(lg,'HandleVisibility','Off');  set(findobj(lg,'Type','text'),'FontSize',7,'HandleVisibility','Off');    
+     linkprop(ax,{'Position','XTick'}); 
 
 figure; 
 set(gcf,'Tag',sprintf('TEMP_COMP_TEMP_%s_%d',Cal.brw_str{Cal.n_inst},pp))
@@ -200,6 +200,7 @@ tabla_tc.events=data_tab.evnts;
 tabla_tc.data_lbl=lbl_TC;
 tabla_tc.sl_r=data_slr;
 tabla_tc.sl=data_sl;
+save('-APPEND',[config_temp.brw_name,'_sl_rw.mat'],'tabla_tc')
 
 
 
