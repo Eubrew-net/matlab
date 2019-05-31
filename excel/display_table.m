@@ -3,15 +3,18 @@ function [ tabla ] = display_table(data, colheadings, wid, fms, rowheadings, fid
 t=array2table(data);
 colHeaders=cellstr(colheadings);
 
+
+ 
 try
     t.Properties.VariableNames=varname(colHeaders);
+    t.Properties.VariableDescriptions=colHeaders;
 catch
     disp('varname error');
     t.Properties.VariableDescriptions=colHeaders;
 end
 
 if nargin>4
- rowNames=cellstr(rowheadings);   
+ rowNames=cellstr(rowheadings);
  try
      t.Properties.RowNames=varname(rowNames);
  catch
