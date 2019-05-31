@@ -98,8 +98,22 @@ lbl_fi={'F#1 corr','se','F#2 corr','se','F#3 corr','se',...
   catch
       disp('error std error');
   end
+
+
+%% mean attenuation
+fech=datevec(fi_avg(:,1));
+[a,b]=group_time_new(datenum(fech),event_info.dates);
+np=length(unique(a));
+mediafi{np}={};
+stdfi=mediafi;
+for i=1:length(unique(a))
+    mediafi{i}=squeeze(nanmedian(fi(a==i,4:2:end,2:end),1));
+    stdfi{i}=squeeze(nanstd(fi(a==i,4:2:end,2:end),1));
+end
+
 tabla_fi.data=aux;
 tabla_fi.events=data_tab.evnts;
 tabla_fi.data_lbl=lbl_fi;
-
+tabla_fi.media_fi=mediafi;
+tabla_fi.std_fi=stdfi;
 
