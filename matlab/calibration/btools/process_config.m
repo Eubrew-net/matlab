@@ -33,6 +33,7 @@ datefich=datejul(fileinfo(3),fileinfo(2));
 
 
 [config_bfile,TC_B,DT_B,extrat_B,absx_B,AT_B]=readb_config(bfile);
+config_bfile(52)=datefich(1);
 config(:,1)=config_bfile;
 config(:,3)=config_bfile;
 TC_B=tc_coeff(TC_B);
