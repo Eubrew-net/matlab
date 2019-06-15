@@ -9,6 +9,14 @@ i_pwl1=[];
 wv_=[];
 for i=1:6
   stp_(i,:)=polyval(dcf1(i,:),steps);  
+  
+%   wv_(find(wv_<=2865))=NaN;
+%   wv_(find(wv_>3635))=NaN;
+%   aux=squeeze(wv_(i,1,:));
+%   jn=find(~isnan(aux));
+%   aux_x=steps(jn)';
+%   aux_y=aux(jn);
+%   
   i_pwl1(i,:)=polyfit(aux_y,aux_x,2);    
   stp_(i,:)=polyval(i_pwl1(i,:),wv);
   % check with julian
@@ -25,7 +33,7 @@ ozo_pos=icf(44)+icf(14);
 % ozone_os
 for i=1:6
   wv_o3(1,i)=polyval(dcf1(i,:),ozo_pos);
-  st_o3(1,i)=steps2wl(
+  st_o3(1,i)=steps2wl(steps,i-1,1,file1);
 end
 % umkher waveleng
 
