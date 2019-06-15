@@ -1,4 +1,4 @@
-function [wv_o3,dcf,pwl_i]=dcf_comp(file1,file2,icf_file)
+function [wv_o3,dcf,pwl_i,table_steps]=dcf_comp(file1,file2,icf_file)
 dcf1=read_dcf(file1);
 dcf2=read_dcf(file2);
 icf=read_icf(icf_file);
@@ -15,7 +15,8 @@ for i=1:6
   wv_(find(wv_>3635))=NaN;
   aux=squeeze(wv_(i,1,:));
   jn=find(~isnan(aux));
-  aux_x=steps(jn)';aux_y=aux(jn);
+  aux_x=steps(jn)';
+  aux_y=aux(jn);
   i_pwl1(i,:)=polyfit(aux_y,aux_x,2); 
   
   aux=squeeze(wv_(i,2,:));
@@ -43,17 +44,30 @@ for i=1:6
   st_o3(2,i)=polyval(i_pwl2(i,:),wv_o3(2,i));   
 end
 
+%% tabla
+%  Differences between step numbers for wl 2900 to 3600
+%Step number for dcf21913.218  minus step number for dc%f28713.218
+%  WL   Slit1  Slit2  Slit3  Slit4  Slit5  Slit0
+% wv=2865:35:3635
+%  WL   Slit0  Slit2  Slit3  Slit4  Slit5  Slit6
+table_steps=[wv(1:7:end)',(squeeze(stp_(1:6,1,1:7:end))-squeeze(stp_(1:6,2,1:7:end)))']
+
+
 % ploteos 
 stp_(find(stp_<=0))=NaN;
 wv_(find(wv_<=2865))=NaN;
 wv_(find(wv_>3635))=NaN;
 figure
 plot(wv,squeeze(stp_(1:6,1,:))-squeeze(stp_(1:6,2,:)));
-title({['steps _delta',num2str(diff(round(st_o3)))],...
-       ['wv _delta= ',num2str(diff(wv_o3))]});     
+title({['steps _\delta',num2str(diff(round(st_o3)))],...
+       ['wv _\delta= ',num2str(diff(wv_o3))]});     
+xlabel('Amstrong')
+ylabel('Steps');
 figure
 plot(steps,squeeze(wv_(1:6,1,:))-squeeze(wv_(1:6,2,:)))
-
+ylabel('Amstrong')
+xlabel('Steps');
+legend(cellstr(num2str([1:6]')))
 
 function [pwl,dcf]=read_dcf(file)
 dcf=textread(file,'%f',18); % only ozone
