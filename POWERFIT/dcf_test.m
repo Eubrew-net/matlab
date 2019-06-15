@@ -40,7 +40,7 @@ round(wl_o3*100)/100
 
 umk_steps=round(wl2steps(3163.5,file1)-icf(44));
 wl_umk=steps2wl(umk_steps(2)+icf(44),file1);
-round(wl_umk*100)
+round(wl_umk*100)/100
 disp('holo');
 
 
