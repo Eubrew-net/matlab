@@ -98,7 +98,11 @@ try
 % READ HG
 % filtro de hg
 if ~isempty(jhg)
+ try   
   hg=readb_hg_measures(l,jhgscan,jhg)';
+ catch
+  disp('error hg read');
+ end
 else
   hg=NaN*ones(1,9)';
 end
