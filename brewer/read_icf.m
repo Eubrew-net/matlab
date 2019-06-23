@@ -57,7 +57,7 @@ config(54:end)=[];
 %model erase
 config(24:25)=[];
 if isempty(fecha)
-  [pat,name,ext,ve]=fileparts(file); 
+  [pat,name,ext]=fileparts(file); 
   fileinfo=sscanf([name,ext],'%*3c%03d%02d.%03d');
   datefich=datejul(fileinfo(2),fileinfo(1));
   fecha=datefich(1);
@@ -66,7 +66,7 @@ else
 try
   fecha=datenum(fecha);
 catch
-  [pat,name,ext,ve]=fileparts(file); 
+  [pat,name,ext]=fileparts(file); 
   fileinfo=sscanf([name,ext],'%*3c%03d%02d.%03d');
   %fileinfo=sscanf(file,'%*3c%03d%02d.%03d');
   datefich=datejul(fileinfo(2),fileinfo(1));
