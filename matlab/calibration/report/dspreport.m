@@ -32,7 +32,7 @@ arg.addOptional('n_inst',NaN,@isfloat); % Es opcional -------------> Ya esta en 
 arg.addOptional('dsp_dir','',@ischar);% por defecto todos los dsp's
 arg.addOptional('config_n',2,@(x)(isfloat(x) || ischar(x)));% por defecto la confg. final (2)
 arg.addOptional('csn',[],@(x)isfloat(x));% por defecto la confg. final (2)
-
+arg.addOptional('wlim',[],@(x)isfloat(x));
 % validamos los argumentos definidos:
 try
 arg.parse(file_setup,varargin{:});
@@ -113,12 +113,12 @@ for j=1:length(s)
        if isempty(dsp_dir)
           [res{j},detail{j}, ...
           DSP_QUAD{j},QUAD_SUM{j},QUAD_DETAIL{j},CUBIC_SUM{j},CUBIC_DETAIL{j},salida{j}...
-          ]=dsp_report(day,year,brewnb,dsp_dir,cfg,coment,uvr);% path
+          ]=dsp_report(day,year,brewnb,dsp_dir,cfg,coment,uvr,wlim);% path
 %          ]=dsp_report(day,year,brewnb,path,cfg,coment,uvr);
        else
           [res,detail, ...
           DSP_QUAD,QUAD_SUM,QUAD_DETAIL,CUBIC_SUM,CUBIC_DETAIL,salida...
-          ]=dsp_report(day,year,brewnb,dsp_dir,cfg,coment,uvr);           
+          ]=dsp_report(day,year,brewnb,dsp_dir,cfg,coment,uvr,wlim);           
 %          ]=dsp_report(day,year,brewnb,path,cfg,coment,uvr);           
        end
        
