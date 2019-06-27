@@ -6,9 +6,16 @@ function [res,detail,DSP_QUAD,QUAD_SUM,QUAD_DETAIL,CUBIC_SUM,CUBIC_DETAIL,SALIDA
 % decimales
 % 
 
-if nargin==7
+if nargin==7 
      wvlim=3500 ; 
 end
+if nargin==8
+     if isempty(wvlim)
+       wvlim=3500 ; 
+     end
+end
+
+
 day=day-1:day+1;
 polynb=3;% polinomial order
 ozonepos=cfg(14)+cfg(44);% ozone pos-> from icf / or passed directly to function

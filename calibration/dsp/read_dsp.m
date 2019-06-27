@@ -101,6 +101,7 @@ for brwi=1:Cal.n_brw
         if ~arg.Results.process
             try
                load(fullfile(dsp_dir,ldsp{indx},strcat(ldsp{indx},'.mat')));
+               dsp_sum
                wv_matrix_quad(idx,:)=cat(2,info_(1),dsp_sum.brewnb,indx,dsp_sum.salida.QUAD{end-1}.thiswl,dsp_sum.salida.QUAD{end-1}.fwhmwl/2,...
                                                     dsp_sum.salida.QUAD{end-1}.cal_ozonepos,dsp_sum.salida.QUAD{end-1}.ozone_pos,...
                                                     dsp_sum.salida.QUAD{end-1}.o3coeff,dsp_sum.salida.QUAD{end-1}.raycoeff);        
