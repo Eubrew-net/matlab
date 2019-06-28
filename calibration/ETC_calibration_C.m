@@ -119,12 +119,12 @@ end
 % los dias que se procesan son los cosiderados dias finales
 % Buscamos los datos  comunes
 % realizqamos la calibracion con los datos de los sumarios
-jday=findm(diaj(summary{n_ref}(:,1)),blinddays{n_ref},0.5);
+jday=findm(dayj(summary{n_ref}(:,1)),blinddays{n_ref},0.5);
 ref=summary{n_ref}(jday,:);
  %for i=1:length(brw)
 
      %n_inst;
-         jday=findm(diaj(summary{n_inst}(:,1)),blinddays{n_inst},0.5);
+         jday=findm(dayj(summary{n_inst}(:,1)),blinddays{n_inst},0.5);
          inst=summary{n_inst}(jday,:);
          %o3_c=ratio_min(ref,inst,10);
          MIN=60*24;
@@ -178,7 +178,7 @@ ref=summary{n_ref}(jday,:);
          try
             [ETC(1).TP(1,:),ETC(1).TP_STATS] = robustfit(ozone_slant(j),ms9(j));
          catch exception
-            fprintf('%s, brewer: %s\n',exception.message,Cal.brw_str{n_inst});
+            fprintf('%s, brewer: %s\n',exception.message,file_setup.brw_str{n_inst});
             ETC(1).TP(1,:)=NaN*ETC(2).TP(1,:);
             ETC(1).TP_STATS=NaN*ETC(1).TP_STATS;
          end
@@ -278,7 +278,7 @@ ref=summary{n_ref}(jday,:);
         title(sprintf('%d ',round(ms(:,2))));
         %%
 %         figure;
-%         grpstats(res,diaj(o3_c(:,1)),0.05);
+%         grpstats(res,dayj(o3_c(:,1)),0.05);
 %         rotateticklabel(gca);
 %         
 %          %% depurar
@@ -347,7 +347,7 @@ ref=summary{n_ref}(jday,:);
          [m,s,cx,dx]=outliers_bp(ETC_time(:,2),3.5); ETC_time(dx,:)=[]; 
          [mn err]=grpstats(ETC_time,fix(ETC_time(:,1)),{@(x)nanmean(x,1),'sem'});        
          errorbar(mn(:,1),mn(:,2),err(:,2),'s'); grid;
-         set(gca,'Ylim',[m-10 m+10],'XTicklabel',diaj(get(gca,'XTick')));  hline(m,'b-',sprintf('%d \\pm %d',round(m),round(s)));
+         set(gca,'Ylim',[m-10 m+10],'XTicklabel',dayj(get(gca,'XTick')));  hline(m,'b-',sprintf('%d \\pm %d',round(m),round(s)));
          title(sprintf('ETC Daily Means and Standard Error CI.'));
          ylabel('ETC =  MS9 - A1*{O_{3REF}}*M2'); xlabel('Julian Day');
          legend(sprintf('%s vs. %s',file_setup.brw_name{instrumento},file_setup.brw_name{referencia}))   
@@ -365,7 +365,7 @@ ref=summary{n_ref}(jday,:);
 %   4-> inst: si summary     -> O3 recalculado + SL correct 
 %             si summary_old -> O3 original + SL correct)  
 %   5-> inst  O3 recalculado con nueva ETC (ver ariba, l?neas 287-8)  
-         [m,s,n,grpn]=grpstats(o3_c(:,[1,13,19,23,25,end]),{diaj(o3_c(:,1))},{'mean','std','numel','gname'});         
+         [m,s,n,grpn]=grpstats(o3_c(:,[1,13,19,23,25,end]),{dayj(o3_c(:,1))},{'mean','std','numel','gname'});         
          m_netc=round([m(:,1),m(:,2),s(:,2),n(:,2),...%ref + sl
                        m(:,3),s(:,3),...% campo 6 de inst
                        m(:,4),s(:,4),...% campo 10 de inst
