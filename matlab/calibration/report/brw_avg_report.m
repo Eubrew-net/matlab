@@ -5,11 +5,11 @@ function [sl_data,dt_data,rs_data,ap_data,hg_data,h2o_data,op_data,OUTliers]=brw
 %%MODIFICADO
 %   090109 : trycatch update alberto
 %   230909 : update to read the files from bfiles/brw
-%   240909 : Alberto   añandido flag de depuracion en SL->sl_avg
+%   240909 : Alberto   aï¿½andido flag de depuracion en SL->sl_avg
 %            cuando cambia el sl durante la calibracion los toma como outlier.
-%   021109 : Juanjo se distingue el flag_outlier segun para que función sea
+%   021109 : Juanjo se distingue el flag_outlier segun para que funciï¿½n sea
 %            sl_avg, dt_avg, rs_avg o bien ap_avg
-%            En todos los casos será 'flag_outlier_??'
+%            En todos los casos serï¿½ 'flag_outlier_??'
 %   210410 : Isa, Introducidos HGOAVG
 %   220410 : Isa, Introducidos MIOAVG
 %   230410 : Isa, Introducidos OPOAVG
@@ -197,10 +197,13 @@ catch
     disp(['ERROR',opfile]); op_data=[];
 end
 %% Guardamos outliers
+try
    OUTliers.DT=OutHTLT;
    OUTliers.RS=OutRS;
 %     [OutR6F5R5 (:,[6:end]) OutRS(:,[6:end]) OutHTSL5V(:,[6:end]) OutHG(:,[6:end]) OutMSFW(:,[6:end])];
-
+catch
+   disp('Error DT,RS ouliers')
+end
 %%
 if chk
     % Se muestran los argumentos que toman los valores por defecto
