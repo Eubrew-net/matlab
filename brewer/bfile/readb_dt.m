@@ -1,4 +1,4 @@
-function [dt,rs]=readb_dt(bfile,config)
+function [dt,rs]=readb_dt(bfile)
 %  Input : fichero B, configuracion (ICF en formato ASCII)
 %  Output:
 %          dt: [ fecha, año, diaj, hh,mm,dd, steps revolution]
@@ -31,7 +31,7 @@ function [dt,rs]=readb_dt(bfile,config)
 % Funcion especializada en leer los datos de sr , basada en readb
 % Requiere mmstrtok
 % TODO: Si se facilita fichero de configuracion lo usa si no lee la configuracion
-% de la cabecer
+% de la cabecera
 % Alberto Redondas 2005
 
 dt=[]; rs=[];
