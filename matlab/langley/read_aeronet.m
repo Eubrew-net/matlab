@@ -7,11 +7,16 @@ function [aod,aod_m,aeronet]=read_aeronet(filename,varargin)
     end
     aeronet=[];
     aeronet_f=fopen(filename,'rt');
-    aeronet=textscan(aeronet_f,'%f:%f:%f,%f:%f:%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d/%d/%d,%f\t',...
+    if aeronet_f~=-1
+      aeronet=textscan(aeronet_f,'%f:%f:%f,%f:%f:%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d/%d/%d,%f\t',...
         'headerlines',5,'treatAsEmpty','N/A'); %Formato all points corresponent al format del Level 1.5 i 2.0 de la Versió 2 d'AERONET.
     %aeronet=textscan(aeronet_f,'%f','headerlines',5,'treatAsEmpty','N/A','Delimiter',',:'); %Formato all points corresponent al format del Level 1.5 i 2.0 de la Versió 2 d'AERONET.
     fclose(aeronet_f);
-
+    else  %string
+       warning('file not open try to read as string' );
+       aeronet=textscan(filename,'%f:%f:%f,%f:%f:%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d/%d/%d,%f\t',...
+        'headerlines',5,'treatAsEmpty','N/A'); %Formato all points corresponent al format del Level 1.5 i 2.0 de la Versió 2 d'AERONET.
+     end
 
     dia_aeronet=aeronet{1,1};
     mes_aeronet=aeronet{1,2};
