@@ -39,11 +39,13 @@ if ~isempty(date_range)
 end
                     
         
-        summary(:,[6,12])=matadd(summary(:,[6,12]),-FC_new');   % cal2       
+        summary(:,[6,12])=matadd(summary(:,[6,12]),-FC_new');   % cal1  
+        summary(:,[10])=matadd(summary(:,[10]),-FC_old');   % cal2  
         summary(:,9)=summary(:,8); % MS9
         summary(:,8)=summary(:,9)-Fc_new'; % MS9 corrected
     
         summary_old(:,[6,12])=matadd(summary_old(:,[6,12]),-FC_old');   % cal2       
+        summary(:,[10])=matadd(summary(:,[10]),-FC_new');   % cal1  
         summary_old(:,9)=summary_old(:,8); % MS9
         summary_old(:,8)=summary_old(:,9)-Fc_old'; % MS9 corrected
     
