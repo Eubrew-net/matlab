@@ -67,13 +67,14 @@ switch class(a)
     a = a';
     
     str = cellfun('isclass', a, 'char');
+    str2= cellfun('isclass', a, 'datetime');
     numtypes = {'double', 'logical'};
     num = zeros(size(a));
     for i = 1:length(numtypes)
       num = or(num, cellfun('isclass', a, numtypes{i}));
     end
     classType = zeros(size(a));
-    classType(str) = 1; classType(num) = 2;
+    classType(str) = 1; classType(num) = 2;classType(str2) = 1; 
     if any(~classType(:))
       error('Unknown type in the cell array. Only strings, doubles, and logicals are allowed.');
     end
