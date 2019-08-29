@@ -18,7 +18,8 @@ function [Options,figuras]=printfiles_report(n0,patern,varargin)
 %                    imprimir.
 
 
-Options.Format='eps';   %'Format'  a string specifies the output format. Defaults to 'eps'. For 
+%Options.Format='eps';   %'Format'  a string specifies the output format. Defaults to 'eps'. For 
+Options.Format='pdf';   %'Format'  a string specifies the output format. Defaults to 'pdf'. 
 Options.Preview='tiff'; %'Preview' one of the strings 'none', 'tiff' specifies a preview for EPS files. Defaults to 'none'.  
 
 Options.Width=18;  %cm a positive scalar specifies the width in the figure's PaperUnits
