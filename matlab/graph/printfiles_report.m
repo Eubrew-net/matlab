@@ -148,6 +148,8 @@ try
         print(h,'-depsc','-tiff','-r300','-cmyk',[figura,'.eps']);
         
      else
+        set(h,'PaperSize',[Options.Width Options.Height]);
+        set(h,'color','w')
         exportfig(h,strtok(figura,'.'),Options);
      end
      saveas(h,figura,'fig');
