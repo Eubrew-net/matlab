@@ -1,6 +1,6 @@
 %  Juanjo 02/11/2009
 %% Modificaciones
-% aÿadido flag de depuracion;
+% aï¿½adido flag de depuracion;
 % 28/10/2010 Isabel  Comentados:
 %         disp('outliers HT')
 %         disp(datestr(apa(dx,1)))
@@ -73,7 +73,7 @@ set(gca,'XLim',[date_range(1)-2,apa(end,1)+2]);
 set(gca,'XTick',[date_range(1),date_range(1)+((apa(end,1)+2)-date_range(1))/2,(apa(end,1)+2)],...
     'XTickLabel',[date_range(1),date_range(1)+((apa(end,1)+2)-date_range(1))/2,(apa(end,1)+2)]);
 set(gca,'GridLineStyle','-.','Linewidth',1);
-datetick('x',12,'keeplimits','keepticks');
+datetick('x',25,'keeplimits','keepticks'); xtickangle(gca,20); %J 20190923 changed tick format
 ylabel('SL Current {\it(A)}','FontWeight','bold');
 grid;
 
@@ -85,7 +85,7 @@ set(gca,'XTick',[date_range(1),date_range(1)+((apa(end,1)+2)-date_range(1))/2,(a
     'XTickLabel',[date_range(1),date_range(1)+((apa(end,1)+2)-date_range(1))/2,(apa(end,1)+2)]);
 hline([4.95 5.10],'r-')
 set(gca,'GridLineStyle','-.','Linewidth',1);
-datetick('x',12,'keeplimits','keepticks');
+datetick('x',25,'keeplimits','keepticks'); xtickangle(gca,20); %J 20190923 changed tick format
 ylabel('+5V Voltage {\it(V)}','FontWeight','bold');
 grid;
 
