@@ -70,8 +70,8 @@ subplot(2,2,1)
 % apa(find(apa(:,6)<1.2),6)=NaN;
 plot(apa(:,1),apa(:,6),'-k.');
 set(gca,'XLim',[date_range(1)-2,apa(end,1)+2]);
-set(gca,'XTick',[date_range(1),date_range(1)+((apa(end,1)+2)-date_range(1))/2,(apa(end,1)+2)],...
-    'XTickLabel',[date_range(1),date_range(1)+((apa(end,1)+2)-date_range(1))/2,(apa(end,1)+2)]);
+%set(gca,'XTick',[date_range(1),date_range(1)+((apa(end,1)+2)-date_range(1))/2,(apa(end,1)+2)],...
+%    'XTickLabel',[date_range(1),date_range(1)+((apa(end,1)+2)-date_range(1))/2,(apa(end,1)+2)]); %J 20190923 commented to use auto ticks
 set(gca,'GridLineStyle','-.','Linewidth',1);
 datetick('x',25,'keeplimits','keepticks'); xtickangle(gca,20); %J 20190923 changed tick format
 ylabel('SL Current {\it(A)}','FontWeight','bold');
@@ -81,8 +81,8 @@ subplot(2,2,2)
 % apa(find(apa(:,5)<3),5)=NaN;
 plot(apa(:,1),apa(:,5),'-k.');
 set(gca,'XLim',[date_range(1)-2,apa(end,1)+2]);
-set(gca,'XTick',[date_range(1),date_range(1)+((apa(end,1)+2)-date_range(1))/2,(apa(end,1)+2)],...
-    'XTickLabel',[date_range(1),date_range(1)+((apa(end,1)+2)-date_range(1))/2,(apa(end,1)+2)]);
+%set(gca,'XTick',[date_range(1),date_range(1)+((apa(end,1)+2)-date_range(1))/2,(apa(end,1)+2)],...
+%    'XTickLabel',[date_range(1),date_range(1)+((apa(end,1)+2)-date_range(1))/2,(apa(end,1)+2)]); %J 20190923 commented to use auto ticks
 hline([4.95 5.10],'r-')
 set(gca,'GridLineStyle','-.','Linewidth',1);
 datetick('x',25,'keeplimits','keepticks'); xtickangle(gca,20); %J 20190923 changed tick format
