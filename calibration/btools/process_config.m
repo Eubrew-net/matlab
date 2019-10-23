@@ -79,7 +79,7 @@ elseif  nargin>1 && ischar(config_file) % 1 fichero configuracion/ matriz de con
 elseif nargin>1 && iscellstr(config_file) % dos configuraciones
 %    Config1
     [fpath,ffile,fext]=fileparts(config_file{1});
-    if strcmp(fext,'.cfg')
+    if strcmpi(fext,'.cfg')
       [config_1,TC_1,DT_1,extrat_1,absx_1,AT_1]=read_icf(config_file{1},datefich(1));
     else
       [config_1,TC_1,DT_1,extrat_1,absx_1,AT_1]=read_icf(config_file{1});     
