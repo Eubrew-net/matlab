@@ -89,7 +89,7 @@ elseif nargin>1 && iscellstr(config_file) % dos configuraciones
 
 %    Config2
     [fpath,ffile,fext]=fileparts(config_file{2});
-    if strcmp(fext,'.cfg')
+    if strcmpi(fext,'.cfg')
       [config_2,TC_2,DT_2,extrat_2,absx_2,AT_2]=read_icf(config_file{2},datefich(1));
     else
       [config_2,TC_2,DT_2,extrat_2,absx_2,AT_2]=read_icf(config_file{2});
