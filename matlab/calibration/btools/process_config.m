@@ -65,7 +65,7 @@ if nargin>1 & isnumeric(config_file)  % matriz  de configuraciones
 elseif  nargin>1 && ischar(config_file) % 1 fichero configuracion/ matriz de configuraciones
     
     [fpath,ffile,fext]=fileparts(config_file);
-    if strcmp(fext,'.cfg')
+    if strcmpi(fext,'.cfg')
         [config_2,TC_2,DT_2,extrat_2,absx_2,AT_2]=read_icf(config_file,datefich(1));
         config(:,2)=config_2;
         TC_2=tc_coeff(TC_2);           
